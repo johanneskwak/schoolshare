@@ -1,0 +1,33 @@
+{
+  "name": "teacher-town",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "seed": "tsx --env-file=.env.local scripts/seed.ts",
+    "demo": "tsx --env-file=.env.local scripts/demo-data.ts",
+    "demo:more": "tsx --env-file=.env.local scripts/demo-more.ts",
+    "verify": "tsx --env-file=.env.local scripts/verify-rls.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.45.4",
+    "next": "^15.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@types/node": "^22.9.0",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "eslint": "^9.14.0",
+    "eslint-config-next": "^15.0.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
