@@ -11,6 +11,7 @@
     "seed": "tsx --env-file=.env.local scripts/seed.ts",
     "demo": "tsx --env-file=.env.local scripts/demo-data.ts",
     "demo:more": "tsx --env-file=.env.local scripts/demo-more.ts",
+    "demo:board": "tsx --env-file=.env.local scripts/demo-board-events.ts",
     "verify": "tsx --env-file=.env.local scripts/verify-rls.ts"
   },
   "dependencies": {
