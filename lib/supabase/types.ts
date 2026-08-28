@@ -3,7 +3,9 @@ export type SchoolLevel = "elementary" | "secondary";
 export type ProfileStatus = "pending" | "approved" | "rejected";
 export type ProfileRole = "teacher" | "admin";
 
-export type SharePostStatus = "available" | "reserved" | "completed";
+export type SharePostStatus = "available" | "reserved" | "completed" | "renting" | "returned";
+export type TransactionType = "share" | "rental";
+export type ConditionGrade = "new" | "like_new" | "good" | "fair" | "worn";
 
 export interface Database {
   public: {
@@ -83,6 +85,15 @@ export interface Database {
           reserved_at: string | null;
           completed_at: string | null;
           created_at: string;
+          transaction_type: TransactionType;
+          condition_grade: ConditionGrade;
+          components_complete: boolean;
+          condition_note: string | null;
+          rental_start_date: string | null;
+          rental_end_date: string | null;
+          returned_at: string | null;
+          grade_band: string | null;
+          subject: string | null;
         };
         Insert: {
           author_id: string;
@@ -92,13 +103,42 @@ export interface Database {
           category: string;
           item_type_id: string;
           carbon_g: number;
+          transaction_type: TransactionType;
+          condition_grade: ConditionGrade;
+          components_complete: boolean;
+          condition_note?: string | null;
+          rental_start_date?: string | null;
+          rental_end_date?: string | null;
+          grade_band?: string | null;
+          subject?: string | null;
         };
         Update: Partial<{
           status: SharePostStatus;
           reserved_by: string | null;
           reserved_at: string | null;
           completed_at: string | null;
+          returned_at: string | null;
         }>;
+        Relationships: [];
+      };
+      post_attachments: {
+        Row: {
+          id: string;
+          post_id: string;
+          file_name: string;
+          storage_path: string;
+          file_size: number;
+          mime_type: string;
+          created_at: string;
+        };
+        Insert: {
+          post_id: string;
+          file_name: string;
+          storage_path: string;
+          file_size: number;
+          mime_type: string;
+        };
+        Update: Partial<Record<string, never>>;
         Relationships: [];
       };
       share_post_images: {

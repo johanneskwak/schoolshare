@@ -74,17 +74,66 @@ async function main() {
   const approved1 = await signInAs("teacher1@teachertown.test");
   const approved2 = await signInAs("teacher2@teachertown.test");
 
-  // AC4: 학교급-카테고리 불일치
-  const { error: badCategoryError } = await approved1.from("share_posts").insert({
+  // AC4(신규 스키마): 초등인데 grade_band 누락은 제약 위반으로 거부된다
+  const { error: missingGradeBandError } = await approved1.from("share_posts").insert({
     author_id: teacher1.id,
-    title: "제약 테스트",
+    title: "제약 테스트: 학년군 누락",
     description: "설명",
     school_level: "elementary",
-    category: "수학",
+    category: "수업교구",
     item_type_id: itemType.id,
     carbon_g: itemType.carbon_g,
+    transaction_type: "share",
+    condition_grade: "good",
+    components_complete: true,
   });
-  check("AC4 elementary+수학 조합은 제약 위반으로 거부된다", badCategoryError != null);
+  check("초등 + 학년군 누락은 제약 위반으로 거부된다", missingGradeBandError != null);
+
+  // 교과자료인데 subject 누락/불일치는 제약 위반으로 거부된다
+  const { error: missingSubjectError } = await approved1.from("share_posts").insert({
+    author_id: teacher1.id,
+    title: "제약 테스트: 교과목 누락",
+    description: "설명",
+    school_level: "secondary",
+    category: "교과자료",
+    item_type_id: itemType.id,
+    carbon_g: itemType.carbon_g,
+    transaction_type: "share",
+    condition_grade: "good",
+    components_complete: true,
+  });
+  check("교과자료 + 교과목 누락은 제약 위반으로 거부된다", missingSubjectError != null);
+
+  // 대여인데 대여 기간 누락/역전은 제약 위반으로 거부된다
+  const { error: missingRentalDatesError } = await approved1.from("share_posts").insert({
+    author_id: teacher1.id,
+    title: "제약 테스트: 대여 기간 누락",
+    description: "설명",
+    school_level: "secondary",
+    category: "수업교구",
+    item_type_id: itemType.id,
+    carbon_g: itemType.carbon_g,
+    transaction_type: "rental",
+    condition_grade: "good",
+    components_complete: true,
+  });
+  check("대여 + 대여 기간 누락은 제약 위반으로 거부된다", missingRentalDatesError != null);
+
+  const { error: reversedRentalDatesError } = await approved1.from("share_posts").insert({
+    author_id: teacher1.id,
+    title: "제약 테스트: 대여 기간 역전",
+    description: "설명",
+    school_level: "secondary",
+    category: "수업교구",
+    item_type_id: itemType.id,
+    carbon_g: itemType.carbon_g,
+    transaction_type: "rental",
+    condition_grade: "good",
+    components_complete: true,
+    rental_start_date: "2026-03-10",
+    rental_end_date: "2026-03-01",
+  });
+  check("대여 종료일이 시작일보다 빠르면 거부된다", reversedRentalDatesError != null);
 
   // 정상 나눔 글 생성 (이후 테스트에서 재사용)
   const { data: post, error: postError } = await approved1
@@ -94,9 +143,12 @@ async function main() {
       title: "RLS 테스트용 글",
       description: "설명",
       school_level: "secondary",
-      category: "과학",
+      category: "수업교구",
       item_type_id: itemType.id,
       carbon_g: itemType.carbon_g,
+      transaction_type: "share",
+      condition_grade: "good",
+      components_complete: true,
     })
     .select("id")
     .single();
@@ -164,6 +216,133 @@ async function main() {
     check(
       `AC10 완료된 글의 탄소량이 합산된다 (실측: ${carbonTotal?.total_carbon_g})`,
       Number(carbonTotal?.total_carbon_g ?? 0) >= Number(itemType.carbon_g),
+    );
+
+    // 대여 완료 시 completed 전이는 거부된다 (거래유형 가드)
+    const { error: completeOnShareOkButRentalFails } = await approved1
+      .from("share_posts")
+      .update({ status: "returned" })
+      .eq("id", post.id);
+    check("나눔 글에는 returned 전이가 거부된다", completeOnShareOkButRentalFails != null);
+
+    // 첨부파일: 개수 제한(3개), 확장자·용량 검증, 소유권 검증
+    for (let i = 0; i < 3; i++) {
+      await approved1.from("post_attachments").insert({
+        post_id: post.id,
+        file_name: `worksheet-${i}.pdf`,
+        storage_path: `t/att-${i}.pdf`,
+        file_size: 1024,
+        mime_type: "application/pdf",
+      });
+    }
+    const { error: fourthAttachmentError } = await approved1.from("post_attachments").insert({
+      post_id: post.id,
+      file_name: "worksheet-4.pdf",
+      storage_path: "t/att-4.pdf",
+      file_size: 1024,
+      mime_type: "application/pdf",
+    });
+    check("첨부파일 4번째는 거부된다", fourthAttachmentError != null);
+
+    const { error: badExtError } = await approved1.from("post_attachments").insert({
+      post_id: post.id,
+      file_name: "worksheet.exe",
+      storage_path: "t/att-bad.exe",
+      file_size: 1024,
+      mime_type: "application/octet-stream",
+    });
+    check("허용되지 않은 확장자는 거부된다", badExtError != null);
+
+    const { error: tooBigError } = await approved1.from("post_attachments").insert({
+      post_id: post.id,
+      file_name: "worksheet-big.pdf",
+      storage_path: "t/att-big.pdf",
+      file_size: 20 * 1024 * 1024,
+      mime_type: "application/pdf",
+    });
+    check("10MB 초과 첨부파일은 거부된다", tooBigError != null);
+
+    const { error: nonAuthorAttachmentError } = await approved2.from("post_attachments").insert({
+      post_id: post.id,
+      file_name: "worksheet-other.pdf",
+      storage_path: "t/att-other.pdf",
+      file_size: 1024,
+      mime_type: "application/pdf",
+    });
+    check("작성자가 아니면 첨부파일 추가가 거부된다", nonAuthorAttachmentError != null);
+
+    const { error: nonAuthorDeleteError, count: nonAuthorDeleteCount } = await approved2
+      .from("post_attachments")
+      .delete({ count: "exact" })
+      .eq("post_id", post.id);
+    check(
+      "작성자가 아니면 첨부파일 삭제가 거부된다(0행)",
+      nonAuthorDeleteError != null || nonAuthorDeleteCount === 0,
+    );
+  }
+
+  // 대여 상태 전이: reserved -> renting -> returned는 작성자만, 탄소 적립은 returned 기준
+  const { data: rentalPost, error: rentalPostError } = await approved1
+    .from("share_posts")
+    .insert({
+      author_id: teacher1.id,
+      title: "RLS 테스트용 대여 글",
+      description: "설명",
+      school_level: "secondary",
+      category: "수업교구",
+      item_type_id: itemType.id,
+      carbon_g: itemType.carbon_g,
+      transaction_type: "rental",
+      condition_grade: "good",
+      components_complete: true,
+      rental_start_date: "2026-03-02",
+      rental_end_date: "2026-03-16",
+    })
+    .select("id")
+    .single();
+  check("대여 글 생성 성공", rentalPostError == null && rentalPost != null);
+
+  if (rentalPost) {
+    await approved2.from("share_posts").update({ status: "reserved", reserved_by: teacher2.id }).eq("id", rentalPost.id);
+
+    const { error: reserverStartsRentalError } = await approved2
+      .from("share_posts")
+      .update({ status: "renting" })
+      .eq("id", rentalPost.id);
+    check("대여자는 renting으로 바꿀 수 없다(작성자만)", reserverStartsRentalError != null);
+
+    const { error: authorStartsRentalError } = await approved1
+      .from("share_posts")
+      .update({ status: "renting" })
+      .eq("id", rentalPost.id);
+    check("작성자는 reserved -> renting으로 바꿀 수 있다", authorStartsRentalError == null);
+
+    const { error: authorCompletesRentalError } = await approved1
+      .from("share_posts")
+      .update({ status: "completed" })
+      .eq("id", rentalPost.id);
+    check("대여 글에는 completed 전이가 거부된다", authorCompletesRentalError != null);
+
+    const { error: reserverReturnsError } = await approved2
+      .from("share_posts")
+      .update({ status: "returned" })
+      .eq("id", rentalPost.id);
+    check("대여자는 반납 완료로 바꿀 수 없다(작성자만)", reserverReturnsError != null);
+
+    const { error: authorReturnsError } = await approved1
+      .from("share_posts")
+      .update({ status: "returned" })
+      .eq("id", rentalPost.id);
+    check("작성자는 renting -> returned로 바꿀 수 있다", authorReturnsError == null);
+
+    const { data: rentalCarbonTotal } = await approved1
+      .from("user_carbon_totals")
+      .select("total_carbon_g")
+      .eq("user_id", teacher1.id)
+      .maybeSingle();
+    check(
+      `반납 완료된 대여 글의 탄소량도 합산된다 (실측: ${rentalCarbonTotal?.total_carbon_g})`,
+      Number(rentalCarbonTotal?.total_carbon_g ?? 0) >= Number(itemType.carbon_g) * 2,
     );
   }
 

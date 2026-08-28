@@ -3,6 +3,7 @@ import type { SchoolLevel } from "@/lib/supabase/types";
 /**
  * 학교급-카테고리 매핑. Postgres CHECK 제약(0002_category_check.sql)과 반드시 동기화한다.
  * 값을 바꿀 때는 이 파일과 마이그레이션을 같이 고친다.
+ * 소모임(club_posts) 전용이다. 나눔/대여(share_posts)는 lib/constants/share.ts를 쓴다.
  */
 export const CATEGORIES_BY_LEVEL: Record<SchoolLevel, readonly string[]> = {
   elementary: ["수업자료", "학급자료"],
