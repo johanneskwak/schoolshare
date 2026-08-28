@@ -1,4 +1,4 @@
--- 0010: 나눔/대여 통합 스키마. share_posts에 거래유형·물건상태·대여·학년군·교과목 컬럼을
+-- 0014: 나눔/대여 통합 스키마. share_posts에 거래유형·물건상태·대여·학년군·교과목 컬럼을
 -- 추가하고, 카테고리 체계를 학교급 무관 3값으로 교체하며, 상태 전이 트리거를 대여
 -- 흐름(available -> reserved -> renting -> returned)까지 확장한다.
 -- club_posts/valid_school_category()는 이 마이그레이션에서 전혀 건드리지 않는다(계속 club 전용).
@@ -94,7 +94,7 @@ alter table share_posts
   );
 
 -- 나눔 완료 인덱스(0003)와 짝을 이루는 대여 반납 완료 인덱스. user_carbon_totals가
--- completed와 returned를 모두 집계하게 되므로(0012) 두 상태 모두 부분 인덱스가 필요하다.
+-- completed와 returned를 모두 집계하게 되므로(0016) 두 상태 모두 부분 인덱스가 필요하다.
 create index if not exists share_posts_returned_author_idx
   on share_posts (author_id) where status = 'returned';
 

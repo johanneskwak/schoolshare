@@ -1,4 +1,4 @@
--- 0011: 나눔/대여 글 첨부파일. post_attachments 테이블 + post-attachments 스토리지 버킷 정책.
+-- 0015: 나눔/대여 글 첨부파일. post_attachments 테이블 + post-attachments 스토리지 버킷 정책.
 -- 버킷 자체(post-attachments)는 share-images/club-images와 마찬가지로 Supabase 대시보드에서
 -- 수동으로 만든다(비공개). 읽기는 서버가 service-role로 서명 URL을 발급한다.
 -- 되돌리기:
