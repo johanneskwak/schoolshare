@@ -103,7 +103,7 @@ lib/
   schools/normalize.ts            검색어 정규화 (캐시 키)
   storage/signed-url.ts           비공개 버킷 서명 URL 발급
   format.ts                       날짜·파일크기 표시 포맷 유틸
-supabase/migrations/              0001~0012 SQL 마이그레이션
+supabase/migrations/              0001~0016 SQL 마이그레이션
 scripts/                          seed.ts, verify-rls.ts
 docs/                             prd.md, checklist.md, context-notes.md, DESIGN.md
 ```
