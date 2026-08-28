@@ -34,7 +34,7 @@ export function SchoolReviewForm({ schoolId, questions, initialAnswers }: School
     startTransition(async () => {
       const result = await submitSchoolReviewAction(schoolId, answers);
       if (result.error) setError(result.error);
-      else router.refresh();
+      else router.push(`/schools/${schoolId}`);
     });
   }
 
@@ -64,7 +64,7 @@ export function SchoolReviewForm({ schoolId, questions, initialAnswers }: School
       ))}
       {error && <p className="error">{error}</p>}
       <button className="btn" style={{ marginTop: 12 }} onClick={submit} disabled={pending}>
-        {pending ? "저장 중..." : "평가 남기기"}
+        {pending ? "저장 중..." : Object.keys(initialAnswers).length ? "평가 수정" : "평가 제출"}
       </button>
     </div>
   );
