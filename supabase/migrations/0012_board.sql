@@ -1,4 +1,4 @@
--- 0010: 경력단계(대분류) x 주제(소분류) 게시판. board_posts, board_comments, RLS.
+-- 0012: 경력단계(대분류) x 주제(소분류) 게시판. board_posts, board_comments, RLS.
 -- 되돌리기: drop table if exists board_comments, board_posts cascade;
 --
 -- 대분류와 소분류는 학교급-카테고리와 달리 서로 독립적인 값 목록이다 (짝을 강제하지 않음).

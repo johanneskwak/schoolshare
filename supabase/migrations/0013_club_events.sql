@@ -1,4 +1,4 @@
--- 0011: 소모임 번개모임(공유 캘린더 이벤트). club_events, RLS.
+-- 0013: 소모임 번개모임(공유 캘린더 이벤트). club_events, RLS.
 -- 되돌리기: drop table if exists club_events cascade;
 --
 -- 특정 소모임 글에 종속되지 않는 독립적인 캘린더다. 승인된 교사라면 누구나
