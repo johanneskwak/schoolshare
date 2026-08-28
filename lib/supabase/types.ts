@@ -175,6 +175,52 @@ export interface Database {
         Update: Partial<{ rank: number }>;
         Relationships: [];
       };
+      board_posts: {
+        Row: {
+          id: string;
+          author_id: string;
+          title: string;
+          body: string;
+          major_category: string;
+          minor_category: string;
+          created_at: string;
+        };
+        Insert: {
+          author_id: string;
+          title: string;
+          body: string;
+          major_category: string;
+          minor_category: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      board_comments: {
+        Row: { id: string; post_id: string; author_id: string; body: string; created_at: string };
+        Insert: { post_id: string; author_id: string; body: string };
+        Update: never;
+        Relationships: [];
+      };
+      club_events: {
+        Row: {
+          id: string;
+          author_id: string;
+          title: string;
+          event_date: string;
+          location: string;
+          description: string | null;
+          created_at: string;
+        };
+        Insert: {
+          author_id: string;
+          title: string;
+          event_date: string;
+          location: string;
+          description?: string | null;
+        };
+        Update: never;
+        Relationships: [];
+      };
     };
     Views: {
       user_carbon_totals: {
