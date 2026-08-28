@@ -361,3 +361,45 @@ button {
   padding: 14px 16px;
   margin-bottom: 10px;
 }
+
+.rating-radar {
+  margin: 0;
+}
+
+.rating-radar svg {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.radar-grid,
+.radar-axis {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.radar-value {
+  fill: rgba(255, 122, 48, 0.24);
+  stroke: var(--color-accent);
+  stroke-width: 2;
+}
+
+.radar-label {
+  fill: var(--color-text-muted);
+  font-size: 10px;
+}
+
+.radar-legend {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.radar-legend span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { SchoolReviewForm } from "./SchoolReviewForm";
+import { RatingRadar } from "./RatingRadar";
 
 export default async function SchoolDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -29,10 +30,10 @@ export default async function SchoolDetailPage({ params }: { params: Promise<{ i
   const summaryByQuestion = new Map((summary ?? []).map((s) => [s.question_id, s]));
   const participantCount = participants?.participant_count ?? 0;
 
-  const overallAvg =
-    (summary ?? []).length > 0
-      ? (summary ?? []).reduce((sum, s) => sum + (s.avg_score ?? 0), 0) / (summary ?? []).length
-      : null;
+  const answerCount = (summary ?? []).reduce((sum, item) => sum + item.answer_count, 0);
+  const overallAvg = answerCount > 0
+    ? (summary ?? []).reduce((sum, item) => sum + (item.avg_score ?? 0) * item.answer_count, 0) / answerCount
+    : null;
 
   let myAnswers: Record<string, number> = {};
   if (user) {
@@ -64,6 +65,14 @@ export default async function SchoolDetailPage({ params }: { params: Promise<{ i
         </div>
 
         <div className="card">
+          <RatingRadar items={activeQuestions.slice(0, 6).map((q) => ({
+            id: q.id,
+            label: q.text,
+            score: summaryByQuestion.get(q.id)?.avg_score ?? null,
+          }))} />
+        </div>
+
+        <div className="card">
           {(questions ?? []).map((q) => {
             const s = summaryByQuestion.get(q.id);
             return (
@@ -75,8 +84,9 @@ export default async function SchoolDetailPage({ params }: { params: Promise<{ i
           })}
         </div>
 
-        <h2 className="title" style={{ fontSize: 16, marginTop: 24 }}>이 학교 근무경험 남기기</h2>
-        <SchoolReviewForm schoolId={school.id} questions={activeQuestions} initialAnswers={myAnswers} />
+        <Link className="btn" href={`/schools/${school.id}/review`}>
+          {Object.keys(myAnswers).length > 0 ? "내 평가 수정" : "평가하기"}
+        </Link>
       </div>
     </>
   );

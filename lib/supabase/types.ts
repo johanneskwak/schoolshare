@@ -246,7 +246,12 @@ export interface Database {
         Relationships: [];
       };
     };
-    Functions: Record<string, never>;
+    Functions: {
+      submit_school_review: {
+        Args: { target_school_id: string; answer_scores: Record<string, number> };
+        Returns: string;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

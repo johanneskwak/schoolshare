@@ -6,7 +6,7 @@ export default async function QuestionsPage() {
   const supabase = await createClient();
   const { data: questions } = await supabase
     .from("school_review_questions")
-    .select("id, text, is_active")
+    .select("id, text, sort_order, is_active")
     .order("sort_order");
 
   return (
@@ -15,7 +15,7 @@ export default async function QuestionsPage() {
       <AddQuestionForm />
       <div style={{ marginTop: 16 }}>
         {questions?.map((q) => (
-          <QuestionRow key={q.id} id={q.id} text={q.text} isActive={q.is_active} />
+          <QuestionRow key={q.id} id={q.id} text={q.text} sortOrder={q.sort_order} isActive={q.is_active} />
         ))}
       </div>
     </div>
