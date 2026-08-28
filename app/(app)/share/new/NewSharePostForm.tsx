@@ -171,8 +171,14 @@ export function NewSharePostForm({ itemTypes }: { itemTypes: ItemType[] }) {
           구성품이 모두 있어요
         </label>
         <div className="field">
-          <label htmlFor="condition_note">비고</label>
-          <textarea id="condition_note" name="condition_note" maxLength={300} placeholder="선택 입력" />
+          <label htmlFor="condition_note">활용팁</label>
+          <textarea
+            id="condition_note"
+            name="condition_note"
+            maxLength={2000}
+            placeholder="어떤 단원·교육과정 성취기준에 쓰기 좋은지, 실제 수업에서 어떻게 활용했는지 적어주세요. (선택 입력)"
+            style={{ minHeight: 120 }}
+          />
         </div>
       </fieldset>
 

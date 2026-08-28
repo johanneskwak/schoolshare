@@ -12,6 +12,7 @@
     "demo": "tsx --env-file=.env.local scripts/demo-data.ts",
     "demo:more": "tsx --env-file=.env.local scripts/demo-more.ts",
     "demo:board": "tsx --env-file=.env.local scripts/demo-board-events.ts",
+    "demo:tips": "tsx --env-file=.env.local scripts/demo-usage-tips.ts",
     "verify": "tsx --env-file=.env.local scripts/verify-rls.ts"
   },
   "dependencies": {

@@ -91,10 +91,12 @@ export default async function ShareDetailPage({ params }: { params: Promise<{ id
               <th>구성품</th>
               <td>{post.components_complete ? "구성품 모두 있음" : "구성품 일부 없음"}</td>
             </tr>
-            <tr>
-              <th>비고</th>
-              <td>{post.condition_note ?? "-"}</td>
-            </tr>
+            {post.condition_note && (
+              <tr>
+                <th>활용팁</th>
+                <td style={{ whiteSpace: "pre-wrap" }}>{post.condition_note}</td>
+              </tr>
+            )}
             {isRental && post.rental_start_date && post.rental_end_date && (
               <>
                 <tr>
