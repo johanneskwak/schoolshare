@@ -1,11 +1,20 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signImageUrls } from "@/lib/storage/signed-url";
+import { checkIsAdmin } from "@/lib/admin";
+import { AdminEditPanel } from "@/components/AdminEditPanel";
+import { AdminDeleteButton } from "@/components/AdminDeleteButton";
 import { ClubCommentForm } from "./ClubCommentForm";
+import { adminDeleteClubCommentAction, adminDeleteClubPostAction, adminUpdateClubPostAction } from "../actions";
 
 export default async function ClubDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isAdmin = await checkIsAdmin(supabase, user?.id);
 
   const { data: post } = await supabase
     .from("club_posts")
@@ -48,13 +57,40 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ id:
 
         <p style={{ whiteSpace: "pre-wrap", marginTop: 12 }}>{post.description}</p>
 
+        {isAdmin && (
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+            <AdminEditPanel
+              action={adminUpdateClubPostAction.bind(null, post.id)}
+              fields={[
+                { name: "title", label: "제목", defaultValue: post.title },
+                { name: "description", label: "설명", type: "textarea", defaultValue: post.description },
+              ]}
+            />
+            <AdminDeleteButton
+              onDelete={adminDeleteClubPostAction.bind(null, post.id)}
+              label="관리자: 글 삭제"
+              confirmMessage="이 소모임 글을 삭제할까요? 되돌릴 수 없습니다."
+            />
+          </div>
+        )}
+
         <h2 className="title" style={{ fontSize: 16, marginTop: 28 }}>댓글</h2>
         <ClubCommentForm postId={post.id} />
         <div style={{ marginTop: 12 }}>
           {(comments ?? []).length === 0 && <p className="muted">아직 댓글이 없어요.</p>}
           {comments?.map((c) => (
             <div key={c.id} className="comment">
-              <p className="author">{nicknameById.get(c.author_id) ?? "교사"}</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <p className="author">{nicknameById.get(c.author_id) ?? "교사"}</p>
+                {isAdmin && (
+                  <AdminDeleteButton
+                    onDelete={adminDeleteClubCommentAction.bind(null, post.id, c.id)}
+                    label="삭제"
+                    small
+                    confirmMessage="이 댓글을 삭제할까요?"
+                  />
+                )}
+              </div>
               <p>{c.body}</p>
             </div>
           ))}

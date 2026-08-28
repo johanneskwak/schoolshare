@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { buildMonthGrid, monthParamKey, parseMonthParam, shiftMonth, WEEKDAY_LABELS } from "@/lib/calendar";
+import { checkIsAdmin } from "@/lib/admin";
+import { AdminEditPanel } from "@/components/AdminEditPanel";
+import { adminUpdateClubEventAction } from "../actions";
 import { DeleteEventButton } from "./DeleteEventButton";
 
 export default async function MeetupsPage({
@@ -18,6 +21,7 @@ export default async function MeetupsPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const isAdmin = await checkIsAdmin(supabase, user?.id);
 
   const { data: events } = await supabase
     .from("club_events")
@@ -88,8 +92,21 @@ export default async function MeetupsPage({
                 {e.description && <p style={{ marginTop: 4 }}>{e.description}</p>}
                 <p className="muted" style={{ marginTop: 4 }}>{nicknameById.get(e.author_id) ?? "교사"}</p>
               </div>
-              {user?.id === e.author_id && <DeleteEventButton eventId={e.id} />}
+              {(user?.id === e.author_id || isAdmin) && <DeleteEventButton eventId={e.id} />}
             </div>
+            {isAdmin && (
+              <div style={{ marginTop: 10 }}>
+                <AdminEditPanel
+                  action={adminUpdateClubEventAction.bind(null, e.id)}
+                  fields={[
+                    { name: "title", label: "제목", defaultValue: e.title },
+                    { name: "event_date", label: "날짜", type: "date", defaultValue: e.event_date },
+                    { name: "location", label: "장소", defaultValue: e.location },
+                    { name: "description", label: "설명", type: "textarea", defaultValue: e.description ?? "" },
+                  ]}
+                />
+              </div>
+            )}
           </div>
         ))}
       </div>

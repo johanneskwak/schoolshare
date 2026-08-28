@@ -1,10 +1,19 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { checkIsAdmin } from "@/lib/admin";
+import { AdminEditPanel } from "@/components/AdminEditPanel";
+import { AdminDeleteButton } from "@/components/AdminDeleteButton";
 import { BoardCommentForm } from "./BoardCommentForm";
+import { adminDeleteBoardCommentAction, adminDeleteBoardPostAction, adminUpdateBoardPostAction } from "../actions";
 
 export default async function BoardDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isAdmin = await checkIsAdmin(supabase, user?.id);
 
   const { data: post } = await supabase
     .from("board_posts")
@@ -37,13 +46,40 @@ export default async function BoardDetailPage({ params }: { params: Promise<{ id
 
         <p style={{ whiteSpace: "pre-wrap", marginTop: 12 }}>{post.body}</p>
 
+        {isAdmin && (
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+            <AdminEditPanel
+              action={adminUpdateBoardPostAction.bind(null, post.id)}
+              fields={[
+                { name: "title", label: "제목", defaultValue: post.title },
+                { name: "body", label: "내용", type: "textarea", defaultValue: post.body },
+              ]}
+            />
+            <AdminDeleteButton
+              onDelete={adminDeleteBoardPostAction.bind(null, post.id)}
+              label="관리자: 글 삭제"
+              confirmMessage="이 게시글을 삭제할까요? 되돌릴 수 없습니다."
+            />
+          </div>
+        )}
+
         <h2 className="title" style={{ fontSize: 16, marginTop: 28 }}>댓글</h2>
         <BoardCommentForm postId={post.id} />
         <div style={{ marginTop: 12 }}>
           {(comments ?? []).length === 0 && <p className="muted">아직 댓글이 없어요.</p>}
           {comments?.map((c) => (
             <div key={c.id} className="comment">
-              <p className="author">{nicknameById.get(c.author_id) ?? "교사"}</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <p className="author">{nicknameById.get(c.author_id) ?? "교사"}</p>
+                {isAdmin && (
+                  <AdminDeleteButton
+                    onDelete={adminDeleteBoardCommentAction.bind(null, post.id, c.id)}
+                    label="삭제"
+                    small
+                    confirmMessage="이 댓글을 삭제할까요?"
+                  />
+                )}
+              </div>
               <p>{c.body}</p>
             </div>
           ))}
