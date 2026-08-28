@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { SchoolSearchResult } from "@/app/api/schools/search/route";
 
 interface SchoolsSearchProps {
@@ -14,7 +14,6 @@ export function SchoolsSearch({ initialSchools }: SchoolsSearchProps) {
   const [results, setResults] = useState<SchoolSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -54,12 +53,12 @@ export function SchoolsSearch({ initialSchools }: SchoolsSearchProps) {
       )}
       <div style={{ marginTop: 8 }}>
         {list.map((school) => (
-          <div key={school.id} className="card-link" onClick={() => router.push(`/schools/${school.id}`)}>
+          <Link key={school.id} href={`/schools/${school.id}`} className="card-link">
             <div className="card">
               <p className="title">{school.name}</p>
               {school.address && <p className="muted">{school.address}</p>}
             </div>
-          </div>
+          </Link>
         ))}
         {!loading && isSearching && results.length === 0 && (
           <div className="empty">검색 결과가 없어요.</div>
