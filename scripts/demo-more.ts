@@ -59,7 +59,7 @@ async function main() {
 
   const shareImagePlan: { postTitle: string; files: string[] }[] = [
     { postTitle: "세계사 보드게임 나눔합니다", files: ["boardgame1.jpg", "boardgame2.jpg"] },
-    { postTitle: "학급문고용 동화책 세트 나눔", files: ["booksclub.jpg"] },
+    { postTitle: "저학년 학급문고용 동화책 세트 대여", files: ["booksclub.jpg"] },
     { postTitle: "과학 실험 키트 나눔완료", files: ["sciencekit.jpg"] },
   ];
 
