@@ -77,3 +77,42 @@ export async function addClubCommentAction(
   revalidatePath(`/clubs/${postId}`);
   return { error: null };
 }
+
+export async function createClubEventAction(
+  _prevState: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "로그인이 필요합니다." };
+
+  const title = String(formData.get("title") ?? "").trim();
+  const eventDate = String(formData.get("event_date") ?? "");
+  const location = String(formData.get("location") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+
+  if (!title || !eventDate || !location) {
+    return { error: "날짜, 장소, 제목을 모두 입력해 주세요." };
+  }
+
+  const { error } = await supabase.from("club_events").insert({
+    author_id: user.id,
+    title,
+    event_date: eventDate,
+    location,
+    description: description || null,
+  });
+
+  if (error) return { error: "번개모임 등록에 실패했습니다." };
+
+  revalidatePath("/clubs/meetups");
+  redirect("/clubs/meetups");
+}
+
+export async function deleteClubEventAction(eventId: string) {
+  const supabase = await createClient();
+  await supabase.from("club_events").delete().eq("id", eventId);
+  revalidatePath("/clubs/meetups");
+}
