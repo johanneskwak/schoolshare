@@ -311,3 +311,132 @@ button {
   font-weight: 800;
   color: var(--color-accent);
 }
+
+.field-group {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  padding: 16px 0 0;
+  margin: 8px 0 16px;
+}
+
+.field-group legend {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0;
+  margin-bottom: 12px;
+}
+
+.field-group .field:last-child {
+  margin-bottom: 0;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.card-thumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  background: var(--color-border);
+}
+
+.tag-renting {
+  background: #fff3d6;
+  color: #b8860b;
+}
+
+.tag-returned {
+  background: #eee;
+  color: var(--color-text-muted);
+}
+
+.tag-condition-new,
+.tag-condition-like_new {
+  background: #e4f4e9;
+  color: var(--color-success);
+}
+
+.tag-condition-good {
+  background: var(--color-accent-weak);
+  color: var(--color-accent);
+}
+
+.tag-condition-fair {
+  background: #fff3d6;
+  color: #b8860b;
+}
+
+.tag-condition-worn {
+  background: #fbe6e6;
+  color: var(--color-danger);
+}
+
+.filters-accordion {
+  margin: 0 16px 12px;
+}
+
+.filters-accordion summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 0;
+  color: var(--color-text-muted);
+}
+
+.filters-accordion .filters {
+  padding: 4px 0 0;
+  flex-wrap: wrap;
+}
+
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+.info-table tr {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.info-table tr:last-child {
+  border-bottom: none;
+}
+
+.info-table th,
+.info-table td {
+  text-align: left;
+  padding: 8px 0;
+  font-weight: 400;
+}
+
+.info-table th {
+  width: 96px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.attachment-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.attachment-card .file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

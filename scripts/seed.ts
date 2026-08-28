@@ -83,10 +83,47 @@ async function main() {
     },
   ]);
 
-  await supabase.from("item_types").insert([
-    { label: "보드게임", carbon_g: 500 },
-    { label: "학급 도서", carbon_g: 300 },
-    { label: "교구", carbon_g: 800 },
+  const { data: itemTypes, error: itemTypesError } = await supabase
+    .from("item_types")
+    .insert([
+      { label: "보드게임", carbon_g: 500 },
+      { label: "학급 도서", carbon_g: 300 },
+      { label: "교구", carbon_g: 800 },
+    ])
+    .select("id, label");
+  if (itemTypesError) throw itemTypesError;
+  const itemTypeByLabel = new Map((itemTypes ?? []).map((it) => [it.label, it.id]));
+
+  await supabase.from("share_posts").insert([
+    {
+      author_id: teacher1Id,
+      title: "보드게임 나눔합니다 (시드)",
+      description: "시드 스크립트가 만든 나눔 샘플 글입니다.",
+      school_level: "secondary",
+      category: "수업교구",
+      item_type_id: itemTypeByLabel.get("보드게임")!,
+      carbon_g: 500,
+      transaction_type: "share",
+      condition_grade: "good",
+      components_complete: true,
+      condition_note: "구성품 모두 있음",
+    },
+    {
+      author_id: teacher2Id,
+      title: "저학년 학급 도서 대여합니다 (시드)",
+      description: "시드 스크립트가 만든 대여 샘플 글입니다.",
+      school_level: "elementary",
+      category: "교과자료",
+      grade_band: "1~2학년군",
+      subject: "국어",
+      item_type_id: itemTypeByLabel.get("학급 도서")!,
+      carbon_g: 300,
+      transaction_type: "rental",
+      condition_grade: "like_new",
+      components_complete: true,
+      rental_start_date: "2026-03-02",
+      rental_end_date: "2026-03-16",
+    },
   ]);
 
   await supabase.from("school_review_questions").insert([

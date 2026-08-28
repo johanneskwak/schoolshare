@@ -12,9 +12,9 @@
 - **인증**: Supabase Auth(이메일+비밀번호). `middleware.ts`가 세션을 갱신하고 승인 상태에
   따라 `/pending`, `/rejected`, `/login`으로 리다이렉트하지만, 이건 UX용 게이트일 뿐이다.
   **실제 접근 차단은 모든 테이블의 Row Level Security가 담당한다.**
-- **파일 저장**: Supabase Storage. `share-images`, `club-images` 두 개의 비공개 버킷을
-  쓰고, 읽기는 서버가 `service_role`로 서명 URL을 발급해서 내려준다
-  (`lib/storage/signed-url.ts`).
+- **파일 저장**: Supabase Storage. `share-images`, `club-images`, `post-attachments`
+  세 개의 비공개 버킷을 쓰고, 읽기는 서버가 `service_role`로 서명 URL을 발급해서
+  내려준다 (`lib/storage/signed-url.ts`).
 - **외부 API**: 카카오 로컬 키워드 검색. 호출부는 `app/api/schools/search/route.ts` 단
   하나뿐이며, 검색 결과는 90일짜리 캐시(`school_search_cache*`)를 거친다.
 
@@ -41,7 +41,7 @@
 
 1. Supabase 프로젝트를 만들고 Auth의 Email 제공자를 켠다. 로컬 개발 중에는 이메일 확인을
    꺼도 된다(`supabase/config.toml`의 `enable_confirmations = false`가 로컬 스택 기준값).
-2. Storage에 비공개 버킷 두 개를 만든다: `share-images`, `club-images`.
+2. Storage에 비공개 버킷 세 개를 만든다: `share-images`, `club-images`, `post-attachments`.
 3. 카카오 개발자 콘솔에서 애플리케이션을 만들고 REST API 키를 발급받는다.
 4. 마이그레이션 적용:
    ```bash
@@ -98,10 +98,12 @@ app/
   api/schools/search              카카오 프록시 (호출부 단일화)
 lib/
   supabase/                       서버·클라이언트·미들웨어 헬퍼, DB 타입
-  constants/categories.ts         학교급-카테고리 매핑 (DB CHECK 제약과 동기화 필요)
+  constants/categories.ts         소모임 학교급-카테고리 매핑 (DB CHECK 제약과 동기화 필요)
+  constants/share.ts              나눔/대여 카테고리·학년군·교과목·물건상태 상수 (DB CHECK 제약과 동기화 필요)
   schools/normalize.ts            검색어 정규화 (캐시 키)
   storage/signed-url.ts           비공개 버킷 서명 URL 발급
-supabase/migrations/              0001~0008 SQL 마이그레이션
+  format.ts                       날짜·파일크기 표시 포맷 유틸
+supabase/migrations/              0001~0012 SQL 마이그레이션
 scripts/                          seed.ts, verify-rls.ts
 docs/                             prd.md, checklist.md, context-notes.md, DESIGN.md
 ```

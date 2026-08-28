@@ -24,6 +24,12 @@
 - [ ] T20 시드 스크립트 + RLS·제약 조건 검증 스크립트 (req: R4) (ac: AC3, AC4) (after: T7, T12, T16)
 - [ ] T21 마이그레이션 6: `school_search_cache`, `school_search_cache_items`, 인덱스, 읽기 전용 RLS (req: R30, R31, R34) (ac: AC22) (after: T15)
 - [ ] T22 검색어 정규화 유틸 + 캐시 조회·기록 로직 + 90일 만료 처리 (req: R30, R31, R32, R33) (ac: AC18, AC19, AC20, AC21) (after: T21)
+- [x] T23 마이그레이션: share_posts에 transaction_type/condition_grade/rental_*/grade_band/subject 추가, 카테고리 3종 교체, 상태 전이 트리거에 renting/returned 추가 (이슈#5-1) (after: T7)
+- [x] T24 post_attachments 테이블 + post-attachments 버킷 RLS, 확장자/개수/용량 제약 (이슈#5-2) (after: T23)
+- [x] T25 나눔/대여 작성 폼: 조건부 학년군/교과목, 대여 기간, 물건상태, 첨부파일 업로드 (이슈#5-3) (after: T23, T24)
+- [x] T26 나눔/대여 목록: 확장 필터 바, 대표사진, 컨디션 뱃지, 거래유형 아이콘 (이슈#5-4) (after: T23)
+- [x] T27 나눔/대여 상세: 물건정보 표, 대여기간/반납예정, 첨부파일 카드, 대여 상태 버튼 (이슈#5-5) (after: T23, T24, T26)
+- [x] T28 대여 상태 전이 권한(작성자만) + user_carbon_totals에 returned 포함 (이슈#5-6) (after: T23, T27)
 
 ## Acceptance Criteria
 

@@ -3,8 +3,17 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { isValidCategory } from "@/lib/constants/categories";
-import type { SchoolLevel } from "@/lib/supabase/types";
+import {
+  CONDITION_GRADES,
+  TRANSACTION_TYPES,
+  isShareCategory,
+  isValidGradeBand,
+  isValidRentalDates,
+  isValidSubject,
+  requiresGradeBand,
+  requiresSubject,
+} from "@/lib/constants/share";
+import type { ConditionGrade, SchoolLevel, TransactionType } from "@/lib/supabase/types";
 
 export interface FormActionState {
   error: string | null;
@@ -12,6 +21,11 @@ export interface FormActionState {
 
 const SHARE_BUCKET = "share-images";
 const MAX_SHARE_IMAGES = 4;
+
+const ATTACHMENT_BUCKET = "post-attachments";
+const MAX_ATTACHMENTS = 3;
+const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024;
+const ATTACHMENT_EXTENSIONS = ["pdf", "hwp", "hwpx", "docx", "pptx"];
 
 export async function createSharePostAction(
   _prevState: FormActionState,
@@ -29,16 +43,63 @@ export async function createSharePostAction(
   const category = String(formData.get("category") ?? "");
   const itemTypeId = String(formData.get("item_type_id") ?? "");
   const carbonG = Number(formData.get("carbon_g") ?? 0);
+  const transactionType = String(formData.get("transaction_type") ?? "") as TransactionType;
+  const conditionGrade = String(formData.get("condition_grade") ?? "") as ConditionGrade;
+  const componentsComplete = formData.get("components_complete") === "on";
+  const conditionNote = String(formData.get("condition_note") ?? "").trim() || null;
+  const gradeBandInput = String(formData.get("grade_band") ?? "").trim() || null;
+  const subjectInput = String(formData.get("subject") ?? "").trim() || null;
+  const rentalStartInput = String(formData.get("rental_start_date") ?? "").trim() || null;
+  const rentalEndInput = String(formData.get("rental_end_date") ?? "").trim() || null;
   const images = formData.getAll("images").filter((f): f is File => f instanceof File && f.size > 0);
+  const attachments = formData.getAll("attachments").filter((f): f is File => f instanceof File && f.size > 0);
 
   if (!title || !description || !schoolLevel || !category || !itemTypeId) {
     return { error: "모든 항목을 입력해 주세요." };
   }
-  if (!isValidCategory(schoolLevel, category)) {
-    return { error: "학교급과 카테고리 조합이 올바르지 않습니다." };
+  if (!isShareCategory(category)) {
+    return { error: "카테고리가 올바르지 않습니다." };
   }
+  if (!(TRANSACTION_TYPES as readonly string[]).includes(transactionType)) {
+    return { error: "나눔/대여 유형을 선택해 주세요." };
+  }
+  if (!(CONDITION_GRADES as readonly string[]).includes(conditionGrade)) {
+    return { error: "물건 상태를 선택해 주세요." };
+  }
+  if (conditionNote && conditionNote.length > 300) {
+    return { error: "비고는 300자 이하로 입력해 주세요." };
+  }
+
+  const gradeBand = requiresGradeBand(schoolLevel) ? gradeBandInput : null;
+  if (!isValidGradeBand(schoolLevel, gradeBand)) {
+    return { error: "학년군을 선택해 주세요." };
+  }
+
+  const subject = requiresSubject(category) ? subjectInput : null;
+  if (!isValidSubject(schoolLevel, category, subject)) {
+    return { error: "교과목을 선택해 주세요." };
+  }
+
+  const rentalStartDate = transactionType === "rental" ? rentalStartInput : null;
+  const rentalEndDate = transactionType === "rental" ? rentalEndInput : null;
+  if (!isValidRentalDates(transactionType, rentalStartDate, rentalEndDate)) {
+    return { error: "대여 가능 기간(시작~종료일)을 올바르게 입력해 주세요." };
+  }
+
   if (images.length < 1 || images.length > MAX_SHARE_IMAGES) {
     return { error: `사진은 1장 이상 ${MAX_SHARE_IMAGES}장 이하로 첨부해 주세요.` };
+  }
+  if (attachments.length > MAX_ATTACHMENTS) {
+    return { error: `첨부파일은 최대 ${MAX_ATTACHMENTS}개까지 첨부할 수 있습니다.` };
+  }
+  for (const file of attachments) {
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+    if (!ATTACHMENT_EXTENSIONS.includes(ext)) {
+      return { error: "첨부파일은 pdf, hwp, hwpx, docx, pptx만 가능합니다." };
+    }
+    if (file.size > MAX_ATTACHMENT_SIZE) {
+      return { error: "첨부파일은 개당 10MB 이하만 가능합니다." };
+    }
   }
 
   const { data: post, error: postError } = await supabase
@@ -51,6 +112,14 @@ export async function createSharePostAction(
       category,
       item_type_id: itemTypeId,
       carbon_g: carbonG,
+      transaction_type: transactionType,
+      condition_grade: conditionGrade,
+      components_complete: componentsComplete,
+      condition_note: conditionNote,
+      grade_band: gradeBand,
+      subject,
+      rental_start_date: rentalStartDate,
+      rental_end_date: rentalEndDate,
     })
     .select("id")
     .single();
@@ -66,6 +135,21 @@ export async function createSharePostAction(
     const { error: uploadError } = await supabase.storage.from(SHARE_BUCKET).upload(path, file);
     if (uploadError) continue;
     await supabase.from("share_post_images").insert({ post_id: post.id, storage_path: path, sort_order: i });
+  }
+
+  for (let i = 0; i < attachments.length; i++) {
+    const file = attachments[i]!;
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+    const path = `${user.id}/${post.id}/attachments/${i}.${ext}`;
+    const { error: uploadError } = await supabase.storage.from(ATTACHMENT_BUCKET).upload(path, file);
+    if (uploadError) continue;
+    await supabase.from("post_attachments").insert({
+      post_id: post.id,
+      file_name: file.name,
+      storage_path: path,
+      file_size: file.size,
+      mime_type: file.type || "application/octet-stream",
+    });
   }
 
   revalidatePath("/share");
@@ -91,6 +175,18 @@ export async function cancelReservationAction(postId: string) {
 export async function completeSharePostAction(postId: string) {
   const supabase = await createClient();
   await supabase.from("share_posts").update({ status: "completed" }).eq("id", postId);
+  revalidatePath(`/share/${postId}`);
+}
+
+export async function startRentalAction(postId: string) {
+  const supabase = await createClient();
+  await supabase.from("share_posts").update({ status: "renting" }).eq("id", postId);
+  revalidatePath(`/share/${postId}`);
+}
+
+export async function returnRentalAction(postId: string) {
+  const supabase = await createClient();
+  await supabase.from("share_posts").update({ status: "returned" }).eq("id", postId);
   revalidatePath(`/share/${postId}`);
 }
 
