@@ -113,6 +113,9 @@ export interface Database {
           subject?: string | null;
         };
         Update: Partial<{
+          title: string;
+          description: string;
+          condition_note: string | null;
           status: SharePostStatus;
           reserved_by: string | null;
           reserved_at: string | null;
@@ -232,7 +235,7 @@ export interface Database {
           major_category: string;
           minor_category: string;
         };
-        Update: never;
+        Update: Partial<{ title: string; body: string; major_category: string; minor_category: string }>;
         Relationships: [];
       };
       board_comments: {
@@ -258,7 +261,7 @@ export interface Database {
           location: string;
           description?: string | null;
         };
-        Update: never;
+        Update: Partial<{ title: string; event_date: string; location: string; description: string | null }>;
         Relationships: [];
       };
     };

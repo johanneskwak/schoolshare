@@ -210,3 +210,41 @@ export async function addShareCommentAction(
   revalidatePath(`/share/${postId}`);
   return { error: null };
 }
+
+export async function adminUpdateSharePostAction(
+  postId: string,
+  _prevState: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const supabase = await createClient();
+  const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const conditionNote = String(formData.get("condition_note") ?? "").trim() || null;
+
+  if (!title || !description) return { error: "제목과 설명은 비워둘 수 없습니다." };
+  if (conditionNote && conditionNote.length > 2000) {
+    return { error: "활용팁은 2000자 이하로 입력해 주세요." };
+  }
+
+  const { error } = await supabase
+    .from("share_posts")
+    .update({ title, description, condition_note: conditionNote })
+    .eq("id", postId);
+  if (error) return { error: "수정 권한이 없거나 저장에 실패했습니다." };
+
+  revalidatePath(`/share/${postId}`);
+  return { error: null };
+}
+
+export async function adminDeleteSharePostAction(postId: string) {
+  const supabase = await createClient();
+  await supabase.from("share_posts").delete().eq("id", postId);
+  revalidatePath("/share");
+  redirect("/share");
+}
+
+export async function adminDeleteShareCommentAction(postId: string, commentId: string) {
+  const supabase = await createClient();
+  await supabase.from("share_comments").delete().eq("id", commentId);
+  revalidatePath(`/share/${postId}`);
+}

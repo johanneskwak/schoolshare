@@ -60,3 +60,33 @@ export async function addBoardCommentAction(
   revalidatePath(`/board/${postId}`);
   return { error: null };
 }
+
+export async function adminUpdateBoardPostAction(
+  postId: string,
+  _prevState: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const supabase = await createClient();
+  const title = String(formData.get("title") ?? "").trim();
+  const body = String(formData.get("body") ?? "").trim();
+  if (!title || !body) return { error: "제목과 내용은 비워둘 수 없습니다." };
+
+  const { error } = await supabase.from("board_posts").update({ title, body }).eq("id", postId);
+  if (error) return { error: "수정 권한이 없거나 저장에 실패했습니다." };
+
+  revalidatePath(`/board/${postId}`);
+  return { error: null };
+}
+
+export async function adminDeleteBoardPostAction(postId: string) {
+  const supabase = await createClient();
+  await supabase.from("board_posts").delete().eq("id", postId);
+  revalidatePath("/board");
+  redirect("/board");
+}
+
+export async function adminDeleteBoardCommentAction(postId: string, commentId: string) {
+  const supabase = await createClient();
+  await supabase.from("board_comments").delete().eq("id", commentId);
+  revalidatePath(`/board/${postId}`);
+}
