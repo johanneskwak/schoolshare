@@ -66,8 +66,8 @@ export async function createSharePostAction(
   if (!(CONDITION_GRADES as readonly string[]).includes(conditionGrade)) {
     return { error: "물건 상태를 선택해 주세요." };
   }
-  if (conditionNote && conditionNote.length > 300) {
-    return { error: "비고는 300자 이하로 입력해 주세요." };
+  if (conditionNote && conditionNote.length > 2000) {
+    return { error: "활용팁은 2000자 이하로 입력해 주세요." };
   }
 
   const gradeBand = requiresGradeBand(schoolLevel) ? gradeBandInput : null;
