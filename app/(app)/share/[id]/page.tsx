@@ -1,15 +1,11 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signImageUrls } from "@/lib/storage/signed-url";
+import { formatDate, formatFileSize } from "@/lib/format";
+import { CONDITION_GRADE_LABELS, SHARE_STATUS_LABELS } from "@/lib/constants/share";
+import { TransactionTypeIcon } from "@/components/TransactionTypeIcon";
 import { ShareDetailActions } from "./ShareDetailActions";
 import { ShareCommentForm } from "./ShareCommentForm";
-import type { SharePostStatus } from "@/lib/supabase/types";
-
-const STATUS_LABEL: Record<SharePostStatus, string> = {
-  available: "나눔중",
-  reserved: "예약중",
-  completed: "나눔완료",
-};
 
 export default async function ShareDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -21,19 +17,30 @@ export default async function ShareDetailPage({ params }: { params: Promise<{ id
 
   const { data: post } = await supabase
     .from("share_posts")
-    .select("id, title, description, status, school_level, category, author_id, reserved_by, created_at")
+    .select(
+      "id, title, description, status, school_level, category, grade_band, subject, author_id, reserved_by, created_at, transaction_type, condition_grade, components_complete, condition_note, rental_start_date, rental_end_date",
+    )
     .eq("id", id)
     .maybeSingle();
 
   if (!post) notFound();
 
-  const [{ data: images }, { data: author }, { data: comments }] = await Promise.all([
+  const [{ data: images }, { data: author }, { data: comments }, { data: attachments }] = await Promise.all([
     supabase.from("share_post_images").select("storage_path").eq("post_id", id).order("sort_order"),
     supabase.from("public_profiles").select("nickname").eq("id", post.author_id).single(),
     supabase.from("share_comments").select("id, author_id, body, created_at").eq("post_id", id).order("created_at"),
+    supabase
+      .from("post_attachments")
+      .select("id, file_name, storage_path, file_size")
+      .eq("post_id", id)
+      .order("created_at"),
   ]);
 
   const signedUrls = await signImageUrls("share-images", (images ?? []).map((i) => i.storage_path));
+  const signedAttachmentUrls = await signImageUrls(
+    "post-attachments",
+    (attachments ?? []).map((a) => a.storage_path),
+  );
 
   const commentAuthorIds = Array.from(new Set((comments ?? []).map((c) => c.author_id)));
   const { data: commentAuthors } = commentAuthorIds.length
@@ -44,12 +51,21 @@ export default async function ShareDetailPage({ params }: { params: Promise<{ id
   const isAuthor = user?.id === post.author_id;
   const isReserver = user?.id === post.reserved_by;
   const isReserved = post.status === "reserved";
+  const isRental = post.transaction_type === "rental";
+  const isOverdue =
+    isRental && post.status === "renting" && !!post.rental_end_date && post.rental_end_date < new Date().toISOString().slice(0, 10);
 
   return (
     <>
-      <header className="header">나눔 상세</header>
+      <header className="header">{isRental ? "대여 상세" : "나눔 상세"}</header>
       <div className="container">
-        <span className={`tag tag-${post.status}`}>{STATUS_LABEL[post.status]}</span>
+        <div className="badge-row">
+          <span className={`tag tag-${post.status}`}>{SHARE_STATUS_LABELS[post.status]}</span>
+          <span className={`tag tag-condition-${post.condition_grade}`}>
+            {CONDITION_GRADE_LABELS[post.condition_grade]}
+          </span>
+          <TransactionTypeIcon type={post.transaction_type} className="muted" />
+        </div>
         <h1 className="title" style={{ fontSize: 20, marginTop: 8 }}>{post.title}</h1>
         <p className="muted">
           {post.category} · {author?.nickname ?? "교사"}
@@ -65,10 +81,65 @@ export default async function ShareDetailPage({ params }: { params: Promise<{ id
 
         <p style={{ whiteSpace: "pre-wrap", marginTop: 12 }}>{post.description}</p>
 
+        <table className="info-table">
+          <tbody>
+            <tr>
+              <th>상태등급</th>
+              <td>{CONDITION_GRADE_LABELS[post.condition_grade]}</td>
+            </tr>
+            <tr>
+              <th>구성품</th>
+              <td>{post.components_complete ? "구성품 모두 있음" : "구성품 일부 없음"}</td>
+            </tr>
+            <tr>
+              <th>비고</th>
+              <td>{post.condition_note ?? "-"}</td>
+            </tr>
+            {isRental && post.rental_start_date && post.rental_end_date && (
+              <>
+                <tr>
+                  <th>대여 가능 기간</th>
+                  <td>
+                    {formatDate(post.rental_start_date)} ~ {formatDate(post.rental_end_date)}
+                  </td>
+                </tr>
+                <tr>
+                  <th>반납 예정일</th>
+                  <td>{formatDate(post.rental_end_date)}</td>
+                </tr>
+              </>
+            )}
+          </tbody>
+        </table>
+
+        {isOverdue && (
+          <p className="error">반납 예정일이 지났습니다. 대여자와 반납 일정을 확인해 주세요.</p>
+        )}
+
+        {(attachments ?? []).length > 0 && (
+          <>
+            <h2 className="title" style={{ fontSize: 16, marginTop: 20 }}>첨부파일</h2>
+            {attachments?.map((a) => (
+              <a
+                key={a.id}
+                href={signedAttachmentUrls.get(a.storage_path)}
+                target="_blank"
+                rel="noreferrer"
+                className="attachment-card"
+              >
+                <span>📎</span>
+                <span className="file-name">{a.file_name}</span>
+                <span className="muted">{formatFileSize(a.file_size)}</span>
+              </a>
+            ))}
+          </>
+        )}
+
         <div style={{ marginTop: 20 }}>
           <ShareDetailActions
             postId={post.id}
             status={post.status}
+            transactionType={post.transaction_type}
             isAuthor={isAuthor}
             isReserver={isReserver}
           />
