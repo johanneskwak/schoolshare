@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--", "-p", "3099"],
       "port": 3099
+    },
+    {
+      "name": "teacher-town-modules",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "C:\\dev\\teacher-town-modules", "run", "dev", "--", "-p", "3098"],
+      "port": 3098
     }
   ]
 }
