@@ -1,0 +1,636 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>핵확산 시뮬레이션</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E6EAED; --card:#F4F6F7; --ink:#12212E; --ink-2:#4C6069; --rule:#A6B2BB;
+  --chamber:#16283A; --gold:#A8873C;
+  --peace:#2E6E9E; --nuke:#B0402C; --neu:#8A9499;
+  --r:2px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);
+  font-family:'IBM Plex Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:16px;line-height:1.55;font-variant-numeric:tabular-nums;-webkit-text-size-adjust:100%}
+.disp{font-family:'Black Han Sans',sans-serif;font-weight:400;letter-spacing:-.01em}
+h1{font-family:'Black Han Sans',sans-serif;font-size:1.7rem;margin:0 0 .3rem;font-weight:400}
+h2{font-family:'Black Han Sans',sans-serif;font-size:1.05rem;margin:0 0 .6rem;font-weight:400}
+.wrap{max-width:1120px;margin:0 auto;padding:18px 18px 72px}
+.narrow{max-width:500px}
+.muted{color:var(--ink-2)} .small{font-size:.82rem}
+hr.rule{border:0;border-top:1px solid var(--rule);margin:24px 0}
+a{color:var(--peace)}
+
+button{font:inherit;cursor:pointer;border-radius:var(--r)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--peace);outline-offset:2px}
+.btn{background:var(--ink);color:#fff;border:1px solid var(--ink);padding:.6rem 1.05rem;font-weight:500}
+.btn:hover{background:#1B333D}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+.btn.ghost:hover{background:#D7DEE1}
+.btn.danger{background:var(--nuke);border-color:var(--nuke)}
+.btn:disabled{opacity:.34;cursor:not-allowed}
+.btn.wide{width:100%}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+input,select{font:inherit;padding:.58rem .7rem;border:1px solid var(--rule);border-radius:var(--r);background:#fff;width:100%;color:var(--ink)}
+label{display:block;font-size:.84rem;color:var(--ink-2);margin:0 0 .25rem}
+.field{margin-bottom:13px}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:var(--r);padding:15px}
+.err{background:#F4DED9;border-left:3px solid var(--nuke);color:#7C2C1E;padding:.6rem .8rem;margin:12px 0;font-size:.9rem}
+.note{background:var(--card);border-left:3px solid var(--peace);padding:.6rem .8rem;margin:12px 0;font-size:.9rem}
+.resolution{border:1px solid var(--gold);border-top:4px solid var(--gold);background:#FBF8F1;
+  border-radius:var(--r);padding:15px 17px;margin-top:14px}
+.resolution h2{color:#6E5A22;letter-spacing:.02em}
+.ballot{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.ballot button{flex:1;min-width:180px;padding:.75rem 1rem;background:#fff;border:1px solid var(--rule);
+  border-left:5px solid var(--rule);text-align:left;font-weight:500}
+.ballot button:hover{background:var(--card)}
+.ballot .bn{border-left-color:var(--nuke)} .ballot .bp{border-left-color:var(--peace)}
+.ballot small{display:block;font-weight:400;color:var(--ink-2);font-size:.74rem;margin-top:2px}
+
+/* ── 헤더 ── */
+.banner{background:var(--chamber);color:#EEF2F4;border-radius:var(--r);
+  border-bottom:3px solid var(--gold);padding:14px 18px;display:flex;
+  justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:4px}
+.banner .seal{flex:0 0 auto}
+.banner .ttl{display:flex;align-items:center;gap:13px}
+.banner .turn{font-family:'Black Han Sans',sans-serif;font-size:1.7rem;line-height:1.05}
+.banner .turn span{font-size:.95rem;color:#9FB3C2;font-family:'IBM Plex Sans KR',sans-serif;font-weight:400}
+.banner .sub{font-size:.74rem;color:#8FA5B5;margin-top:3px;letter-spacing:.02em}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;
+  border-bottom:3px solid var(--ink);padding-bottom:12px;margin-bottom:6px}
+.hdr .turn{font-family:'Black Han Sans',sans-serif;font-size:2.1rem;line-height:1}
+.hdr .turn span{color:var(--ink-2);font-size:1.1rem}
+.hdr .sub{font-size:.8rem;color:var(--ink-2);margin-top:2px}
+.stats{display:flex;gap:10px;align-items:flex-start}
+.stat{text-align:center;border:1px solid var(--rule);border-radius:var(--r);padding:6px 14px 7px;background:#fff;min-width:96px}
+.stat b{font-family:'Black Han Sans',sans-serif;font-size:2.4rem;line-height:1;display:block}
+.stat span{font-size:.72rem;color:var(--ink-2);display:block;margin-top:2px;white-space:nowrap}
+.stat.nu{border-color:var(--nuke)} .stat.nu b{color:var(--nuke)}
+.stat.pe{border-color:var(--peace)} .stat.pe b{color:var(--peace)}
+.stats .memo{font-size:.68rem;color:var(--ink-2);align-self:flex-end;max-width:128px;line-height:1.35;text-align:left}
+.banner .memo{color:#8FA5B5}
+
+/* ── 턴 진행 눈금 ── */
+.pips{display:flex;gap:3px;margin:22px 0 20px}
+.pip{flex:1;height:9px;background:#CBD5D8;border-radius:1px;position:relative}
+.pip.on{background:var(--ink)}
+.pip.now{background:var(--peace);box-shadow:0 0 0 2px rgba(47,111,143,.28)}
+.pip.un::after{content:'UN';position:absolute;top:-15px;left:50%;transform:translateX(-50%);
+  font-size:.6rem;letter-spacing:.05em;color:var(--peace);font-weight:600}
+.pip.un{background:#B4C3C8}.pip.un.on{background:var(--peace)}
+
+/* ── 레이스 레인 (신호 요소) ── */
+.floor{background:linear-gradient(#D6DEE3,#EAEEF0);border:1px solid #9DACB6;
+  border-radius:var(--r);padding:13px 17px 8px;margin-top:12px;
+  box-shadow:inset 0 1px 0 #F2F5F6}
+.lane{display:grid;grid-template-columns:minmax(104px,164px) 1fr 74px;gap:14px;align-items:center;
+  padding:8px 0;border-bottom:1px solid rgba(166,178,187,.5)}
+.lane:last-of-type{border-bottom:0}
+.lane.colhead{font-size:.72rem;color:var(--ink-2);letter-spacing:.03em;padding:0 0 7px;
+  border-bottom:2px solid var(--ink)}
+.plate{background:#FAFBFB;border:1px solid #97A6B0;border-top:3px solid var(--pc,#888);
+  border-radius:1px;padding:6px 9px 5px;box-shadow:0 1px 0 rgba(18,33,46,.16)}
+.plate .cty{font-family:'Black Han Sans',sans-serif;font-size:1.08rem;line-height:1.1;letter-spacing:.01em}
+.plate .tier{font-size:.66rem;color:var(--ink-2);letter-spacing:.04em;margin-top:1px}
+.gauges{display:flex;flex-direction:column;gap:4px}
+.strip{position:relative;border-radius:1px;overflow:hidden}
+.strip.p{height:22px;background:#CFD9DD}
+.strip.n{height:11px;background:#CFD9DD}
+.fillp{position:absolute;inset:0 auto 0 0;background:var(--peace);transition:width .8s cubic-bezier(.2,.7,.3,1)}
+.filln{position:absolute;inset:0 auto 0 0;background:var(--nuke);transition:width .8s cubic-bezier(.2,.7,.3,1)}
+.fog{position:absolute;inset:0;background-image:repeating-linear-gradient(115deg,
+  #B7C3C7 0 6px, #C6D0D4 6px 12px)}
+.fog::after{content:'비공개';position:absolute;left:7px;top:50%;transform:translateY(-50%);
+  font-size:.62rem;color:#5E7079;letter-spacing:.08em}
+.goal{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);right:0}
+.lane .val{text-align:right;font-family:'Black Han Sans',sans-serif;font-size:1.5rem;line-height:1}
+.lane .val i{display:block;font-style:normal;font-family:'IBM Plex Sans KR',sans-serif;
+  font-size:.7rem;color:var(--ink-2);line-height:1.3;margin-top:3px}
+.lane.hot .plate{border-color:var(--nuke);background:#FBF0ED}
+.lane.hot .val i{color:var(--nuke)}
+.legend{display:flex;gap:16px;font-size:.74rem;color:var(--ink-2);margin:8px 0 0}
+.legend b{display:inline-block;width:11px;height:11px;vertical-align:-1px;margin-right:4px;border-radius:1px}
+
+/* ── 학생 ── */
+.flag{height:8px;margin-bottom:12px;border-radius:1px}
+.mine{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.mg{border:1px solid var(--rule);border-radius:var(--r);padding:12px 13px;background:#fff}
+.mg.secret{background:repeating-linear-gradient(115deg,#F3F6F6 0 8px,#EAEFF0 8px 16px);
+  border-style:dashed;border-color:var(--nuke)}
+.mg .lbl{font-size:.74rem;color:var(--ink-2)}
+.mg .v{font-family:'Black Han Sans',sans-serif;font-size:2.3rem;line-height:1.05}
+.mg.pub .v{color:var(--peace)} .mg.secret .v{color:var(--nuke)}
+.mg .of{font-size:.72rem;color:var(--ink-2)}
+.mini-bar{height:5px;background:#CFD9DD;border-radius:1px;margin-top:7px;overflow:hidden}
+.mini-bar i{display:block;height:100%}
+.choices{display:grid;gap:10px;margin-top:4px}
+.choice{border:1px solid var(--rule);border-left:6px solid var(--rule);background:#fff;
+  border-radius:var(--r);padding:14px 16px;text-align:left;width:100%;transition:transform .07s}
+.choice:active{transform:scale(.99)}
+.choice .t{font-family:'Black Han Sans',sans-serif;font-size:1.25rem;line-height:1.2}
+.choice .d{font-size:.83rem;color:var(--ink-2);margin-top:1px}
+.choice.pe{border-left-color:var(--peace)} .choice.ne{border-left-color:var(--neu)}
+.choice.nu{border-left-color:var(--nuke)}
+.choice:disabled{opacity:.4}
+.state{text-align:center;padding:34px 14px}
+.state .k{font-family:'Black Han Sans',sans-serif;font-size:1.9rem;line-height:1.2}
+.log{border-left:3px solid var(--rule);padding-left:11px;margin:10px 0}
+.log div{font-size:.83rem;padding:2px 0}
+.hit{color:var(--peace);font-weight:600} .miss{color:var(--nuke);font-weight:600}
+
+table.t{width:100%;border-collapse:collapse;font-size:.85rem;background:#fff}
+table.t th,table.t td{border:1px solid var(--rule);padding:.42rem .5rem;text-align:center}
+table.t th{background:var(--card);font-weight:600}
+
+/* ── 룰렛 ── */
+.setup{display:grid;grid-template-columns:296px 1fr;gap:26px;align-items:start}
+@media(max-width:760px){.setup{grid-template-columns:1fr}}
+.wheelbox{position:relative;width:296px;height:296px;margin:0 auto}
+.wheelbox svg{width:100%;height:100%;transition:transform 4.2s cubic-bezier(.13,.72,.16,1)}
+.needle{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:0;height:0;
+  border-left:10px solid transparent;border-right:10px solid transparent;border-top:19px solid var(--ink);z-index:2}
+.slot{display:grid;grid-template-columns:62px 1fr 74px 44px;gap:9px;align-items:center;
+  padding:7px 9px;border:1px solid var(--rule);background:#fff;margin-bottom:5px;border-radius:var(--r)}
+.slot.done{background:var(--card)}
+.sw{width:12px;height:12px;border-radius:1px;display:inline-block;vertical-align:-1px;margin-right:5px}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:1.02rem;letter-spacing:.12em;font-weight:600}
+.qr svg{width:42px;height:42px;display:block}.qrbig svg{width:124px;height:124px;display:block}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(max-width:640px){
+  .lane{grid-template-columns:82px 1fr 58px;gap:9px}
+  .lane .who .cty{font-size:.92rem}.lane .val{font-size:1.1rem}
+  .hdr .turn{font-size:1.5rem}.kcount b{font-size:2.2rem}
+  .mine{grid-template-columns:1fr}
+}
+</style>
+<div id="app" class="wrap"><p class="muted">불러오는 중…</p></div>
+<script type="module">
+let createClient=null, qrlib=null;
+try{ createClient=(await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm')).createClient; }catch(e){}
+try{ qrlib=(await import('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/+esm')).default; }catch(e){}
+const qrSVG=(t,c=3)=>{ if(!qrlib)return''; try{const q=qrlib(0,'M');q.addData(t);q.make();return q.createSvgTag(c,0);}catch(e){return'';} };
+
+/* ===== Supabase Publishable key ===== */
+const KEY_BAKED='sb_publishable_erhF21wt3qmOagP38OBaXQ_g_YQTPPO';
+const URL_='https://wsmwfhoeoravcmmvreqq.supabase.co';
+let KEY=KEY_BAKED;
+
+const NUKE_WIN=60, PEACE_WIN=80, EXPOSE_AT=40;
+const COUNTRIES=[{n:'아르곤국',t:'강대국',c:'#3F6E8C'},{n:'크림슨국',t:'강대국',c:'#A3503F'},
+ {n:'사파이어국',t:'중견국',c:'#3E8175'},{n:'앰버국',t:'중견국',c:'#B5872C'},
+ {n:'미스트국',t:'약소국',c:'#7C6E9B'},{n:'테라국',t:'약소국',c:'#6E7F46'}];
+const POOL5=['아르곤국','크림슨국','사파이어국','미스트국','테라국'];
+const COLOR=Object.fromEntries(COUNTRIES.map(c=>[c.n,c.c]));
+const CARDS=[
+ {k:'평화',cls:'pe',d:'군축에 동참한다 · 핵개발국이 많을수록 이득이 준다'},
+ {k:'중립',cls:'ne',d:'관망한다 · 평화 +4, 핵 +2 · 강대국의 지목을 피할 수 있다'},
+ {k:'핵개발',cls:'nu',d:'몰래 핵무장을 추진한다 · 핵 +6, 위장 외교로 평화도 +3'}];
+const PHASE_KO={setup:'개회 준비',negotiation:'비공식 협의',submit:'표결',result:'결과 발표',ended:'폐회'};
+const VICTORY={
+ '강대국':{p:'지목 카드 2장 — 한 나라를 지목한다. 결과는 그 나라가 그 턴에 무엇을 골랐느냐로 갈린다. 핵개발이면 상대 핵 −10 · 우리 평화 +10. 평화면 상대 평화 −5 · 우리 평화 −4(외교적 고립). 중립이면 헛방으로 우리 평화 −10.'},
+ '중견국':{p:'첩보 카드 2장 — 한 나라를 조사한다. 그 나라가 핵개발을 골랐다면 우리 평화 +5, 아니면 −5. 성패와 관계없이 그 나라의 핵 포인트를 알게 된다.'},
+ '약소국':{p:'첩보 카드 2장 (중견국과 같은 방식) · 호소 카드 1회 — 게임 중 한 번, 30초 동안 전체에게 연설할 수 있다 (다른 나라 발언 금지, 선생님께 선언).'}};
+
+const H=()=>Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
+const setH=o=>{location.hash=new URLSearchParams({...H(),...o}).toString();};
+let h=H(); if(!KEY&&h.k)KEY=h.k;
+async function safeFetch(input,init){init=init||{};let url=input,o={...init};
+  if(typeof Request!=='undefined'&&input instanceof Request){url=input.url;o={method:input.method,headers:input.headers,body:init.body,...init};}
+  else if(input&&typeof input==='object'&&input.url)url=input.url;
+  const hd=o.headers;
+  if(hd&&typeof hd.forEach==='function'&&hd.constructor!==Object){const pl={};hd.forEach((v,k)=>{pl[k]=v;});o.headers=pl;}
+  delete o.signal; return fetch(String(url),o);}
+const memStore=(()=>{const m=new Map();return{getItem:k=>m.has(k)?m.get(k):null,
+  setItem:(k,v)=>{m.set(k,String(v));},removeItem:k=>{m.delete(k);}};})();
+const base=()=>location.origin+location.pathname;
+const link=c=>{const q=new URLSearchParams({s:c});if(!KEY_BAKED&&KEY)q.set('k',KEY);return base()+'#'+q.toString();};
+const SEAL=`<svg class="seal" width="42" height="42" viewBox="0 0 42 42" aria-hidden="true">
+  <circle cx="21" cy="21" r="19" fill="none" stroke="#A8873C" stroke-width="1.2"/>
+  <circle cx="21" cy="21" r="11" fill="none" stroke="#7E93A4" stroke-width=".9"/>
+  <path d="M2 21h38M21 2v38" stroke="#7E93A4" stroke-width=".7"/>
+  <ellipse cx="21" cy="21" rx="6" ry="11" fill="none" stroke="#7E93A4" stroke-width=".7"/>
+  ${[...Array(12)].map((_,i)=>{const a=i*30*Math.PI/180;
+    return `<line x1="${21+16*Math.cos(a)}" y1="${21+16*Math.sin(a)}"
+      x2="${21+19*Math.cos(a)}" y2="${21+19*Math.sin(a)}" stroke="#A8873C" stroke-width="1"/>`;}).join('')}
+</svg>`;
+const app=document.getElementById('app');
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const el=x=>{app.innerHTML=x;};
+const eb=m=>`<div class="err">${esc(m)}</div>`;
+const val=id=>{const e=document.getElementById(id);return e?e.value:'';};
+const on=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
+let sb=null;
+async function rpc(fn,args){let r;
+  try{r=await sb.rpc(fn,args);}
+  catch(e){const m=String(e&&e.message||e);
+    if(/postMessage|cloned|Failed to fetch|NetworkError/i.test(m))
+      throw new Error('서버에 연결하지 못했습니다. 미리보기 창에서는 막히니 실제 주소에 배포한 뒤 열어 주세요.');
+    throw e;}
+  if(r.error)throw new Error(String(r.error.message).replace(/^.*?:\s*/,''));
+  return r.data;}
+
+/* ══════════ 입구 ══════════ */
+function keyScreen(msg){el(`<div class="narrow"><h1>선생님 1회 설정</h1>
+  <p class="muted small">Supabase → Settings → API Keys → Publishable key를 붙여넣으세요.</p>${msg?eb(msg):''}
+  <div class="field"><input id="k" placeholder="sb_publishable_…"></div>
+  <button class="btn wide" id="go">저장하고 시작</button></div>`);
+  on('go',()=>{const v=val('k').trim();if(v.length<20)return keyScreen('키가 너무 짧습니다.');
+    setH({k:v});location.reload();});}
+
+function home(msg){el(`<div class="narrow">
+  <h1>핵확산 시뮬레이션</h1>
+  <p class="muted small">중학교 3학년 사회 · 국제사회의 갈등과 협력 · 15턴</p>${msg?eb(msg):''}
+  <hr class="rule"><h2>학생용</h2>
+  <div class="field"><label for="jc">모둠 입장 코드 (숫자 4자리)</label>
+    <input id="jc" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+  <button class="btn wide" id="join">입장</button>
+  <hr class="rule"><h2>교사용</h2>
+  <div class="field"><label for="ac">교사 코드</label><input id="ac"></div>
+  <div class="row"><button class="btn ghost" id="login">이어서 진행</button>
+    <button class="btn ghost" id="new">새 게임 만들기</button></div></div>`);
+  on('join',async()=>{const c=val('jc').trim();
+    try{await rpc('gg_join',{p_join_code:c});setH({s:c,t:'',n:''});route();}catch(e){home(e.message);}});
+  on('login',async()=>{const c=val('ac').trim();
+    try{const id=await rpc('gg_admin_login',{p_code:c});
+      if(!id)return home('교사 코드를 찾을 수 없습니다.');setH({t:c,s:'',n:''});route();}catch(e){home(e.message);}});
+  on('new',()=>{setH({n:'1',t:'',s:''});route();});}
+
+function newGame(msg){el(`<div class="narrow"><h1>새 게임 만들기</h1>${msg?eb(msg):''}
+  <div class="field"><label for="ti">수업 이름</label><input id="ti" placeholder="3학년 4반"></div>
+  <div class="field"><label for="cd">교사 코드 (4자 이상, 직접 정하세요)</label><input id="cd" placeholder="sahoe34"></div>
+  <div class="field"><label for="tc">모둠 수</label><select id="tc">
+    <option value="6">6모둠 — 강대국2 · 중견국2 · 약소국2</option>
+    <option value="5">5모둠 — 강대국2 · 중견국1 · 약소국2</option></select></div>
+  <button class="btn wide" id="mk">만들기</button>
+  <p class="small muted" style="margin-top:13px">교사 코드는 잊으면 게임을 이어갈 수 없으니 적어두세요.</p></div>`);
+  on('mk',async()=>{const code=val('cd').trim();
+    try{await rpc('gg_create_game',{p_title:val('ti').trim(),p_admin_code:code,p_team_count:+val('tc')});
+      setH({t:code,n:'',s:''});route();}catch(e){newGame(e.message);}});}
+
+/* ══════════ 교사 ══════════ */
+let tS=null,tT=null,spin=false,angle=0,sig='',lastR=null;
+async function teacher(code){clearInterval(tT);sig='';
+  const pull=async()=>{try{const st=await rpc('gg_admin_state',{p_code:code});
+      const s2=JSON.stringify(st); if(s2===sig||spin)return; sig=s2;tS=st;drawTeacher(code);}
+    catch(e){clearInterval(tT);el(eb(e.message)+`<button class="btn ghost" id="b">처음으로</button>`);
+      on('b',()=>{setH({t:''});route();});}};
+  await pull(); tT=setInterval(pull,1800);}
+async function refresh(code){tS=await rpc('gg_admin_state',{p_code:code});sig=JSON.stringify(tS);drawTeacher(code);}
+
+function drawTeacher(code){
+  const g=tS.game,teams=tS.teams,done=new Set(tS.submitted||[]);
+  if(teams.some(t=>!t.country))return drawSetup(code,teams);
+  const fin=g.status!=='playing';
+
+  const pips=Array.from({length:g.max_turns},(_,i)=>{const n=i+1;
+    const un=(n===5||n===10);
+    return `<div class="pip${un?' un':''}${n<g.round_no?' on':''}${n===g.round_no?' now':''}"
+      title="제${n}차 회의${un?' · 안보리 소집':''}"></div>`;}).join('');
+
+  const lanes=teams.map(t=>{
+    const pw=Math.min(100,t.peace_pts/PEACE_WIN*100);
+    const nk=t.exposed?`<div class="filln" style="width:${Math.min(100,t.nuke_shown/NUKE_WIN*100)}%"></div>`
+                      :`<div class="fog"></div>`;
+    return `<div class="lane${t.exposed?' hot':''}">
+      <div class="plate" style="--pc:${COLOR[t.country]||'#888'}">
+        <div class="cty">${esc(t.country)}</div>
+        <div class="tier">${esc(t.group_label)} · ${esc(t.tier)}</div></div>
+      <div class="gauges">
+        <div class="strip p"><div class="fillp" style="width:${pw}%"></div><div class="goal"></div></div>
+        <div class="strip n">${nk}<div class="goal"></div></div>
+      </div>
+      <div class="val">${t.peace_pts}
+        <i>${g.phase==='submit'?(done.has(t.id)?'제출 완료':'대기 중')
+           :(t.exposed?`핵 ${t.nuke_shown}`:'&nbsp;')}</i></div>
+    </div>`;}).join('');
+
+  const B=(id,l,ok=true,gh=false)=>`<button class="btn${gh?' ghost':''}" id="${id}"${ok?'':' disabled'}>${l}</button>`;
+  const UN_TURNS=[5,10];
+  const unList=tS.un||[];
+  const unDone=unList.some(u=>u.round===g.round_no);
+  const unNow=UN_TURNS.includes(g.round_no)&&g.phase==='result'&&!fin;
+
+  el(`<div class="banner">
+    <div class="ttl">${SEAL}<div>
+      <div class="turn">${g.round_no?`제${g.round_no}차 회의`:'개회 준비'}
+        <span>／ 전 ${g.max_turns}차 · ${PHASE_KO[g.phase]}</span></div>
+      <div class="sub">${esc(g.title||'')} · 의장 코드 ${esc(code)}</div></div></div>
+    ${g.round_no>1?`<div class="stats">
+      <div class="stat pe"><b>${Math.max(0,6-g.last_k)}</b><span>평화 이득</span></div>
+      <div class="stat nu"><b>${g.last_k}</b><span>핵개발 국가</span></div>
+      <div class="memo">지난 회의 기준<br>어느 나라인지는 비공개</div></div>`:''}
+  </div>
+  <div class="pips">${pips}</div>
+
+  ${fin?`<div class="panel" style="text-align:center;margin-bottom:16px;border-left:4px solid var(--nuke)">
+    <div class="disp" style="font-size:1.8rem">${esc(g.outcome||'')}</div></div>`:''}
+
+  <div class="floor">
+    <div class="lane colhead"><div>대표부</div>
+      <div>평화 포인트 · 목표 ${PEACE_WIN}<span style="opacity:.65">　／　아랫줄은 핵 포인트 · 목표 ${NUKE_WIN}</span></div>
+      <div style="text-align:right">평화</div></div>
+    ${lanes}
+  </div>
+  <div class="legend">
+    <span><b style="background:var(--peace)"></b>평화 포인트 · 목표 ${PEACE_WIN}</span>
+    <span><b style="background:var(--nuke)"></b>핵 포인트 · 목표 ${NUKE_WIN}</span>
+    <span><b style="background:#C6D0D4"></b>비공개 · ${EXPOSE_AT}점을 넘으면 핵실험이 탐지되어 공개</span>
+  </div>
+
+  <hr class="rule">
+  <div class="row">
+    ${B('bNeg','비공식 협의 시작',!fin&&g.phase!=='submit',true)}
+    ${B('bSub','표결 개시',!fin&&g.round_no>0&&g.phase!=='submit')}
+    ${B('bEnd','표결 종료 · 집계',!fin&&g.phase==='submit')}
+    ${B('bNext','다음 회의',!fin&&(g.phase==='result'||g.round_no===0),true)}
+  </div>
+
+  ${unNow&&!unDone?`<div class="resolution">
+    <h2>안전보장이사회 소집 · 사찰 결의 제${UN_TURNS.indexOf(g.round_no)+1}호</h2>
+    <p class="small muted" style="margin:.2rem 0 .6rem">각 대표부의 공개 토론과 표결로 <b>사찰 대상국 한 곳</b>을 정합니다.
+      대상국의 핵 포인트를 6 깎고, <b>남은 핵 포인트를 전체에 공개</b>합니다.
+      한 번의 결의로 한 나라의 실상이 드러납니다. 대신 회의당 한 나라뿐입니다.</p>
+    <div class="row">
+      <select id="unT" style="width:auto;min-width:190px">
+        ${teams.map(t=>`<option value="${t.id}">${esc(t.country)}</option>`).join('')}</select>
+      <button class="btn danger" id="unGo">사찰 결의 채택</button>
+      <span class="small muted">과반이 안 되면 채택하지 말고 그대로 다음 회의로 넘어가세요.</span>
+    </div></div>`:''}
+  ${unList.length?`<div class="panel" style="margin-top:14px;border-left:4px solid var(--gold)">
+    <b class="disp">사찰 기록</b>
+    ${unList.map(u=>`<div class="small" style="margin-top:4px">제${u.round}차 · <b>${esc(u.country)}</b> —
+      6점 삭감 후 남은 핵 포인트 <b class="${u.after>0?'miss':'hit'}">${u.after}</b>
+      ${u.after===0?'· 핵 활동이 확인되지 않았습니다'
+        :u.after>=30?'· 완성이 임박했습니다'
+        :'· 핵 개발이 진행 중입니다'}</div>`).join('')}
+  </div>`:''}
+
+  <div id="rbox">${resultHTML(g)}</div>
+
+  <hr class="rule">
+  <h2>대표부별 카드 잔량</h2>
+  <table class="t"><tr><th>국가</th><th>등급</th><th>지목</th><th>첩보</th></tr>
+    ${teams.map(t=>`<tr><td>${esc(t.country)}</td><td>${esc(t.tier)}</td>
+      <td>${t.tier==='강대국'?t.sanctions_left+'장':'–'}</td>
+      <td>${t.tier!=='강대국'?t.spy_left+'장':'–'}</td></tr>`).join('')}</table>
+
+  <hr class="rule">
+  <details><summary class="small muted" style="cursor:pointer">대표부 접속 QR · 신임장 인쇄</summary>
+    <div class="row" style="margin-top:11px;align-items:flex-start">${teams.map(t=>
+      `<div style="text-align:center"><div class="qrbig">${qrSVG(link(t.join_code),3)}</div>
+       <div class="small"><b>${esc(t.group_label)}</b> ${esc(t.join_code)}</div></div>`).join('')}</div>
+    <div class="row" style="margin-top:11px"><button class="btn ghost" id="bPrint">신임장 인쇄</button></div>
+  </details>
+  ${fin?`<div class="row" style="margin-top:14px">
+    <button class="btn ghost" id="bRev">모든 핵 포인트 공개 (성찰용)</button></div><div id="rev"></div>`:''}`);
+
+  const call=async(fn,a)=>{try{await rpc(fn,a);await refresh(code);}catch(e){alert(e.message);}};
+  on('bNeg',()=>call('gg_set_phase',{p_code:code,p_phase:'negotiation'}));
+  on('bSub',()=>call('gg_set_phase',{p_code:code,p_phase:'submit'}));
+  on('bNext',()=>call('gg_next_round',{p_code:code}));
+  on('bEnd',async()=>{try{lastR=await rpc('gg_end_round',{p_code:code});await refresh(code);}catch(e){alert(e.message);}});
+  on('unGo',async()=>{
+    const sel=document.getElementById('unT');
+    const name=sel.options[sel.selectedIndex].text;
+    if(!confirm(`${name}을(를) 사찰 대상으로 채택합니다.\n핵 포인트 6점을 깎고 결과를 공개합니다.`))return;
+    try{ const res=await rpc('gg_un_action',{p_code:code,p_target:sel.value,p_cut:6});
+      await refresh(code);
+      alert(`사찰 결과 — ${res.country}\n`+
+        `${res.cut}점 삭감, 남은 핵 포인트 ${res.after}\n`+
+        (res.after===0?'핵 활동이 확인되지 않았습니다.':'핵 개발이 진행 중입니다.'));
+    }catch(e){alert(e.message);} });
+  on('bPrint',()=>printCards(teams));
+  on('bRev',async()=>{const d=await rpc('gg_reveal',{p_code:code});
+    document.getElementById('rev').innerHTML=`<table class="t" style="margin-top:11px">
+      <tr><th>국가</th><th>등급</th><th>핵</th><th>평화</th></tr>${d.map(x=>
+      `<tr><td>${esc(x.country)}</td><td>${esc(x.tier)}</td><td>${x.nuke}</td><td>${x.peace}</td></tr>`).join('')}</table>`;});
+}
+
+function resultHTML(g){const r=lastR;
+  if(!r||g.phase!=='result'||r.round!==g.round_no)return'';
+  const ne=r.newly_exposed||[], sc=r.sanctions||[];
+  return `<hr class="rule"><h2>제${r.round}차 회의 결과</h2>
+   <div class="note">이번 회의에서 <b>핵개발 ${r.nuclear_count}곳</b> → 평화국은 각자 <b>+${r.peace_gain}</b>.
+     어느 나라가 핵개발을 골랐는지는 공개되지 않습니다.</div>
+   ${ne.length?`<div class="err"><b>핵실험 탐지</b> — ${ne.map(esc).join(', ')}.
+     핵개발이 드러났고, <b>다른 모든 나라의 평화 포인트가 ${r.shock} 깎였습니다.</b></div>`:''}
+   ${sc.length?`<table class="t" style="margin:10px 0"><tr><th>지목한 나라</th><th>대상</th><th>결과</th></tr>
+     ${sc.map(x=>`<tr><td>${esc(x.actor)}</td><td>${esc(x.target)}</td>
+       <td class="${x.result==='제재 적중'?'hit':'miss'}">${
+         x.result==='제재 적중'?'제재 적중 · 우리 +10 · 상대 핵 −10'
+         :x.result==='봉쇄'?'외교적 고립 · 상대 −5 · 우리 −4'
+         :'헛방(중립으로 회피) · 우리 −10'}</td></tr>`).join('')}</table>`:''}
+   ${r.outcome?`<div class="panel" style="text-align:center;border-left:4px solid var(--nuke)">
+     <div class="disp" style="font-size:1.5rem">${esc(r.outcome)}</div></div>`:''}`;}
+
+function printCards(teams){
+  const cards=teams.filter(t=>t.country).map(t=>{const v=VICTORY[t.tier]||{p:''};
+    return `<div class="pc"><div class="bar" style="background:${COLOR[t.country]}"></div>
+    <div class="hd"><div><div class="cty">${esc(t.country)}</div>
+      <div class="mt">${esc(t.group_label)} · ${esc(t.tier)}</div></div>
+      <div class="qr">${qrSVG(link(t.join_code),3)}</div></div>
+    <div class="jc">입장 코드 <b>${esc(t.join_code)}</b></div>
+    <div class="s"><b>우리의 특권</b><br>${v.p}</div>
+    <div class="s"><b>승리 조건</b><br>평화 포인트 80 → 영세중립국으로 승리.
+      (평화 이득 = 6 − 그 회의의 핵개발국 수. 모든 나라는 5점에서 시작.)<br>
+      핵 포인트 60 → 우리만 완성했을 때 승리. 두 나라가 같은 회의에서 완성하면 핵전쟁으로 전원 패배.<br>
+      둘이 같은 턴에 달성되면 평화가 이긴다.</div>
+    <div class="w">다른 나라에 보여주지 마세요.</div></div>`;}).join('');
+  const w=window.open('','_blank'); if(!w)return alert('팝업이 차단되었습니다.');
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>대표부 신임장</title><style>
+   @page{margin:11mm}body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;color:#0F2027;margin:0}
+   .g{display:grid;grid-template-columns:1fr 1fr;gap:8mm}
+   .pc{border:1px solid #A6B4B9;break-inside:avoid;overflow:hidden;padding-bottom:9px}
+   .bar{height:9px}.hd{display:flex;justify-content:space-between;padding:9px 11px 0;gap:9px}
+   .cty{font-size:18px;font-weight:700}.mt{font-size:10.5px;color:#4C6069}
+   .qr svg{width:72px;height:72px;display:block}
+   .jc{padding:5px 11px;font-size:12px}.jc b{font-size:19px;letter-spacing:.13em}
+   .s{padding:5px 11px;font-size:10.5px;line-height:1.5}.s b{font-size:10px;color:#4C6069}
+   .w{padding:4px 11px 0;font-size:9.5px;color:#B5432F}
+  </style><div class="g">${cards}</div>`);
+  w.document.close();setTimeout(()=>w.print(),400);}
+
+/* ── 국가 배정 룰렛 ── */
+function drawSetup(code,teams){
+  const taken=new Set(teams.filter(t=>t.country).map(t=>t.country));
+  const pool=(teams.length===5?COUNTRIES.filter(c=>POOL5.includes(c.n)):COUNTRIES).filter(c=>!taken.has(c.n));
+  const nx=teams.find(t=>!t.country);
+  const R=138,C=148,n=pool.length;
+  const sec=pool.map((c,i)=>{const a0=(i/n)*2*Math.PI-Math.PI/2,a1=((i+1)/n)*2*Math.PI-Math.PI/2,m=(a0+a1)/2;
+    const P=(a,r)=>[C+r*Math.cos(a),C+r*Math.sin(a)];
+    const[x0,y0]=P(a0,R),[x1,y1]=P(a1,R),[tx,ty]=P(m,R*.62);
+    return `<path d="M${C},${C} L${x0},${y0} A${R},${R} 0 ${(a1-a0)>Math.PI?1:0},1 ${x1},${y1} Z"
+     fill="${c.c}" stroke="#E4E9EB" stroke-width="2"/><text x="${tx}" y="${ty}" fill="#fff" font-size="13"
+     font-weight="600" text-anchor="middle" dominant-baseline="middle"
+     transform="rotate(${m*180/Math.PI+90},${tx},${ty})">${c.n.replace('국','')}</text>`;}).join('');
+  el(`<div class="banner"><div class="ttl">${SEAL}<div>
+    <div class="turn">대표부 배정</div>
+    <div class="sub">${teams.length}개 모둠 · 룰렛으로 뽑습니다</div></div></div></div>
+  <div class="setup"><div>
+    <div class="wheelbox"><div class="needle"></div>
+      <svg id="wh" viewBox="0 0 296 296" style="transform:rotate(${angle}deg)">${sec}
+      <circle cx="148" cy="148" r="16" fill="#E4E9EB" stroke="#0F2027" stroke-width="2"/></svg></div>
+    <button class="btn wide" id="spin" style="margin-top:13px"${spin?' disabled':''}>${esc(nx.group_label)} 뽑기</button>
+    <p class="small muted" style="text-align:center;margin-top:8px">국력은 뽑기로 정해집니다.
+      아무도 자기 국력을 고르지 않았다는 사실이 성찰의 재료가 됩니다.</p></div>
+  <div>${teams.map(t=>`<div class="slot ${t.country?'done':''}"><b>${esc(t.group_label)}</b>
+    <span>${t.country?`<span class="sw" style="background:${COLOR[t.country]}"></span><b>${esc(t.country)}</b>
+      <span class="small muted">${esc(t.tier)}</span>`:'<span class="muted small">대기</span>'}</span>
+    <span class="code">${esc(t.join_code)}</span><span class="qr">${qrSVG(link(t.join_code),2)}</span></div>`).join('')}
+    <div class="row" style="margin-top:10px"><button class="btn ghost" id="bPrint">신임장 인쇄</button></div>
+    <div class="panel" style="margin-top:14px"><h2>등급별 특권</h2>
+      <table class="t"><tr><th>등급</th><th>특권</th></tr>
+      <tr><td>강대국</td><td>지목 카드 2장 (핵 +10 / 평화 −4 / 중립 −10)</td></tr>
+      <tr><td>중견국</td><td>첩보 카드 2장</td></tr>
+      <tr><td>약소국</td><td>첩보 카드 2장 · 호소 카드 1회</td></tr></table></div>
+      <p class="small muted" style="margin:.5rem 0 0">모든 나라는 평화 5점을 갖고 시작합니다.</p>
+  </div></div>`);
+  on('bPrint',()=>printCards(teams));
+  on('spin',()=>{if(spin)return;spin=true;document.getElementById('spin').disabled=true;
+    const i=Math.floor(Math.random()*pool.length),seg=360/pool.length;
+    const tgt=360*6+(360-(i*seg+seg/2)); angle=tgt;
+    document.getElementById('wh').style.transform=`rotate(${tgt}deg)`;
+    setTimeout(async()=>{const c=pool[i];
+      try{await rpc('gg_assign_country',{p_code:code,p_slot:nx.slot,p_country:c.n,p_tier:c.t});}
+      catch(e){alert(e.message);}
+      angle=tgt%360;spin=false;await refresh(code);},4400);});}
+
+/* ══════════ 학생 ══════════ */
+let sT=null,me=null,sSig='';
+async function student(join){clearInterval(sT);sSig='';
+  try{me=await rpc('gg_join',{p_join_code:join});}catch(e){setH({s:''});return home(e.message);}
+  const pull=async()=>{try{
+    const[{data:g},st]=await Promise.all([
+      sb.from('gg_games').select('round_no,max_turns,phase,status,outcome,last_k,last_p').eq('id',me.game_id).single(),
+      rpc('gg_status',{p_join_code:join})]);
+    const s2=JSON.stringify([g,st]); if(s2===sSig)return; sSig=s2; drawStudent(join,g,st);}catch(e){}};
+  await pull(); sT=setInterval(pull,2000);}
+
+function drawStudent(join,g,st){
+  const col=COLOR[me.country]||'#888';
+  const head=`<div class="flag" style="background:${col}"></div>
+   <div class="banner">
+     <div><div class="turn">${esc(me.country||'')} 대표부</div>
+       <div class="sub">${esc(me.group_label)} · ${esc(me.tier||'')}</div></div>
+     <div style="text-align:right"><div class="turn" style="font-size:1.15rem">제${g.round_no}차
+       <span>／ 전 ${g.max_turns}차</span></div>
+       <div class="sub">${PHASE_KO[g.phase]}</div></div></div>
+   <div class="mine">
+     <div class="mg pub"><div class="lbl">평화 포인트 · 모두에게 공개</div>
+       <div class="v">${st.peace_pts}</div><div class="of">목표 ${PEACE_WIN} · 영세중립국 승리</div>
+       <div class="mini-bar"><i style="width:${Math.min(100,st.peace_pts/PEACE_WIN*100)}%;background:var(--peace)"></i></div></div>
+     <div class="mg secret"><div class="lbl">핵 포인트 · 우리만 봅니다</div>
+       <div class="v">${st.nuke_pts}</div><div class="of">목표 ${NUKE_WIN} · ${EXPOSE_AT} 넘으면 들킴</div>
+       <div class="mini-bar"><i style="width:${Math.min(100,st.nuke_pts/NUKE_WIN*100)}%;background:var(--nuke)"></i></div></div>
+   </div>
+   ${g.round_no>1?`<div class="note">지난 회의에서 <b>핵개발 ${g.last_k}곳</b> → 평화 이득 <b>+${Math.max(0,6-g.last_k)}</b>.
+     누가 골랐는지는 비공개입니다.</div>`:''}
+   ${(st.exposed||[]).length?`<div class="err"><b>핵실험이 탐지된 나라</b> — ${st.exposed.map(esc).join(', ')}</div>`:''}
+   ${(st.spy_results||[]).length?`<h2 style="margin-top:16px">첩보 보고</h2><div class="log">
+     ${st.spy_results.map(x=>`<div>제${x.round}차 · ${esc(x.country)} — 그때 선택 <b>${esc(x.card||'?')}</b>,
+       핵 포인트 <b>${x.pts}</b> <span class="${x.delta>0?'hit':'miss'}">${x.delta>0?'+':''}${x.delta}</span></div>`).join('')}</div>`:''}
+   ${(st.sanction_results||[]).length?`<h2 style="margin-top:16px">제재 기록</h2><div class="log">
+     ${st.sanction_results.map(x=>`<div>제${x.round}차 · ${esc(x.country)} 지목 —
+       <span class="${x.result==='제재 적중'?'hit':'miss'}">${
+         x.result==='제재 적중'?'제재 적중 +10':x.result==='봉쇄'?'외교적 고립 −4':'헛방 −10'}</span></div>`).join('')}</div>`:''}`;
+
+  if(g.status!=='playing')
+    return el(head+`<div class="state"><div class="k">게임 종료</div><p class="muted">${esc(g.outcome||'')}</p></div>`);
+
+  if(g.phase==='submit'&&!st.my_card){
+    const rs=st.roster||[];
+    const sanc=(me.tier==='강대국'&&st.sanctions_left>0)?`<div class="panel" style="margin:12px 0;border-left:4px solid var(--nuke)">
+      <h2 style="margin-bottom:.2rem">지목 카드 · ${st.sanctions_left}장 남음</h2>
+      <p class="small muted" style="margin:.2rem 0 .5rem">한 나라를 지목합니다.
+        결과는 그 나라가 <b>이번 회의에서 무엇을 냈느냐</b>로 갈립니다.</p>
+      <table class="t" style="margin-bottom:.6rem"><tr><th>상대가 고른 카드</th><th>결과</th></tr>
+        <tr><td>핵개발</td><td class="hit">상대 핵 −10 · 우리 평화 +10</td></tr>
+        <tr><td>평화</td><td>상대 평화 −5 · 우리 평화 −4</td></tr>
+        <tr><td>중립</td><td class="miss">헛방 · 우리 평화 −10</td></tr></table>
+      <p class="small muted" style="margin:0 0 .6rem">상대는 지목당한 사실을 모릅니다.
+        앞서가는 나라를 누르는 데 쓸 수도 있지만, 그 카드로 핵을 잡았다면 +10이었습니다.</p>
+      <select id="sanc"><option value="">쓰지 않음</option>
+        ${rs.map(t=>`<option value="${t.id}">${esc(t.country)} 지목</option>`).join('')}</select></div>`:'';
+    const spy=(me.tier!=='강대국'&&st.spy_left>0)?`<div class="panel" style="margin:12px 0;border-left:4px solid var(--peace)">
+      <h2 style="margin-bottom:.2rem">첩보 카드 · ${st.spy_left}장 남음</h2>
+      <p class="small muted" style="margin:.2rem 0 .6rem">조사한 나라가 이번 회의에서 핵개발을 골랐다면
+        <b>우리 평화 +5</b>, 아니면 <b>−5</b>. 성패와 관계없이 그 나라의 핵 포인트를 알게 됩니다.
+        그 정보를 강대국에 넘길지는 우리가 정합니다.</p>
+      <select id="spy"><option value="">쓰지 않음</option>
+        ${rs.map(t=>`<option value="${t.id}">${esc(t.country)} 조사</option>`).join('')}</select></div>`:'';
+    el(head+`<hr class="rule"><p class="small muted">카드는 한 번 내면 바꿀 수 없습니다. 모둠에서 합의한 뒤 누르세요.</p>
+      ${sanc}${spy}
+      <div class="choices">${CARDS.map(c=>`<button class="choice ${c.cls}" data-k="${c.k}">
+        <div class="t">${c.k}</div><div class="d">${c.d}</div></button>`).join('')}</div>
+      <details style="margin-top:14px" open><summary class="small muted" style="cursor:pointer">점수표</summary>
+        <div style="margin-top:9px"><table class="t">
+    <tr><th>카드</th><th>평화 포인트</th><th>핵 포인트</th></tr>
+    <tr><td>평화</td><td><b>+6 − (그 회의의 핵개발국 수)</b></td><td>–</td></tr>
+    <tr><td>중립</td><td>+4</td><td>+2</td></tr>
+    <tr><td>핵개발</td><td>+3</td><td>+6</td></tr></table>
+    <p class="small muted">모든 나라는 평화 5점을 갖고 시작합니다. 핵개발국이 한 곳 늘 때마다 평화 이득이 1씩 줄어듭니다.<br>
+      어떤 나라의 핵 포인트가 ${EXPOSE_AT}을 넘으면 핵실험이 탐지되어 <b>다른 모든 나라의 평화 포인트가 8 깎입니다</b>
+      (같은 회의에서 두 곳이면 16).<br>
+      핵 ${NUKE_WIN}을 먼저 채우면 이기지만, 두 나라가 같은 회의에서 완성하면 핵전쟁으로 모두 패배합니다.
+      핵과 평화가 같은 회의에서 달성되면 평화가 이깁니다.</p></div></details>
+      <p class="small muted" style="margin-top:11px">제출 ${st.submitted} / ${st.total}</p>`);
+    app.querySelectorAll('.choice').forEach(b=>{b.onclick=async()=>{
+      const k=b.dataset.k,a=document.getElementById('sanc'),s=document.getElementById('spy');
+      const tg=a&&a.value?a.value:null, sp=s&&s.value?s.value:null;
+      let m=`'${k}' 카드를 냅니다.`;
+      if(tg)m+=`\n제재 지목: ${a.options[a.selectedIndex].text.replace(' 지목','')}`;
+      if(sp)m+=`\n첩보 조사: ${s.options[s.selectedIndex].text.replace(' 조사','')}`;
+      if(!confirm(m+'\n번복할 수 없습니다.'))return;
+      app.querySelectorAll('.choice').forEach(x=>x.disabled=true);
+      try{await rpc('gg_submit',{p_join_code:join,p_card:k,p_target:tg,p_spy:sp});}catch(e){alert(e.message);}
+      sSig='';student(join);};});
+    return;}
+
+  let body;
+  if(g.phase==='submit')body=`<div class="state"><div class="k">${esc(st.my_card)} 표결 완료</div>
+    <p class="muted">기다리는 중 · ${st.submitted} / ${st.total}</p></div>`;
+  else if(g.phase==='negotiation')body=`<div class="state"><div class="k">비공식 협의</div>
+    <p class="muted">대표는 다른 대표부를 찾아가 협의하고 오세요.<br>합의는 구속력이 없습니다.</p></div>`;
+  else if(g.phase==='result')body=`<div class="state"><div class="k">집계 중</div>
+    <p class="muted">의장석 화면을 보세요.</p></div>`;
+  else body=`<div class="state"><div class="k">대기</div>
+    <p class="muted">의장이 회의를 개회하면 카드가 나타납니다.</p></div>`;
+
+  el(head+body+`<hr class="rule"><table class="t">
+    <tr><th>카드</th><th>평화 포인트</th><th>핵 포인트</th></tr>
+    <tr><td>평화</td><td><b>+6 − (그 회의의 핵개발국 수)</b></td><td>–</td></tr>
+    <tr><td>중립</td><td>+4</td><td>+2</td></tr>
+    <tr><td>핵개발</td><td>+3</td><td>+6</td></tr></table>
+    <p class="small muted">모든 나라는 평화 5점을 갖고 시작합니다. 핵개발국이 한 곳 늘 때마다 평화 이득이 1씩 줄어듭니다.<br>
+      어떤 나라의 핵 포인트가 ${EXPOSE_AT}을 넘으면 핵실험이 탐지되어 <b>다른 모든 나라의 평화 포인트가 8 깎입니다</b>
+      (같은 회의에서 두 곳이면 16).<br>
+      핵 ${NUKE_WIN}을 먼저 채우면 이기지만, 두 나라가 같은 회의에서 완성하면 핵전쟁으로 모두 패배합니다.
+      핵과 평화가 같은 회의에서 달성되면 평화가 이깁니다.</p>`);}
+
+/* ══════════ 라우팅 ══════════ */
+function bootError(){
+  const isFile = location.protocol==='file:';
+  el(`<div class="narrow"><h1>실행할 수 없습니다</h1>
+    <div class="err">${isFile
+      ? '이 파일을 컴퓨터에서 직접 열었습니다(주소가 file:/// 로 시작합니다).<br>브라우저가 외부 요청을 막습니다.'
+      : '게임에 필요한 외부 라이브러리를 내려받지 못했습니다.<br>네트워크가 cdn.jsdelivr.net 을 차단하고 있을 수 있습니다.'}</div>
+    <p class="small muted">1. 웹에 올린 뒤 <b>https://</b> 주소로 열어 주세요.<br>
+      2. 이미 https 인데도 이 화면이면 다른 네트워크(휴대폰 테더링)에서 열어 보세요.</p>
+    <p class="small muted">현재 주소 : ${esc(location.href)}</p></div>`);}
+
+function route(){h=H();
+  if(!createClient) return bootError();
+  if(!KEY)return keyScreen();
+  if(!sb)sb=createClient(URL_,KEY,{global:{fetch:safeFetch},
+    auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storage:memStore}});
+  if(h.n)return newGame();
+  if(h.t)return teacher(h.t);
+  if(h.s)return student(h.s);
+  clearInterval(tT);clearInterval(sT);home();}
+window.addEventListener('hashchange',route);
+route();
+</script>

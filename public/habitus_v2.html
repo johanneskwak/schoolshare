@@ -1,0 +1,515 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>인생 게임 · 아비투스</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#EAE6DF;--card:#F9F7F3;--ink:#1E1A16;--ink-2:#6B6259;--rule:#BFB5A8;
+ --gold:#8C6C24;--mid:#4A6E4A;--poor:#9B4230;--r:2px;
+ --q1:#7A5E1E;--q2:#8A6A4F;--q3:#6E7A72;--q4:#E4DFD6}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans KR',-apple-system,sans-serif;
+ font-size:16px;line-height:1.55;font-variant-numeric:tabular-nums;-webkit-text-size-adjust:100%}
+.disp{font-family:'Black Han Sans',sans-serif;font-weight:400}
+h1{font-family:'Black Han Sans',sans-serif;font-size:1.6rem;margin:0 0 .3rem;font-weight:400}
+h2{font-family:'Black Han Sans',sans-serif;font-size:1.05rem;margin:0 0 .6rem;font-weight:400}
+.wrap{max-width:1140px;margin:0 auto;padding:18px 18px 72px}.narrow{max-width:500px}
+.muted{color:var(--ink-2)}.small{font-size:.82rem}
+hr.rule{border:0;border-top:1px solid var(--rule);margin:22px 0}
+button{font:inherit;cursor:pointer;border-radius:var(--r)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.btn{background:var(--ink);color:#F8F6F2;border:1px solid var(--ink);padding:.6rem 1.05rem;font-weight:500}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+.btn.ghost:hover{background:#E4DED5}.btn:disabled{opacity:.34;cursor:not-allowed}
+.btn.wide{width:100%}.btn.gold{background:var(--gold);border-color:var(--gold)}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+input,select{font:inherit;padding:.58rem .7rem;border:1px solid var(--rule);border-radius:var(--r);background:#fff;width:100%;color:var(--ink)}
+label{display:block;font-size:.84rem;color:var(--ink-2);margin:0 0 .25rem}.field{margin-bottom:13px}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:var(--r);padding:15px}
+.err{background:#F3E0DA;border-left:3px solid var(--poor);color:#7A3324;padding:.6rem .8rem;margin:12px 0;font-size:.9rem}
+.note{background:var(--card);border-left:3px solid var(--gold);padding:.6rem .8rem;margin:12px 0;font-size:.9rem}
+
+/* 배너 */
+.banner{background:#241F1B;color:#F1ECE4;border-bottom:3px solid var(--gold);border-radius:var(--r);
+ padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.banner .t{font-family:'Black Han Sans',sans-serif;font-size:1.6rem;line-height:1.05}
+.banner .t span{font-size:.9rem;color:#B8AC9B;font-family:'IBM Plex Sans KR',sans-serif}
+.banner .s{color:#A29684;font-size:.74rem;margin-top:3px}
+.genbadge{background:var(--gold);color:#fff;font-size:.72rem;padding:.2rem .6rem;border-radius:10px;
+ font-weight:600;letter-spacing:.03em}
+
+/* 생애 경로도 */
+.board{background:linear-gradient(#E5DFD5,#F1EDE6);border:1px solid #B6AC9E;
+ border-radius:var(--r);padding:14px 16px 8px;margin-top:12px;overflow-x:auto}
+.stagehead{display:grid;grid-template-columns:164px repeat(5,1fr) 132px;gap:8px;
+ font-size:.72rem;color:var(--ink-2);padding-bottom:8px;border-bottom:2px solid var(--ink);min-width:940px}
+.stagehead div{text-align:center}.stagehead div:first-child{text-align:left}
+.stagehead .cur{color:var(--gold);font-weight:600}
+.pathrow{display:grid;grid-template-columns:164px repeat(5,1fr) 132px;gap:8px;align-items:center;
+ padding:9px 0;border-bottom:1px solid rgba(182,172,158,.6);min-width:940px}
+.pathrow:last-child{border-bottom:0}
+.house{background:#FCFBF9;border:1px solid #A99E90;border-left:5px solid var(--cc,#888);
+ border-radius:1px;padding:6px 9px;box-shadow:0 1px 0 rgba(36,31,27,.14)}
+.house .nm{font-family:'Black Han Sans',sans-serif;font-size:1rem;line-height:1.1}
+.house .as{font-size:.7rem;color:var(--ink-2);margin-top:1px}
+.house .prev{font-size:.66rem;color:var(--gold);margin-top:2px;border-top:1px dotted var(--rule);padding-top:2px}
+.wealth{text-align:right}
+.wealth .num{font-family:'Black Han Sans',sans-serif;font-size:1.25rem;line-height:1}
+.wealth .bar{height:7px;background:#D8D2C7;border-radius:1px;margin-top:4px;overflow:hidden}
+.wealth .bar i{display:block;height:100%;background:var(--q1)}
+.wealth .x{font-size:.64rem;color:var(--ink-2);margin-top:2px}
+.gapline{margin-top:10px;padding:8px 11px;background:#F3EFE8;border-left:3px solid var(--gold);font-size:.84rem}
+.node{position:relative;height:38px;display:flex;align-items:center;justify-content:center}
+.node::before{content:'';position:absolute;left:-8px;right:-8px;top:50%;height:2px;background:#C9C0B2}
+.dot{position:relative;width:100%;text-align:center;font-size:.74rem;padding:3px 4px;
+ background:#FCFBF9;border:1px solid var(--rule);border-radius:1px;line-height:1.25}
+.dot.q1{background:var(--q1);color:#FBF6EA;border-color:var(--q1);font-weight:600}
+.dot.q2{background:var(--q2);color:#FAF4EE;border-color:var(--q2)}
+.dot.q3{background:var(--q3);color:#F2F5F3;border-color:var(--q3)}
+.dot.q4{background:var(--q4);color:#5B554D;border-color:#C3BBAE}
+.dot.bad{background:var(--poor);color:#fff;border-color:var(--poor)}
+.dot.good{background:var(--mid);color:#fff;border-color:var(--mid)}
+.dot.now{box-shadow:0 0 0 2px var(--gold);border-color:var(--gold)}
+.dot.wait.now{background:#FBF4E4}
+.dot.wait{color:#B3A996;background:transparent;border-style:dashed}
+.money{font-family:'Black Han Sans',sans-serif}
+.legend{display:flex;gap:14px;font-size:.73rem;color:var(--ink-2);margin-top:9px;flex-wrap:wrap}
+.legend b{display:inline-block;width:11px;height:11px;vertical-align:-1px;margin-right:4px;border-radius:1px}
+
+/* 학생 */
+.flag{height:8px;margin-bottom:12px;border-radius:1px}
+.stat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.sc{border:1px solid var(--rule);border-radius:var(--r);padding:12px 13px;background:#fff}
+.sc .l{font-size:.74rem;color:var(--ink-2)}
+.sc .v{font-family:'Black Han Sans',sans-serif;font-size:1.9rem;line-height:1.1}
+.opts{display:grid;gap:10px;margin-top:6px}
+.opt{border:1px solid var(--rule);border-left:6px solid var(--rule);background:#fff;
+ border-radius:var(--r);padding:14px 16px;text-align:left;width:100%}
+.opt .t{font-family:'Black Han Sans',sans-serif;font-size:1.15rem}
+.opt .d{font-size:.82rem;color:var(--ink-2);margin-top:2px}
+.opt:disabled{opacity:.45}
+.opt.lock{background:#EEE9E1}
+.dice{display:flex;gap:10px;justify-content:center;margin:16px 0}
+.die{width:56px;height:56px;border:2px solid var(--ink);border-radius:6px;background:#fff;
+ display:flex;align-items:center;justify-content:center;font-family:'Black Han Sans',sans-serif;font-size:1.9rem}
+.state{text-align:center;padding:30px 14px}
+.state .k{font-family:'Black Han Sans',sans-serif;font-size:1.8rem;line-height:1.2}
+table.t{width:100%;border-collapse:collapse;font-size:.85rem;background:#fff}
+table.t th,table.t td{border:1px solid var(--rule);padding:.42rem .5rem;text-align:center}
+table.t th{background:var(--card);font-weight:600}
+.slot{display:grid;grid-template-columns:64px 1fr 76px 44px;gap:9px;align-items:center;
+ padding:7px 9px;border:1px solid var(--rule);background:#fff;margin-bottom:5px}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:1.02rem;letter-spacing:.12em;font-weight:600}
+.qr svg{width:42px;height:42px;display:block}.qrbig svg{width:124px;height:124px;display:block}
+.logline{font-size:.8rem;padding:3px 0;border-bottom:1px dotted var(--rule)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(max-width:640px){.stat{grid-template-columns:1fr}.banner .t{font-size:1.2rem}}
+</style>
+<div id="app" class="wrap"><p class="muted">불러오는 중…</p></div>
+<script type="module">
+let createClient=null, qrlib=null, loadErr=null;
+try{ createClient=(await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm')).createClient; }
+catch(e){ loadErr = e; }
+try{ qrlib=(await import('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/+esm')).default; }catch(e){}
+const qrSVG=(t,c=3)=>{ if(!qrlib)return''; try{const q=qrlib(0,'M');q.addData(t);q.make();return q.createSvgTag(c,0);}catch(e){return'';} };
+
+const KEY_BAKED='sb_publishable_erhF21wt3qmOagP38OBaXQ_g_YQTPPO';
+const URL_='https://wsmwfhoeoravcmmvreqq.supabase.co';
+let KEY=KEY_BAKED;
+
+const STAGES=['출생','학령기','입시','취업','중년'];
+const TUITION=[
+ {k:'VVIP', n:'VVIP 입시 컨설팅', cost:30000, cut:11, d:'전담 팀이 붙는다 · 1티어 커트라인 11 (약 63%)'},
+ {k:'기숙', n:'명문 기숙학원',    cost:10000, cut:14, d:'관리형 재수 · 1티어 커트라인 14 (약 16%)'},
+ {k:'종합', n:'유명 종합학원',    cost:3000,  cut:16, d:'평범한 사교육 · 1티어 커트라인 16 (약 5%)'},
+ {k:'독학', n:'독학 · EBS',       cost:0,     cut:19, d:'1티어는 어떤 숫자가 나와도 불가능 (최대 2티어)'}];
+const JOBS=[
+ {n:'의사',t:1,p:25000},{n:'변호사',t:2,p:11000},{n:'회계·세무사',t:2,p:10000},
+ {n:'변리사',t:2,p:8000},{n:'대기업 사무직',t:3,p:5000},{n:'교사·공무원',t:4,p:6000},
+ {n:'중소기업',t:4,p:4000},{n:'자영업',t:4,p:3000}];
+const HOUSE_C=['#3E6B8A','#A8583F','#6E8F6B','#8A6E9B','#9A7B33','#4F7F86','#8B5E4A','#5D6E8A'];
+
+const won=v=>{ v=Number(v||0);
+  if(v>=10000) return (v/10000).toFixed(v%10000?1:0).replace(/\.0$/,'')+'억';
+  return v.toLocaleString()+'만'; };
+
+const H=()=>Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
+const setH=o=>{location.hash=new URLSearchParams({...H(),...o}).toString();};
+let h=H(); if(!KEY&&h.k)KEY=h.k;
+async function safeFetch(input,init){init=init||{};let url=input,o={...init};
+  if(typeof Request!=='undefined'&&input instanceof Request){url=input.url;o={method:input.method,headers:input.headers,body:init.body,...init};}
+  else if(input&&typeof input==='object'&&input.url)url=input.url;
+  const hd=o.headers;
+  if(hd&&typeof hd.forEach==='function'&&hd.constructor!==Object){const pl={};hd.forEach((v,k)=>{pl[k]=v;});o.headers=pl;}
+  delete o.signal; return fetch(String(url),o);}
+const memStore=(()=>{const m=new Map();return{getItem:k=>m.has(k)?m.get(k):null,
+ setItem:(k,v)=>{m.set(k,String(v));},removeItem:k=>{m.delete(k);}};})();
+const base=()=>location.origin+location.pathname;
+const link=c=>{const q=new URLSearchParams({s:c});if(!KEY_BAKED&&KEY)q.set('k',KEY);return base()+'#'+q.toString();};
+const app=document.getElementById('app');
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const el=x=>{app.innerHTML=x;};
+const eb=m=>`<div class="err">${esc(m)}</div>`;
+const val=id=>{const e=document.getElementById(id);return e?e.value:'';};
+const on=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f;};
+let sb=null;
+function netHelp(){
+  if(location.protocol==='file:')
+    return '파일을 직접 열면 브라우저가 외부 요청을 막습니다.\n'
+         + '주소창이 file:/// 로 시작하고 있습니다.\n'
+         + 'Vercel 등에 올린 뒤 https:// 주소로 열어 주세요.';
+  if(location.protocol!=='https:'&&location.hostname!=='localhost')
+    return 'https 주소가 아니라 요청이 차단되었을 수 있습니다.';
+  return '서버에 연결하지 못했습니다.\n미리보기 창이라면 실제 배포 주소에서 열어 주세요.\n'
+       + '배포 주소인데도 계속 나면 학교 네트워크가 supabase.co 를 막고 있을 수 있습니다.';}
+async function rpc(fn,args){let r;
+  try{r=await sb.rpc(fn,args);}
+  catch(e){const m=String(e&&e.message||e);
+    if(/postMessage|cloned|Failed to fetch|NetworkError|Load failed/i.test(m)) throw new Error(netHelp());
+    throw e;}
+  if(r.error){const m=String(r.error.message||'');
+    if(/Failed to fetch|NetworkError|Load failed|fetch/i.test(m)) throw new Error(netHelp());
+    throw new Error(m.replace(/^.*?:\s*/,''));}
+  return r.data;}
+
+/* ═══ 입구 ═══ */
+function home(msg){el(`<div class="narrow"><h1>인생 게임 · 아비투스</h1>
+  <p class="muted small">계층 재생산 시뮬레이션 · 2세대 · 5단계</p>
+  ${location.protocol==='file:'?eb('이 파일을 컴퓨터에서 직접 열었습니다(file:///). '
+    +'브라우저가 외부 서버 요청을 막기 때문에 게임이 동작하지 않습니다. '
+    +'웹에 올린 뒤 https:// 주소로 열어 주세요.'):''}
+  ${msg?eb(msg):''}
+  <hr class="rule"><h2>학생용</h2>
+  <div class="field"><label for="jc">가문 입장 코드 (숫자 4자리)</label>
+    <input id="jc" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+  <button class="btn wide" id="join">입장</button>
+  <hr class="rule"><h2>교사용</h2>
+  <div class="field"><label for="ac">교사 코드</label><input id="ac"></div>
+  <div class="row"><button class="btn ghost" id="login">이어서 진행</button>
+    <button class="btn ghost" id="new">새 게임 만들기</button></div>
+  <hr class="rule">
+  <button class="btn ghost small" id="ping">서버 연결 확인</button>
+  <div id="pingout" class="small muted" style="margin-top:8px"></div></div>`);
+  on('join',async()=>{const c=val('jc').trim();
+    try{await rpc('lg_join',{p_code:c});setH({s:c,t:'',n:''});route();}catch(e){home(e.message);}});
+  on('login',async()=>{const c=val('ac').trim();
+    try{const id=await rpc('lg_login',{p_code:c});
+      if(!id)return home('교사 코드를 찾을 수 없습니다.');setH({t:c,s:'',n:''});route();}catch(e){home(e.message);}});
+  on('new',()=>{setH({n:'1',t:'',s:''});route();});
+  on('ping',async()=>{const o=document.getElementById('pingout');
+    o.textContent='확인 중…';
+    try{ const t0=Date.now();
+      const res=await fetch(URL_+'/rest/v1/',{headers:{apikey:KEY}});
+      o.innerHTML=`서버 응답 <b>${res.status}</b> · ${Date.now()-t0}ms<br>`+
+        (res.ok?'연결은 정상입니다. 게임을 시작해도 됩니다.'
+               :'서버에 닿았지만 응답 코드가 정상이 아닙니다.');
+    }catch(e){ o.innerHTML='<b style="color:var(--poor)">연결 실패</b><br>'+
+        esc(netHelp()).replace(/\n/g,'<br>'); }});}
+
+function newGame(msg){el(`<div class="narrow"><h1>새 게임 만들기</h1>${msg?eb(msg):''}
+  <div class="field"><label for="ti">수업 이름</label><input id="ti" placeholder="3학년 4반"></div>
+  <div class="field"><label for="cd">교사 코드 (4자 이상)</label><input id="cd" placeholder="habitus1"></div>
+  <div class="field"><label for="tc">가문(조) 수</label><select id="tc">
+    ${[4,5,6,7,8].map(n=>`<option value="${n}"${n===6?' selected':''}>${n}가문</option>`).join('')}
+  </select></div>
+  <button class="btn wide" id="mk">만들기</button></div>`);
+  on('mk',async()=>{const code=val('cd').trim();
+    try{await rpc('lg_create',{p_title:val('ti').trim(),p_code:code,p_teams:+val('tc')});
+      setH({t:code,n:'',s:''});route();}catch(e){newGame(e.message);}});}
+
+/* ═══ 교사 ═══ */
+let S=null,tT=null,sig='';
+async function teacher(code){clearInterval(tT);sig='';
+  const pull=async()=>{try{const st=await rpc('lg_state',{p_code:code});
+    const s2=JSON.stringify(st); if(s2===sig)return; sig=s2;S=st;drawT(code);}
+    catch(e){clearInterval(tT);el(eb(e.message)+`<button class="btn ghost" id="b">처음으로</button>`);
+      on('b',()=>{setH({t:''});route();});}};
+  await pull(); tT=setInterval(pull,1800);}
+async function refreshT(code){S=await rpc('lg_state',{p_code:code});sig=JSON.stringify(S);drawT(code);}
+
+function nodeFor(t,i,g){
+  const st=g.stage;
+  if(i+1>st) return `<div class="dot wait">–</div>`;
+  const now=(i+1===st);
+  const wrap=(q,html)=>`<div class="dot ${q}${now?' now':''}">${html}</div>`;
+  if(i===0){
+    const done = st>1 || (st===1 && t.ready);
+    if(!done) return wrap('q4','대기');
+    const a=t.born_assets;
+    const q = a>=50000?'q1':a>=10000?'q2':a>=3000?'q3':'q4';
+    return wrap(q,`${g.generation===1?'출생':'상속'} ${won(a)}<br>형제 ${t.siblings}명`);
+  }
+  if(i===1){
+    if(!t.tuition) return wrap('q4','대기');
+    const q={'VVIP':'q1','기숙':'q2','종합':'q3','독학':'q4'}[t.tuition];
+    return wrap(q,`${esc(t.tuition)}<br>커트 ${t.cutline}`);
+  }
+  if(i===2){
+    if(!t.tier) return wrap('q4','대기');
+    return wrap('q'+t.tier,`주사위 ${t.dice}<br><b>${t.tier}티어</b>`);
+  }
+  if(i===3){
+    if(!t.job) return wrap('q4','대기');
+    const p=(JOBS.find(j=>j.n===t.job)||{p:0}).p;
+    const q = p>=10000?'q1':p>=6000?'q2':p>=4000?'q3':'q4';
+    return wrap(q,esc(t.job));
+  }
+  if(!t.crisis) return wrap('q4','대기');
+  const good = t.crisis==='승진·사업 성공' || t.crisis==='큰 일 없음';
+  return wrap(t.insured?'q2':(good?'good':'bad'),
+    esc(t.crisis)+(t.insured?'<br>인맥으로 막음':''));
+}
+
+function drawT(code){
+  const g=S.game,teams=S.teams;
+  const ready=teams.filter(t=>t.ready).length;
+  const fin=g.status!=='playing';
+  const maxA=Math.max(10000,...teams.map(t=>t.assets));
+
+  const poorest=Math.max(1,Math.min(...teams.map(t=>t.assets)));
+  const rows=teams.map((t,i)=>`<div class="pathrow">
+    <div class="house" style="--cc:${HOUSE_C[i%8]}">
+      <div class="nm">${esc(t.label)}</div>
+      <div class="as">인맥 ${t.network}${t.tier?` · ${t.tier}티어`:''}</div>
+      ${g.generation===2&&t.gen1_assets!=null
+        ?`<div class="prev">1세대 ${won(t.gen1_assets)} → 여기서 출발</div>`:''}
+    </div>
+    ${[0,1,2,3,4].map(k=>`<div class="node">${nodeFor(t,k,g)}</div>`).join('')}
+    <div class="wealth"><div class="num">${won(t.assets)}</div>
+      <div class="bar"><i style="width:${Math.max(2,t.assets/maxA*100)}%"></i></div>
+      <div class="x">${t.assets<=poorest?'최하위 기준'
+        :'최하위의 '+(t.assets/poorest).toFixed(t.assets/poorest>=10?0:1)+'배'}</div></div>
+  </div>`).join('');
+
+  el(`<div class="banner">
+    <div><div class="t">${g.stage?STAGES[g.stage-1]:'개회 준비'}
+      <span>／ ${g.generation}세대 · ${g.phase==='input'?'가문 결정 중':g.phase==='result'?'결과 공개':'대기'}</span></div>
+      <div class="s">${esc(g.title)} · 교사 코드 ${esc(code)}</div></div>
+    <div class="row">
+      <span class="genbadge">${g.generation}세대</span>
+      <div style="text-align:right"><div class="disp" style="font-size:1.9rem">${ready} / ${teams.length}</div>
+        <div class="s">결정 완료</div></div></div>
+  </div>
+
+  <div class="board">
+    <div class="stagehead"><div>가문</div>
+      ${STAGES.map((s,i)=>`<div class="${i+1===g.stage?'cur':''}">${i+1}. ${s}</div>`).join('')}
+      <div style="text-align:right">현재 자산</div></div>
+    ${rows}
+  </div>
+  <div class="legend">
+    <span><b style="background:var(--q1)"></b>가장 유리한 선택</span>
+    <span><b style="background:var(--q2)"></b>중간</span>
+    <span><b style="background:var(--q3)"></b>불리</span>
+    <span><b style="background:var(--q4);box-shadow:inset 0 0 0 1px var(--rule)"></b>가장 불리 · 미결정</span>
+    <span><b style="background:var(--poor)"></b>위기 피해</span>
+    <span><b style="background:var(--mid)"></b>위기 모면</span>
+  </div>
+  ${g.stage>0?`<div class="gapline">가장 잘사는 가문은 가장 못사는 가문의
+    <b class="money">${(maxA/poorest).toFixed(maxA/poorest>=10?0:1)}배</b>를 가지고 있습니다.
+    ${g.stage<3?'아직 아무도 스스로 선택한 것이 없습니다.':''}</div>`:''}
+
+  <hr class="rule">
+  <div class="row">
+    <button class="btn" id="bNext"${fin||g.stage>=5||(g.stage===4&&g.phase!=='result')?' disabled':''}>다음 단계로</button>
+    <button class="btn ghost" id="bJob"${g.stage===4&&g.phase==='input'?'':' disabled'}>취업 결과 확정</button>
+    <button class="btn gold" id="bGen"${g.stage===5&&ready===teams.length&&!fin?'':' disabled'}>
+      ${g.generation===1?'세대 마감 · 2세대 시작':'게임 종료'}</button>
+  </div>
+  ${g.stage===0?`<p class="small muted" style="margin-top:10px">"다음 단계로"를 누르면 1단계 출생이 시작됩니다.</p>`:''}
+  ${g.stage===4&&g.phase!=='result'?`<p class="small muted" style="margin-top:10px">"취업 결과 확정"을 먼저 눌러야 "다음 단계로"를 누를 수 있습니다.</p>`:''}
+  ${g.generation===1&&g.stage===5?`<div class="note">2세대는 룰렛을 돌리지 않습니다.
+    <b>1세대의 최종 자산이 그대로 자녀의 출발선</b>이 됩니다. 형제 수만 다시 정해집니다.</div>`:''}
+
+  ${fin?`<hr class="rule"><h2>세대 간 계층 이동</h2>
+    <p class="small muted" style="margin-top:-.3rem">1세대 순위와 2세대 순위를 나란히 놓습니다.
+      화살표가 거의 움직이지 않았다면, 그건 각 가문이 잘하거나 못해서가 아닙니다.</p>
+    <table class="t" style="margin-top:8px"><tr>
+      <th>가문</th><th>1세대 최종</th><th>1세대 순위</th><th>2세대 최종</th><th>2세대 순위</th><th>이동</th></tr>
+      ${(()=>{const r1=[...teams].sort((a,b)=>b.gen1_assets-a.gen1_assets).map(t=>t.id);
+        const r2=[...teams].sort((a,b)=>b.assets-a.assets).map(t=>t.id);
+        return [...teams].sort((a,b)=>r2.indexOf(a.id)-r2.indexOf(b.id)).map(t=>{
+          const p1=r1.indexOf(t.id)+1,p2=r2.indexOf(t.id)+1,dv=p1-p2;
+          return `<tr><td>${esc(t.label)}</td><td class="money">${won(t.gen1_assets)}</td><td>${p1}위</td>
+            <td class="money">${won(t.assets)}</td><td>${p2}위</td>
+            <td style="color:${dv>0?'var(--mid)':dv<0?'var(--poor)':'var(--ink-2)'}">
+            ${dv>0?'▲ '+dv:dv<0?'▼ '+(-dv):'—'}</td></tr>`;}).join('');})()}
+    </table>
+    <div class="note" style="margin-top:12px">실제 연구에서는 하위 계층이 다음 세대에도 하위에 남을 확률이
+      약 <b>60%</b>, 상위가 상위에 남을 확률이 약 <b>68%</b>로 나옵니다.
+      완전히 공평한 사회라면 둘 다 33%여야 합니다.</div>`:''}
+
+  <hr class="rule">
+  <h2>최근 기록</h2>
+  <div style="max-height:230px;overflow:auto">
+    ${(S.log||[]).slice(0,24).map(l=>`<div class="logline">
+      <b>${esc(l.team)}</b> · ${l.gen}세대 ${l.stage}단계 · ${esc(l.kind)} — ${esc(l.note)}
+      ${l.delta?`<span class="money" style="color:${l.delta>0?'var(--mid)':'var(--poor)'}">
+        ${l.delta>0?'+':'−'}${won(Math.abs(l.delta))}</span>`:''}</div>`).join('')||'<p class="small muted">아직 없습니다.</p>'}
+  </div>
+
+  <hr class="rule">
+  <details><summary class="small muted" style="cursor:pointer">가문 접속 QR</summary>
+    <div class="row" style="margin-top:11px;align-items:flex-start">${teams.map(t=>
+      `<div style="text-align:center"><div class="qrbig">${qrSVG(link(t.join_code),3)}</div>
+       <div class="small"><b>${esc(t.label)}</b> ${esc(t.join_code)}</div></div>`).join('')}</div></details>`);
+
+  const call=async(fn,a)=>{try{await rpc(fn,a);await refreshT(code);}catch(e){alert(e.message);}};
+  on('bNext',()=>call('lg_next_stage',{p_code:code}));
+  on('bJob',()=>call('lg_job_resolve',{p_code:code}));
+  on('bGen',()=>{if(confirm(g.generation===1
+      ?'1세대를 마감하고 2세대를 시작합니다.\n최종 자산이 자녀의 출발 자산이 됩니다.'
+      :'게임을 종료합니다.'))call('lg_next_generation',{p_code:code});});
+}
+
+/* ═══ 학생 ═══ */
+let sT=null,meInfo=null,sSig='';
+async function student(join){clearInterval(sT);sSig='';
+  try{meInfo=await rpc('lg_join',{p_code:join});}catch(e){setH({s:''});return home(e.message);}
+  const pull=async()=>{try{
+    const [{data:g},d]=await Promise.all([
+      sb.from('lg_games').select('generation,stage,phase,status,title').eq('id',meInfo.game_id).single(),
+      rpc('lg_me',{p_code:join})]);
+    const s2=JSON.stringify([g,d]); if(s2===sSig)return; sSig=s2; drawS(join,g,d);}catch(e){}};
+  await pull(); sT=setInterval(pull,2000);}
+
+function drawS(join,g,d){
+  const m=d.me, col=HOUSE_C[(m.slot-1)%8];
+  const head=`<div class="flag" style="background:${col}"></div>
+   <div class="banner"><div><div class="t">${esc(m.label)}</div>
+     <div class="s">${g.stage?`${g.stage}단계 · ${STAGES[g.stage-1]}`:'개회 준비'}</div></div>
+     <span class="genbadge">${g.generation}세대</span></div>
+   <div class="stat">
+     <div class="sc"><div class="l">자산</div><div class="v">${won(m.assets)}</div>
+       <div class="small muted">출발 ${won(m.born_assets)} · 형제 ${m.siblings}명</div></div>
+     <div class="sc"><div class="l">인맥</div><div class="v">${m.network}</div>
+       <div class="small muted">위기 때 보험으로 쓸 수 있습니다</div></div>
+   </div>
+   ${m.tier?`<div class="note">학력 <b>${m.tier}티어</b>${m.job?` · 직업 <b>${esc(m.job)}</b>`:''}</div>`:''}`;
+
+  if(g.status!=='playing')
+    return el(head+`<div class="state"><div class="k">게임 종료</div>
+      <p class="muted">최종 자산 ${won(m.assets)}</p></div>`);
+
+  const waiting=body=>el(head+`<div class="state"><div class="k">${body}</div>
+    <p class="muted">${d.ready_count} / ${d.total} 가문 결정 완료</p></div>`);
+
+  if(g.phase!=='input') return waiting('선생님 화면을 보세요');
+  if(m.ready) return waiting('결정 완료');
+
+  /* 1단계 출생 */
+  if(g.stage===1){
+    el(head+`<h2>${g.generation===1?'태어난 환경':'물려받는 것'}</h2>
+      <p class="small muted">${g.generation===1
+        ?'부모의 재산을 무작위로 뽑고, 형제 수만큼 나눕니다. 아무도 고르지 않았습니다.'
+        :'룰렛은 없습니다. 1세대가 남긴 자산이 그대로 출발선이 됩니다. 형제 수만 다시 정합니다.'}</p>
+      <button class="btn wide gold" id="go" style="margin-top:10px">
+        ${g.generation===1?'룰렛과 주사위 굴리기':'상속 확인하기'}</button>`);
+    on('go',async()=>{try{const r=await rpc('lg_birth',{p_join:join});
+      alert(`${r.inherited?'물려받은 자산':'부모 재산'} ${won(r.wealth)}\n형제 ${r.siblings}명\n→ 내 몫 ${won(r.assets)}`);
+      sSig='';student(join);}catch(e){alert(e.message);}});
+    return;}
+
+  /* 2단계 사교육 */
+  if(g.stage===2){
+    el(head+`<h2>사교육 투자</h2>
+      <p class="small muted">돈을 쓸수록 1티어 합격 커트라인이 내려갑니다.
+        입시는 주사위 3개(3~18)의 합으로 정해집니다.</p>
+      <div class="opts">${TUITION.map(o=>{const lock=m.assets<o.cost;
+        return `<button class="opt${lock?' lock':''}" data-k="${o.k}"${lock?' disabled':''}>
+          <div class="t">${o.n} <span class="money" style="color:var(--poor)">${o.cost?'−'+won(o.cost):'무료'}</span></div>
+          <div class="d">${o.d}${lock?' · 자산이 부족합니다':''}</div></button>`;}).join('')}</div>`);
+    app.querySelectorAll('.opt').forEach(b=>{b.onclick=async()=>{
+      if(!confirm('이 선택은 되돌릴 수 없습니다.'))return;
+      try{await rpc('lg_tuition_pick',{p_join:join,p_choice:b.dataset.k});sSig='';student(join);}
+      catch(e){alert(e.message);}};});
+    return;}
+
+  /* 3단계 입시 */
+  if(g.stage===3){
+    el(head+`<h2>대학 입시</h2>
+      <p class="small muted">주사위 3개(합 3~18)를 굴립니다.
+        <b>우리 가문의 통과선은 아래와 같습니다.</b> 다른 가문은 통과선이 다릅니다.</p>
+      <table class="t"><tr><th>합계</th><th>결과</th></tr>
+        ${m.cutline>18
+          ?`<tr><td>–</td><td style="color:var(--poor)"><b>1티어 · 도달 불가</b></td></tr>`
+          :`<tr><td>${m.cutline} 이상</td><td><b>1티어</b></td></tr>`}
+        <tr><td>${m.cutline-3}–${Math.min(18,m.cutline-1)}</td><td>2티어</td></tr>
+        <tr><td>${m.cutline-6}–${m.cutline-4}</td><td>3티어</td></tr>
+        <tr><td>${m.cutline-7} 이하</td><td>4티어</td></tr></table>
+      ${m.tuition==='독학'?`<div class="err">독학을 선택했기 때문에 <b>1티어는 어떤 숫자가 나와도 불가능합니다.</b>
+        아무리 잘해도 최대 2티어입니다.</div>`:''}
+      <div class="dice"><div class="die" id="d1">?</div><div class="die" id="d2">?</div><div class="die" id="d3">?</div></div>
+      <button class="btn wide gold" id="go">주사위 굴리기</button>`);
+    on('go',async()=>{document.getElementById('go').disabled=true;
+      try{const r=await rpc('lg_exam',{p_join:join});
+        let n=0; const iv=setInterval(()=>{n++;
+          [1,2,3].forEach(i=>document.getElementById('d'+i).textContent=Math.floor(Math.random()*6)+1);
+          if(n>8){clearInterval(iv);
+            [1,2,3].forEach(i=>document.getElementById('d'+i).textContent=r.d[i-1]);
+            setTimeout(()=>{alert(`합계 ${r.sum} / 커트라인 ${r.cut}\n→ ${r.tier}티어 · 인맥 +${r.net}`);
+              sSig='';student(join);},700);}},90);
+      }catch(e){alert(e.message);document.getElementById('go').disabled=false;}});
+    return;}
+
+  /* 4단계 취업 */
+  if(g.stage===4){
+    const taken=(d.jobs_taken||[]).map(x=>x.job);
+    el(head+`<h2>직업 지원</h2>
+      <p class="small muted">한 곳만 지원합니다. 같은 자리에 여러 가문이 몰리면
+        <b>학력 티어가 높은 가문이 가져갑니다.</b> 밀려나면 중소기업이나 자영업으로 갑니다.</p>
+      <div class="opts">${JOBS.map(j=>{const lock=m.tier>j.t;
+        return `<button class="opt${lock?' lock':''}" data-j="${j.n}"${lock?' disabled':''}>
+          <div class="t">${j.n} <span class="money" style="color:var(--mid)">연봉 ${won(j.p)}</span></div>
+          <div class="d">${j.t===4?'학력 제한 없음':`${j.t}티어 이상 필요`}${lock?` · 우리는 ${m.tier}티어라 지원할 수 없습니다`:''}</div>
+        </button>`;}).join('')}</div>`);
+    app.querySelectorAll('.opt').forEach(b=>{b.onclick=async()=>{
+      try{await rpc('lg_job_wish',{p_join:join,p_job:b.dataset.j});sSig='';student(join);}
+      catch(e){alert(e.message);}};});
+    return;}
+
+  /* 5단계 위기 */
+  if(g.stage===5){
+    el(head+`<h2>중년의 위기</h2>
+      <p class="small muted">다섯 장 중 한 장을 뽑습니다. 무엇이 나올지는 아무도 모릅니다.
+        뽑기 전에 <b>인맥 1장을 보험으로 걸 수 있습니다.</b> 걸면 나쁜 일을 막지만,
+        좋은 일이 나오면 인맥만 없어집니다.</p>
+      <label style="margin:12px 0 6px"><input type="checkbox" id="ins" style="width:auto;vertical-align:-2px"
+        ${m.network<1?'disabled':''}> 인맥 1장을 보험으로 건다 ${m.network<1?'(남은 인맥 없음)':`(보유 ${m.network})`}</label>
+      <div class="opts" style="grid-template-columns:1fr 1fr 1fr;display:grid">
+        ${[1,2,3,4,5].map(i=>`<button class="opt" data-i="${i}" style="text-align:center">
+          <div class="t">${i}</div></button>`).join('')}</div>`);
+    app.querySelectorAll('.opt').forEach(b=>{b.onclick=async()=>{
+      const ins=document.getElementById('ins').checked;
+      try{const r=await rpc('lg_crisis',{p_join:join,p_insure:ins});
+        alert(`${r.event}\n${r.blocked?'인맥으로 막았습니다.':
+          r.delta>0?'+'+won(r.delta):r.delta<0?'−'+won(-r.delta):'변화 없음'}`);
+        sSig='';student(join);}catch(e){alert(e.message);}};});
+    return;}
+  waiting('대기');
+}
+
+function bootError(){
+  const isFile = location.protocol==='file:';
+  el(`<div class="narrow"><h1>실행할 수 없습니다</h1>
+    <div class="err">${isFile
+      ? '이 파일을 컴퓨터에서 직접 열었습니다(주소가 file:/// 로 시작합니다).<br>'
+        +'브라우저가 외부 요청을 막기 때문에 게임이 동작하지 않습니다.'
+      : '게임에 필요한 외부 라이브러리를 내려받지 못했습니다.<br>'
+        +'학교 네트워크가 cdn.jsdelivr.net 을 차단하고 있을 수 있습니다.'}</div>
+    <p class="small muted">해결 방법<br>
+      1. 파일을 Vercel 등 웹에 올린 뒤 <b>https://</b> 주소로 열어 주세요.<br>
+      2. 이미 https 주소인데도 이 화면이 나오면, 다른 네트워크(휴대폰 테더링 등)에서 열어 보세요.
+         그때 정상이면 학교망 차단이 원인입니다.</p>
+    <p class="small muted">현재 주소 : ${esc(location.href)}</p></div>`);}
+
+function route(){h=H();
+  if(!createClient) return bootError();
+  if(!sb)sb=createClient(URL_,KEY,{global:{fetch:safeFetch},
+    auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storage:memStore}});
+  if(h.n)return newGame();
+  if(h.t)return teacher(h.t);
+  if(h.s)return student(h.s);
+  clearInterval(tT);clearInterval(sT);home();}
+window.addEventListener('hashchange',route);
+route();
+</script>
