@@ -118,10 +118,11 @@ let KEY=KEY_BAKED;
 
 const STAGES=['출생','학령기','입시','취업','중년'];
 const TUITION=[
- {k:'VVIP', n:'VVIP 입시 컨설팅', cost:30000, cut:11, d:'전담 팀이 붙는다 · 1티어 커트라인 11 (약 63%)'},
- {k:'기숙', n:'명문 기숙학원',    cost:10000, cut:14, d:'관리형 재수 · 1티어 커트라인 14 (약 16%)'},
- {k:'종합', n:'유명 종합학원',    cost:3000,  cut:16, d:'평범한 사교육 · 1티어 커트라인 16 (약 5%)'},
- {k:'독학', n:'독학 · EBS',       cost:0,     cut:19, d:'1티어는 어떤 숫자가 나와도 불가능 (최대 2티어)'}];
+ {k:'VVIP', n:'VVIP 입시 컨설팅', cost:30000, d:'전담 팀이 붙는다 · 퀴즈 힌트 3개 · 점수 배율 ×1.40'},
+ {k:'기숙', n:'명문 기숙학원',    cost:10000, d:'관리형 재수 · 퀴즈 힌트 2개 · 점수 배율 ×1.25'},
+ {k:'종합', n:'유명 종합학원',    cost:3000,  d:'평범한 사교육 · 퀴즈 힌트 1개 · 점수 배율 ×1.10'},
+ {k:'독학', n:'독학 · EBS',       cost:0,     d:'힌트 없음 · 배율 ×1.00 · 1티어는 어떤 점수를 받아도 도달 불가 (최대 2티어)'}];
+const QUIZ_SECONDS=20;
 const JOBS=[
  {n:'의사',t:1,p:25000},{n:'변호사',t:2,p:11000},{n:'회계·세무사',t:2,p:10000},
  {n:'변리사',t:2,p:8000},{n:'대기업 사무직',t:3,p:5000},{n:'교사·공무원',t:4,p:6000},
@@ -217,14 +218,41 @@ function newGame(msg){el(`<div class="narrow"><h1>새 게임 만들기</h1>${msg
       setH({t:code,n:'',s:''});route();}catch(e){newGame(e.message);}});}
 
 /* ═══ 교사 ═══ */
-let S=null,tT=null,sig='';
+let S=null,Q=null,tT=null,sig='';
 async function teacher(code){clearInterval(tT);sig='';
   const pull=async()=>{try{const st=await rpc('lg_state',{p_code:code});
-    const s2=JSON.stringify(st); if(s2===sig)return; sig=s2;S=st;drawT(code);}
+    const q = st.game.stage===3 ? await rpc('lg_quiz_admin_view',{p_code:code}) : null;
+    const s2=JSON.stringify([st,q]); if(s2===sig)return; sig=s2;S=st;Q=q;drawT(code);}
     catch(e){clearInterval(tT);el(eb(e.message)+`<button class="btn ghost" id="b">처음으로</button>`);
       on('b',()=>{setH({t:''});route();});}};
-  await pull(); tT=setInterval(pull,1800);}
-async function refreshT(code){S=await rpc('lg_state',{p_code:code});sig=JSON.stringify(S);drawT(code);}
+  await pull(); tT=setInterval(pull,1300);}
+async function refreshT(code){S=await rpc('lg_state',{p_code:code});
+  Q = S.game.stage===3 ? await rpc('lg_quiz_admin_view',{p_code:code}) : null;
+  sig=JSON.stringify([S,Q]);drawT(code);}
+
+function quizPanelT(g,Q,code){
+  if(!Q||!Q.active) return `<hr class="rule"><div class="panel">
+    <h2>🎯 대학 입시 퀴즈</h2>
+    <p class="small muted">카훗처럼 전체 가문이 동시에 문제를 풉니다. 5문제, 정답 수 × 사교육 점수 배율로 티어가 정해집니다.</p>
+    <button class="btn wide gold" id="bQuizStart">퀴즈 시작</button></div>`;
+  const idx=g.quiz_idx, total=g.quiz_total||5, reveal=g.quiz_phase==='reveal', last=idx+1>=total;
+  return `<hr class="rule"><div class="panel">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">🎯 ${idx+1} / ${total}번 문제 · ${esc(Q.category)}</h2>
+      <span class="small muted">${Q.answered} / ${Q.total} 제출</span></div>
+    <p style="font-weight:600;margin:8px 0">${esc(Q.question)}</p>
+    <table class="t"><tr>${Q.choices.map((c,i)=>`<th${reveal&&i===Q.answer_index?' style="background:var(--mid);color:#fff"':''}>
+      ${i+1}. ${esc(c)}</th>`).join('')}</tr></table>
+    ${reveal?`<div class="note" style="margin-top:10px">${esc(Q.explain)}</div>
+      <table class="t" style="margin-top:8px"><tr><th>가문</th><th>제출</th><th>결과</th></tr>
+      ${Q.per_team.map(pt=>`<tr><td>${esc(pt.team)}</td>
+        <td>${pt.answered?(pt.choice+1)+'번':'미제출'}</td>
+        <td style="color:${pt.correct?'var(--mid)':'var(--poor)'}">${pt.answered?(pt.correct?'정답':'오답'):'–'}</td></tr>`).join('')}
+      </table>
+      <button class="btn wide gold" id="bQuizNext" style="margin-top:10px">${last?'입시 결과 확정':'다음 문제'}</button>`
+     :`<button class="btn wide" id="bQuizReveal" style="margin-top:10px">정답 공개</button>`}
+  </div>`;
+}
 
 function nodeFor(t,i,g){
   const st=g.stage;
@@ -241,11 +269,11 @@ function nodeFor(t,i,g){
   if(i===1){
     if(!t.tuition) return wrap('q4','대기');
     const q={'VVIP':'q1','기숙':'q2','종합':'q3','독학':'q4'}[t.tuition];
-    return wrap(q,`${esc(t.tuition)}<br>커트 ${t.cutline}`);
+    return wrap(q,`${esc(t.tuition)}<br>힌트 ${t.hints} · ×${t.quiz_mult}`);
   }
   if(i===2){
     if(!t.tier) return wrap('q4','대기');
-    return wrap('q'+t.tier,`주사위 ${t.dice}<br><b>${t.tier}티어</b>`);
+    return wrap('q'+t.tier,`정답 ${t.quiz_correct}/5<br><b>${t.tier}티어</b>`);
   }
   if(i===3){
     if(!t.job) return wrap('q4','대기');
@@ -310,15 +338,17 @@ function drawT(code){
 
   <hr class="rule">
   <div class="row">
-    <button class="btn" id="bNext"${fin||g.stage>=5||(g.stage===4&&g.phase!=='result')?' disabled':''}>다음 단계로</button>
+    <button class="btn" id="bNext"${fin||g.stage>=5||((g.stage===3||g.stage===4)&&g.phase!=='result')?' disabled':''}>다음 단계로</button>
     <button class="btn ghost" id="bJob"${g.stage===4&&g.phase==='input'?'':' disabled'}>취업 결과 확정</button>
     <button class="btn gold" id="bGen"${g.stage===5&&ready===teams.length&&!fin?'':' disabled'}>
       ${g.generation===1?'세대 마감 · 2세대 시작':'게임 종료'}</button>
   </div>
   ${g.stage===0?`<p class="small muted" style="margin-top:10px">"다음 단계로"를 누르면 1단계 출생이 시작됩니다.</p>`:''}
+  ${g.stage===3&&g.phase!=='result'?`<p class="small muted" style="margin-top:10px">퀴즈 5문제를 끝까지 진행해야 "다음 단계로"를 누를 수 있습니다.</p>`:''}
   ${g.stage===4&&g.phase!=='result'?`<p class="small muted" style="margin-top:10px">"취업 결과 확정"을 먼저 눌러야 "다음 단계로"를 누를 수 있습니다.</p>`:''}
   ${g.generation===1&&g.stage===5?`<div class="note">2세대는 룰렛을 돌리지 않습니다.
     <b>1세대의 최종 자산이 그대로 자녀의 출발선</b>이 됩니다. 형제 수만 다시 정해집니다.</div>`:''}
+  ${g.stage===3?quizPanelT(g,Q,code):''}
 
   ${fin?`<hr class="rule"><h2>세대 간 계층 이동</h2>
     <p class="small muted" style="margin-top:-.3rem">1세대 순위와 2세대 순위를 나란히 놓습니다.
@@ -356,23 +386,28 @@ function drawT(code){
   const call=async(fn,a)=>{try{await rpc(fn,a);await refreshT(code);}catch(e){alert(e.message);}};
   on('bNext',()=>call('lg_next_stage',{p_code:code}));
   on('bJob',()=>call('lg_job_resolve',{p_code:code}));
+  on('bQuizStart',()=>call('lg_quiz_start',{p_code:code}));
+  on('bQuizReveal',()=>call('lg_quiz_reveal',{p_code:code}));
+  on('bQuizNext',()=>call('lg_quiz_next',{p_code:code}));
   on('bGen',()=>{if(confirm(g.generation===1
       ?'1세대를 마감하고 2세대를 시작합니다.\n최종 자산이 자녀의 출발 자산이 됩니다.'
       :'게임을 종료합니다.'))call('lg_next_generation',{p_code:code});});
 }
 
 /* ═══ 학생 ═══ */
-let sT=null,meInfo=null,sSig='';
+let sT=null,meInfo=null,sSig='',qTimerT=null;
 async function student(join){clearInterval(sT);sSig='';
   try{meInfo=await rpc('lg_join',{p_code:join});}catch(e){setH({s:''});return home(e.message);}
   const pull=async()=>{try{
     const [{data:g},d]=await Promise.all([
       sb.from('lg_games').select('generation,stage,phase,status,title').eq('id',meInfo.game_id).single(),
       rpc('lg_me',{p_code:join})]);
-    const s2=JSON.stringify([g,d]); if(s2===sSig)return; sSig=s2; drawS(join,g,d);}catch(e){}};
-  await pull(); sT=setInterval(pull,2000);}
+    const quiz = g.stage===3 ? await rpc('lg_quiz_view',{p_join:join}) : null;
+    const s2=JSON.stringify([g,d,quiz]); if(s2===sSig)return; sSig=s2; drawS(join,g,d,quiz);}catch(e){}};
+  await pull(); sT=setInterval(pull,1300);}
 
-function drawS(join,g,d){
+function drawS(join,g,d,quiz){
+  clearInterval(qTimerT); qTimerT=null;
   const m=d.me, col=HOUSE_C[(m.slot-1)%8];
   const head=`<div class="flag" style="background:${col}"></div>
    <div class="banner"><div><div class="t">${esc(m.label)}</div>
@@ -412,8 +447,8 @@ function drawS(join,g,d){
   /* 2단계 사교육 */
   if(g.stage===2){
     el(head+`<h2>사교육 투자</h2>
-      <p class="small muted">돈을 쓸수록 1티어 합격 커트라인이 내려갑니다.
-        입시는 주사위 3개(3~18)의 합으로 정해집니다.</p>
+      <p class="small muted">돈을 쓸수록 대학 입시 퀴즈에서 쓸 힌트가 많아지고, 정답 점수에 곱해지는 배율도 커집니다.
+        입시는 전체 가문이 동시에 푸는 5문제 퀴즈로 진행됩니다.</p>
       <div class="opts">${TUITION.map(o=>{const lock=m.assets<o.cost;
         return `<button class="opt${lock?' lock':''}" data-k="${o.k}"${lock?' disabled':''}>
           <div class="t">${o.n} <span class="money" style="color:var(--poor)">${o.cost?'−'+won(o.cost):'무료'}</span></div>
@@ -424,31 +459,47 @@ function drawS(join,g,d){
       catch(e){alert(e.message);}};});
     return;}
 
-  /* 3단계 입시 */
+  /* 3단계 입시 : 카훗 스타일 실시간 퀴즈 */
   if(g.stage===3){
-    el(head+`<h2>대학 입시</h2>
-      <p class="small muted">주사위 3개(합 3~18)를 굴립니다.
-        <b>우리 가문의 통과선은 아래와 같습니다.</b> 다른 가문은 통과선이 다릅니다.</p>
-      <table class="t"><tr><th>합계</th><th>결과</th></tr>
-        ${m.cutline>18
-          ?`<tr><td>–</td><td style="color:var(--poor)"><b>1티어 · 도달 불가</b></td></tr>`
-          :`<tr><td>${m.cutline} 이상</td><td><b>1티어</b></td></tr>`}
-        <tr><td>${m.cutline-3}–${Math.min(18,m.cutline-1)}</td><td>2티어</td></tr>
-        <tr><td>${m.cutline-6}–${m.cutline-4}</td><td>3티어</td></tr>
-        <tr><td>${m.cutline-7} 이하</td><td>4티어</td></tr></table>
-      ${m.tuition==='독학'?`<div class="err">독학을 선택했기 때문에 <b>1티어는 어떤 숫자가 나와도 불가능합니다.</b>
-        아무리 잘해도 최대 2티어입니다.</div>`:''}
-      <div class="dice"><div class="die" id="d1">?</div><div class="die" id="d2">?</div><div class="die" id="d3">?</div></div>
-      <button class="btn wide gold" id="go">주사위 굴리기</button>`);
-    on('go',async()=>{document.getElementById('go').disabled=true;
-      try{const r=await rpc('lg_exam',{p_join:join});
-        let n=0; const iv=setInterval(()=>{n++;
-          [1,2,3].forEach(i=>document.getElementById('d'+i).textContent=Math.floor(Math.random()*6)+1);
-          if(n>8){clearInterval(iv);
-            [1,2,3].forEach(i=>document.getElementById('d'+i).textContent=r.d[i-1]);
-            setTimeout(()=>{alert(`합계 ${r.sum} / 커트라인 ${r.cut}\n→ ${r.tier}티어 · 인맥 +${r.net}`);
-              sSig='';student(join);},700);}},90);
-      }catch(e){alert(e.message);document.getElementById('go').disabled=false;}});
+    if(!quiz||!quiz.active){
+      el(head+`<div class="state"><div class="k">퀴즈 대기 중</div>
+        <p class="muted">선생님이 "퀴즈 시작"을 누르면 문제가 나타납니다.<br>
+          사교육 투자로 얻은 힌트 ${m.hints}개를 문제마다 쓸 수 있어요.</p></div>`);
+      return;}
+    const reveal = quiz.phase==='reveal', already = quiz.my_choice!=null;
+    const eliminated = quiz.hint_eliminate;
+    el(head+`<h2>🎯 ${quiz.idx+1} / ${quiz.total}번 문제 · ${esc(quiz.category)}</h2>
+      ${!reveal?`<div id="qtimer" class="small muted" style="margin-bottom:6px;font-weight:600"></div>`:''}
+      <p style="font-weight:600;margin:6px 0 12px">${esc(quiz.question)}</p>
+      <div class="opts" id="qopts">${quiz.choices.map((c,i)=>{
+        const isMine=quiz.my_choice===i, isAns=reveal&&i===quiz.answer_index;
+        const isElim=!reveal&&eliminated===i;
+        let style='';
+        if(reveal){ style=isAns?'border-left-color:var(--mid)':(isMine?'border-left-color:var(--poor)':''); }
+        else if(isMine) style='border-left-color:var(--gold)';
+        return `<button class="opt${isElim?' lock':''}" data-i="${i}" style="${style}"
+          ${already||reveal||isElim?'disabled':''}>
+          <div class="t">${i+1}. ${esc(c)}</div>${isElim?'<div class="d">힌트로 오답 확인됨</div>':''}</button>`;}).join('')}</div>
+      ${!already&&!reveal?`<button class="btn ghost wide" id="bHint" style="margin-top:10px"
+          ${m.hints<1||eliminated!=null?'disabled':''}>
+          💡 힌트로 오답 1개 지우기 ${m.hints<1?'(남은 힌트 없음)':`(보유 ${m.hints}개)`}</button>`:''}
+      ${already&&!reveal?`<div class="note" style="margin-top:10px">제출 완료! 다른 가문을 기다리는 중…</div>`:''}
+      ${reveal?`<div class="note" style="margin-top:10px">${
+          quiz.my_correct?'✅ 정답입니다!':(already?'❌ 오답입니다.':'⏱️ 제출하지 못했습니다.')}
+          ${esc(quiz.explain)}</div>`:''}`);
+    if(!already&&!reveal){
+      app.querySelectorAll('#qopts .opt').forEach(b=>{ if(b.disabled)return; b.onclick=async()=>{
+        app.querySelectorAll('#qopts .opt').forEach(x=>x.disabled=true);
+        try{const r=await rpc('lg_quiz_answer',{p_join:join,p_choice:+b.dataset.i});
+          sSig='';student(join);}catch(e){alert(e.message);sSig='';student(join);}};});
+      on('bHint',async()=>{try{await rpc('lg_quiz_hint',{p_join:join});sSig='';student(join);}
+        catch(e){alert(e.message);}});
+      const tick=()=>{const el2=document.getElementById('qtimer'); if(!el2)return;
+        const left=Math.max(0,QUIZ_SECONDS-Math.floor((Date.now()-Date.parse(quiz.started_at))/1000));
+        el2.textContent=`⏱️ 남은 시간 ${left}초`;
+        if(left<=5)el2.style.color='var(--poor)';};
+      tick(); qTimerT=setInterval(tick,500);
+    }
     return;}
 
   /* 4단계 취업 */
