@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인생게임: 아비투스</title>
+<meta name="description" content="가정 배경(경제·문화·사회자본)이 인생 전반의 기회에 미치는 영향을 체험하는 통합사회 수업용 시뮬레이션 게임">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@400;500;700;800;900&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ============ THEME TOKENS ============ */
+  :root{
+    --bg: #E9EEDF;
+    --bg-2: #DDE6CC;
+    --surface: #FCFAF0;
+    --surface-2: #F3EFDC;
+    --surface-border: #D8CFAE;
+    --ink: #2A2A20;
+    --ink-soft: #635F49;
+    --ink-faint: #8A8567;
+
+    --accent: #C2452C;
+    --accent-ink: #FFF7EC;
+    --accent-soft: #EAD9C9;
+
+    --cap-econ: #B4841F;
+    --cap-econ-soft: #F2E4C2;
+    --cap-culture: #2F7A67;
+    --cap-culture-soft: #D9EEE6;
+    --cap-social: #4E62A0;
+    --cap-social-soft: #DEE3F4;
+    --cap-info: #954E82;
+    --cap-info-soft: #F0DEEC;
+
+    --good: #2F7A4F;
+    --bad: #B23B3B;
+    --shadow: 0 10px 30px -12px rgba(42,42,32,0.35);
+    --shadow-sm: 0 4px 14px -6px rgba(42,42,32,0.28);
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --radius-sm: 9px;
+
+    --font-display: 'Black Han Sans', 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    --font-body: 'Gothic A1', 'Apple SD Gothic Neo', 'Malgun Gothic', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #131C16;
+      --bg-2: #0E1611;
+      --surface: #1D2A21;
+      --surface-2: #24352A;
+      --surface-border: #35492D;
+      --ink: #EEE9D6;
+      --ink-soft: #B7B39C;
+      --ink-faint: #8A8B76;
+
+      --accent: #E3714E;
+      --accent-ink: #201007;
+      --accent-soft: #3C2A20;
+
+      --cap-econ: #E3BE5C;
+      --cap-econ-soft: #3A311A;
+      --cap-culture: #62C1A5;
+      --cap-culture-soft: #1B3A31;
+      --cap-social: #93A5EA;
+      --cap-social-soft: #232A4A;
+      --cap-info: #D390C0;
+      --cap-info-soft: #3A2536;
+
+      --good: #6FCB8E;
+      --bad: #E28080;
+      --shadow: 0 10px 34px -10px rgba(0,0,0,0.55);
+      --shadow-sm: 0 4px 16px -6px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #131C16;
+    --bg-2: #0E1611;
+    --surface: #1D2A21;
+    --surface-2: #24352A;
+    --surface-border: #35492D;
+    --ink: #EEE9D6;
+    --ink-soft: #B7B39C;
+    --ink-faint: #8A8B76;
+
+    --accent: #E3714E;
+    --accent-ink: #201007;
+    --accent-soft: #3C2A20;
+
+    --cap-econ: #E3BE5C;
+    --cap-econ-soft: #3A311A;
+    --cap-culture: #62C1A5;
+    --cap-culture-soft: #1B3A31;
+    --cap-social: #93A5EA;
+    --cap-social-soft: #232A4A;
+    --cap-info: #D390C0;
+    --cap-info-soft: #3A2536;
+
+    --good: #6FCB8E;
+    --bad: #E28080;
+    --shadow: 0 10px 34px -10px rgba(0,0,0,0.55);
+    --shadow-sm: 0 4px 16px -6px rgba(0,0,0,0.5);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 560px at 12% -8%, var(--bg-2), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, var(--bg-2), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{ font-family:var(--font-display); font-weight:400; letter-spacing:.01em; text-wrap:balance; }
+  .mono{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
+  a{color:var(--accent);}
+  button{ font-family:inherit; }
+  ::selection{ background:var(--accent-soft); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+  }
+
+  .app{ max-width:900px; margin:0 auto; padding:20px 16px 64px; }
+
+  /* ============ HUD ============ */
+  .hud{
+    position:sticky; top:0; z-index:40;
+    display:flex; align-items:center; gap:10px;
+    background:color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter:blur(8px);
+    border:1px solid var(--surface-border);
+    border-radius:var(--radius-md);
+    padding:10px 14px;
+    margin:0 0 18px;
+    box-shadow:var(--shadow-sm);
+    flex-wrap:wrap;
+  }
+  .hud-id{ display:flex; align-items:center; gap:8px; font-weight:800; }
+  .hud-avatar{ font-size:22px; line-height:1; }
+  .hud-name{ font-size:14px; color:var(--ink-soft); }
+  .hud-stats{ display:flex; gap:6px; flex-wrap:wrap; margin-left:auto; }
+  .chip{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:12.5px; font-weight:700; padding:5px 9px; border-radius:999px;
+    border:1px solid transparent;
+    white-space:nowrap;
+  }
+  .chip-econ{ background:var(--cap-econ-soft); color:var(--cap-econ); }
+  .chip-culture{ background:var(--cap-culture-soft); color:var(--cap-culture); }
+  .chip-social{ background:var(--cap-social-soft); color:var(--cap-social); }
+  .chip-info{ background:var(--cap-info-soft); color:var(--cap-info); }
+  .chip-cash{ background:var(--accent-soft); color:var(--accent); font-family:var(--font-mono); }
+  .hud-hide{ display:none !important; }
+
+  /* ============ STEPPER ============ */
+  .stepper{ display:flex; gap:5px; margin:0 0 18px; overflow-x:auto; padding:2px; }
+  .step-dot{
+    flex:0 0 auto; width:9px; height:9px; border-radius:50%;
+    background:var(--surface-border);
+  }
+  .step-dot.done{ background:var(--cap-culture); }
+  .step-dot.now{ background:var(--accent); transform:scale(1.5); }
+
+  /* ============ CARD SHELL ============ */
+  .stage-card{
+    background:var(--surface);
+    border:1px solid var(--surface-border);
+    border-radius:var(--radius-lg);
+    padding:28px 26px;
+    box-shadow:var(--shadow);
+    animation:riseIn .5s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes riseIn{ from{ opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  .hero-track{ max-width:480px; margin:2px auto 22px; text-align:center; }
+  .hero-track svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .hero-dot{ transform-box:fill-box; transform-origin:50% 50%; animation:heroPulse 2.6s ease-in-out infinite; }
+  @keyframes heroPulse{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.18);} }
+  .hero-caption{ margin:8px 0 0; font-size:12.5px; color:var(--ink-faint); font-weight:800; letter-spacing:.03em; }
+
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:12.5px; font-weight:800; letter-spacing:.06em;
+    color:var(--accent); text-transform:uppercase; margin:0 0 6px;
+  }
+  .stage-title{ font-size:clamp(22px,4vw,32px); margin:0 0 8px; }
+  .stage-desc{ color:var(--ink-soft); font-size:15px; margin:0 0 20px; max-width:62ch; }
+  .stage-desc p{ margin:0 0 10px; }
+
+  .btn{
+    appearance:none; border:2px solid var(--ink); background:var(--ink); color:var(--surface);
+    font-weight:800; font-size:15px; padding:12px 20px; border-radius:999px;
+    cursor:pointer; transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:var(--shadow-sm); }
+  .btn:active{ transform:translateY(0); }
+  .btn:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .btn-primary{ border-color:var(--accent); background:var(--accent); color:var(--accent-ink); }
+  .btn-ghost{ background:transparent; color:var(--ink); }
+  .btn[disabled]{ opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+  .btn-sm{ padding:8px 14px; font-size:13px; }
+
+  .choice-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px; margin:6px 0; }
+  .choice-card{
+    text-align:left; border:2px solid var(--surface-border); background:var(--surface-2);
+    border-radius:var(--radius-md); padding:14px 16px; cursor:pointer;
+    transition:border-color .15s, transform .15s, box-shadow .15s;
+    display:flex; flex-direction:column; gap:6px; color:var(--ink); font-family:inherit;
+  }
+  .choice-card:hover{ border-color:var(--accent); transform:translateY(-2px); box-shadow:var(--shadow-sm); }
+  .choice-card:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .choice-card.selected{ border-color:var(--accent); background:var(--accent-soft); }
+  .choice-card[disabled]{ opacity:.42; cursor:not-allowed; transform:none; }
+  .choice-title{ font-weight:800; font-size:15.5px; }
+  .choice-meta{ font-size:12.5px; color:var(--ink-soft); display:flex; gap:8px; flex-wrap:wrap; }
+  .tag{ display:inline-block; font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:999px; background:var(--surface); border:1px solid var(--surface-border); }
+
+  .statbar-wrap{ margin:10px 0; }
+  .statbar-label{ display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; margin-bottom:4px; }
+  .statbar-track{ height:9px; border-radius:999px; background:var(--surface-2); overflow:hidden; border:1px solid var(--surface-border); }
+  .statbar-fill{ height:100%; border-radius:999px; transition:width .7s cubic-bezier(.2,.8,.2,1); }
+
+  .mission-slots{ display:flex; gap:6px; margin:0 0 14px; }
+  .slot{ width:22px; height:22px; border-radius:6px; border:2px solid var(--surface-border); }
+  .slot.used{ background:var(--accent); border-color:var(--accent); }
+
+  /* roulette */
+  .roulette-zone{ display:flex; flex-direction:column; align-items:center; gap:18px; padding:10px 0 6px; }
+  .roulette-wrap{ position:relative; width:min(280px,72vw); height:min(280px,72vw); }
+  .roulette-wheel{
+    width:100%; height:100%; border-radius:50%;
+    border:6px solid var(--surface); box-shadow:var(--shadow), inset 0 0 0 2px var(--surface-border);
+    transition:transform 3.2s cubic-bezier(.12,.85,.15,1);
+  }
+  .roulette-pin{
+    position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+    width:0; height:0; border-left:12px solid transparent; border-right:12px solid transparent;
+    border-top:20px solid var(--accent); filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));
+  }
+  .roulette-hub{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:20%; height:20%; border-radius:50%; background:var(--surface); border:3px solid var(--ink);
+  }
+  .legend{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; font-size:12.5px; }
+  .legend-item{ display:flex; align-items:center; gap:5px; }
+  .legend-dot{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+  .wealth-ticker{
+    font-family:var(--font-mono); font-weight:700; font-size:clamp(20px,5vw,28px);
+    padding:10px 20px; border-radius:var(--radius-sm); background:var(--surface-2);
+    border:2px solid var(--surface-border); min-width:220px; text-align:center;
+  }
+  .wealth-ticker.rolling{ border-style:dashed; }
+  .wealth-ticker.landed{ animation:popScale .4s cubic-bezier(.3,1.6,.4,1); border-style:solid; border-color:currentColor; }
+  @keyframes popScale{ 0%{ transform:scale(0.85);} 60%{ transform:scale(1.08);} 100%{ transform:scale(1);} }
+
+  .dice-row{ display:flex; gap:14px; align-items:center; justify-content:center; margin:10px 0; }
+  .die{
+    width:56px; height:56px; border-radius:12px; background:var(--surface); border:2px solid var(--ink);
+    display:flex; align-items:center; justify-content:center; font-size:30px; box-shadow:var(--shadow-sm);
+  }
+  .die.rolling{ animation:roll .12s linear infinite; }
+  @keyframes roll{ 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+
+  .reveal-card{
+    border:2px dashed var(--surface-border); border-radius:var(--radius-md); padding:18px;
+    background:var(--surface-2); margin-top:8px; animation:flipIn .5s ease;
+  }
+  @keyframes flipIn{ from{ opacity:0; transform:rotateX(35deg);} to{ opacity:1; transform:rotateX(0);} }
+
+  .quiz-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+  .timer{
+    font-family:var(--font-mono); font-weight:700; font-size:15px; padding:6px 12px; border-radius:999px;
+    background:var(--surface-2); border:1px solid var(--surface-border);
+  }
+  .timer.low{ color:var(--bad); border-color:var(--bad); }
+  .quiz-progress{ font-size:12.5px; color:var(--ink-soft); font-weight:700; }
+  .quiz-prompt{ font-size:17px; font-weight:700; margin:6px 0 14px; }
+  .quiz-option{ width:100%; }
+  .quiz-option.correct{ border-color:var(--good); background:color-mix(in srgb, var(--good) 16%, var(--surface-2)); }
+  .quiz-option.wrong{ border-color:var(--bad); background:color-mix(in srgb, var(--bad) 16%, var(--surface-2)); }
+  .explain-box{ margin-top:12px; padding:12px 14px; border-radius:var(--radius-sm); background:var(--cap-info-soft); color:var(--ink); font-size:14px; }
+
+  .card-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; margin:10px 0; }
+  .net-card{ border-radius:var(--radius-md); padding:14px; border:2px solid var(--surface-border); background:var(--surface-2); transition:transform .2s ease; }
+  .net-card .rarity{ font-size:11px; font-weight:800; letter-spacing:.05em; }
+  .rarity-common{ color: var(--ink-faint); }
+  .rarity-rare{ color: var(--cap-social); }
+  .rarity-epic{ color: var(--accent); }
+  .net-card-rare{ border-color:var(--cap-social); box-shadow:0 0 0 1px var(--cap-social) inset; }
+  .net-card-epic{
+    border-color:var(--accent);
+    background:linear-gradient(155deg, var(--accent-soft) 0%, var(--surface-2) 55%);
+    box-shadow:var(--shadow-sm), 0 0 0 1px var(--accent) inset;
+  }
+  .net-card-rare:hover, .net-card-epic:hover{ transform:translateY(-3px); }
+
+  .event-card{ border-left:5px solid var(--surface-border); background:var(--surface-2); border-radius:var(--radius-sm); padding:14px 16px; margin:10px 0; }
+  .event-card.good{ border-left-color:var(--good); }
+  .event-card.bad{ border-left-color:var(--bad); }
+  .event-title{ font-weight:800; margin-bottom:4px; }
+  .delta{ font-family:var(--font-mono); font-weight:700; }
+  .delta.pos{ color:var(--good); }
+  .delta.neg{ color:var(--bad); }
+
+  .badge-row{ display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
+  .badge-pill{
+    display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:999px;
+    background:var(--accent-soft); color:var(--accent); font-weight:800; font-size:12.5px;
+    border:1px solid var(--accent);
+  }
+
+  .toast-zone{ position:fixed; top:16px; right:16px; z-index:80; display:flex; flex-direction:column; gap:8px; max-width:min(320px,86vw); }
+  .toast{
+    background:var(--ink); color:var(--surface); padding:11px 15px; border-radius:var(--radius-sm);
+    font-size:13.5px; font-weight:700; box-shadow:var(--shadow); animation:toastIn .35s ease, toastOut .35s ease 2.6s forwards;
+  }
+  @keyframes toastIn{ from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:translateX(0);} }
+  @keyframes toastOut{ to{opacity:0; transform:translateX(20px);} }
+
+  .confetti{ position:fixed; inset:0; pointer-events:none; z-index:70; overflow:hidden; }
+  .confetti i{ position:absolute; top:-12px; width:8px; height:14px; opacity:.9; animation:fall linear forwards; }
+  @keyframes fall{ to{ transform:translateY(110vh) rotate(540deg); opacity:0; } }
+
+  .diagram{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; justify-content:center; }
+  .diagram-box{ border-radius:var(--radius-sm); padding:10px 14px; font-size:13px; font-weight:800; text-align:center; border:2px solid; min-width:110px; }
+  .diagram-arrow{ font-size:20px; color:var(--ink-faint); }
+
+  details.panel{ border:1px solid var(--surface-border); border-radius:var(--radius-md); background:var(--surface-2); padding:4px 16px; margin:10px 0; }
+  details.panel > summary{ cursor:pointer; font-weight:800; padding:12px 0; list-style:none; display:flex; align-items:center; gap:8px; }
+  details.panel > summary::-webkit-details-marker{ display:none; }
+  details.panel > summary::before{ content:'▸'; transition:transform .2s; }
+  details.panel[open] > summary::before{ transform:rotate(90deg); }
+  details.panel .panel-body{ padding-bottom:16px; font-size:14px; color:var(--ink-soft); }
+  details.panel .panel-body h4{ color:var(--ink); margin:14px 0 6px; font-size:14px; }
+  details.panel .panel-body ul{ margin:6px 0; padding-left:20px; }
+  details.panel .panel-body li{ margin:4px 0; }
+
+  .avatar-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(50px,1fr)); gap:8px; margin:10px 0 18px; }
+  .avatar-opt{
+    font-size:26px; padding:10px 0; text-align:center; border-radius:var(--radius-sm);
+    border:2px solid var(--surface-border); background:var(--surface-2); cursor:pointer;
+  }
+  .avatar-opt.selected{ border-color:var(--accent); background:var(--accent-soft); }
+  .field{ margin:10px 0 18px; }
+  .field label{ display:block; font-size:12.5px; font-weight:800; color:var(--ink-soft); margin-bottom:6px; }
+  .field input{
+    width:100%; max-width:320px; padding:10px 12px; border-radius:var(--radius-sm);
+    border:2px solid var(--surface-border); background:var(--surface); color:var(--ink); font-size:15px; font-family:inherit;
+  }
+  .field input:focus-visible{ outline:3px solid var(--accent); outline-offset:1px; }
+
+  .final-hero{ text-align:center; padding:8px 0 6px; }
+  .final-title{ font-size:clamp(24px,5vw,36px); margin:6px 0; }
+  .mobility-pill{ display:inline-block; padding:8px 16px; border-radius:999px; font-weight:800; margin:8px 0; }
+  .mobility-up{ background:var(--cap-culture-soft); color:var(--cap-culture); }
+  .mobility-down{ background:var(--cap-info-soft); color:var(--cap-info); }
+  .mobility-flat{ background:var(--surface-2); color:var(--ink-soft); border:1px solid var(--surface-border); }
+
+  table.data-table{ width:100%; border-collapse:collapse; font-size:13.5px; margin:10px 0; }
+  table.data-table th, table.data-table td{ text-align:left; padding:7px 10px; border-bottom:1px solid var(--surface-border); }
+  table.data-table th{ color:var(--ink-soft); font-weight:700; }
+  .table-wrap{ overflow-x:auto; }
+
+  .footer-note{ text-align:center; color:var(--ink-faint); font-size:12px; margin-top:26px; }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <div class="hud hud-hide" id="hud"></div>
+  <div class="stepper hud-hide" id="stepper"></div>
+  <main id="stage-root" class="stage-card" aria-live="polite"></main>
+  <p class="footer-note">인생게임: 아비투스 &middot; 통합사회 수업용 사회 이동 시뮬레이션 &middot; 모든 수치는 교육적 예시이며 실제 통계와 다를 수 있습니다</p>
+</div>
+<div class="toast-zone" id="toastZone"></div>
+<div class="confetti" id="confettiZone"></div>
+
+<script>
+/* =========================================================
+   인생게임: 아비투스 — game data & engine
+   ========================================================= */
+"use strict";
+
+/* ---------- utils ---------- */
+const $ = (sel, el=document) => el.querySelector(sel);
+const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+const clamp = (n,a,b) => Math.max(a, Math.min(b,n));
+/* Amounts are stored in 만원(10,000-won) units throughout. Once a value
+   crosses 1억(=10,000만원) this renders it as "N억 [M만원]" the way a
+   Korean speaker would actually say it, instead of a long raw 만원 figure. */
+function won(n){
+  const neg = n < 0;
+  n = Math.round(Math.abs(n));
+  const eok = Math.floor(n / 10000);
+  const man = n % 10000;
+  let s;
+  if(eok > 0 && man > 0) s = `${eok.toLocaleString('ko-KR')}억 ${man.toLocaleString('ko-KR')}만원`;
+  else if(eok > 0) s = `${eok.toLocaleString('ko-KR')}억원`;
+  else s = `${man.toLocaleString('ko-KR')}만원`;
+  return (neg ? '-' : '') + s;
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function weightedPick(items){
+  const total = items.reduce((s,i)=>s+i.weight,0);
+  let r = Math.random()*total;
+  for(const it of items){ if(r < it.weight) return it; r -= it.weight; }
+  return items[items.length-1];
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- data: SES tiers (parent-wealth roulette) ---------- */
+/* startCash is in 만원(10k-won) units. The gap between tiers is deliberately
+   extreme (400x between top and bottom) — this is the whole point of the
+   simulation, not a balance oversight. See tierForCash() below for how the
+   endgame classification is tuned to match: a huge head start makes later
+   choices almost irrelevant to the rich (they stay rich almost no matter
+   what), while for the poor, choices/luck are a real — if capped — swing. */
+const SES_TIERS = [
+  { id:'diamond', name:'다이아몬드 가문', weight:3, color:'var(--cap-info)', softColor:'var(--cap-info-soft)',
+    startCash:400000, culture:88, social:85, info:80,
+    parentJob:'대기업 오너 / 고위 전문직', home:'강남 대형 아파트, 방학마다 해외 체류',
+    flavor:'가문 자산 40억원대. 태어날 때부터 사교육 1타 강사와 유학 정보가 한 발 앞서 갖춰져 있습니다.' },
+  { id:'gold', name:'골드 가문', weight:10, color:'var(--cap-econ)', softColor:'var(--cap-econ-soft)',
+    startCash:100000, culture:70, social:65, info:60,
+    parentJob:'대기업 임원 / 전문직(의사·변호사)', home:'서울 신축 아파트',
+    flavor:'가문 자산 10억원대. 좋은 학군에 살며, 부모님 네트워크로 웬만한 정보는 미리 듣습니다.' },
+  { id:'silver', name:'실버 가문', weight:22, color:'var(--cap-social)', softColor:'var(--cap-social-soft)',
+    startCash:50000, culture:50, social:45, info:45,
+    parentJob:'중소기업 관리직 / 공무원', home:'수도권 아파트 전세',
+    flavor:'가문 자산 5억원대. 노력하면 웬만한 건 할 수 있지만, 결정적인 순간엔 정보가 한 박자 늦습니다.' },
+  { id:'bronze', name:'브론즈 가문', weight:35, color:'var(--cap-culture)', softColor:'var(--cap-culture-soft)',
+    startCash:5000, culture:30, social:25, info:25,
+    parentJob:'자영업 / 사무직', home:'다세대주택 반전세',
+    flavor:'가문 자산 5천만원대. 부모님이 애쓰시지만 학원비를 댈 때마다 가계부와 씨름해야 합니다.' },
+  { id:'soil', name:'흙 가문', weight:30, color:'#8B6A4A', softColor:'var(--surface-2)',
+    startCash:1000, culture:15, social:10, info:10,
+    parentJob:'비정규직 / 무직', home:'반지하 / 원룸',
+    flavor:'가문 자산 1천만원 남짓. 교육 정보도, 여윳돈도, 기댈 인맥도 없이 시작합니다. 오직 나 자신뿐입니다.' },
+];
+const TIER_RANK = { diamond:1, gold:2, silver:3, bronze:4, soil:5 };
+function tierById(id){ return SES_TIERS.find(t=>t.id===id); }
+
+/* ---------- childhood missions (문화자본 미션 보드) ---------- */
+const CHILD_MISSIONS = [
+  { id:'museum', title:'박물관·미술관 정기 관람', cost:20, culture:8, info:0, note:'꾸준히 다니면 시야가 넓어져요' },
+  { id:'travel', title:'해외 가족여행', cost:150, culture:15, info:5, note:'견문과 함께 입시 정보도 따라옵니다' },
+  { id:'library', title:'동네 도서관 다니기', cost:0, culture:4, info:0, note:'돈 없이도 할 수 있는 몇 안 되는 선택지' },
+  { id:'arts', title:'예체능 학원(피아노·미술)', cost:60, culture:10, info:0, note:'입시 스펙과 정서 발달에 도움' },
+  { id:'selfstudy', title:'혼자 책 읽고 공부하기', cost:0, culture:2, info:0, note:'자기주도력은 늘지만 속도는 느립니다' },
+  { id:'camp', title:'방학 영어캠프', cost:100, culture:6, info:8, note:'또래 네트워크와 입시 정보를 함께 얻어요' },
+];
+
+/* ---------- info-gap events (정보격차) ---------- */
+const INFO_EVENTS = [
+  { id:'meeting', need:'social', threshold:40,
+    have:{ text:'옆집 학부모 모임에서 입시 설명회 꿀팁을 전해 들었습니다.', hint:1 },
+    miss:{ text:'그런 모임이 있는 줄도 몰랐습니다. 정보가 없으니 접근할 방법도 없네요.' } },
+  { id:'flyer', need:'info', threshold:30,
+    have:{ text:'우연히 본 지역 정보지에서 장학금 공고를 발견해 신청했습니다.', cash:20 },
+    miss:{ text:'그런 정보지가 있다는 것도 몰라 장학금 신청 시기를 놓쳤습니다.' } },
+  { id:'deadline', need:'info', threshold:20,
+    have:{ text:'입시 원서 접수 일정을 미리 캘린더에 챙겨 여유 있게 제출했습니다.', hint:1 },
+    miss:{ text:'접수 마감일을 착각해 하마터면 놓칠 뻔했습니다. 급히 야간에 접수했습니다.' } },
+];
+
+/* ---------- exam-prep investment tiers (입시 투자) ---------- */
+const PREP_TIERS = [
+  { id:'self', name:'자습형', cost:0, hints:0, mult:1.00, desc:'인터넷 자료와 학교 수업만으로 준비합니다.' },
+  { id:'hagwon', name:'인강 + 동네 학원', cost:100, hints:1, mult:1.10, desc:'기본기를 다지는 표준 코스입니다.' },
+  { id:'academy', name:'기숙 학원', cost:250, hints:2, mult:1.25, desc:'생활 전체를 입시에 맞춰 설계합니다.' },
+  { id:'vvip', name:'VVIP 1:1 컨설팅', cost:500, hints:3, mult:1.40, desc:'전담 컨설턴트가 예상 문제와 전략을 짜줍니다.' },
+  { id:'legacy', name:'가문 인맥 (특별전형)', cost:30000, hints:5, mult:3.00,
+    desc:'입시 자체가 형식적 절차일 뿐입니다. 결과는 사실상 이미 정해져 있습니다.', exclusive:true },
+];
+
+/* ---------- network cards (대학 네트워크) ---------- */
+const NETWORK_CARDS = [
+  { id:'friend', name:'동네 친구', rarity:'common', effect:'가벼운 정서적 지지 (효과 없음)', hint:0, jobBonus:0, shield:0 },
+  { id:'alba', name:'아르바이트 동료', rarity:'common', effect:'생활 정보 공유', hint:0, jobBonus:2, shield:0 },
+  { id:'studygroup', name:'스터디 그룹 동기', rarity:'common', effect:'취업 스터디 정보 +약간', hint:0, jobBonus:5, shield:0 },
+  { id:'senior', name:'취업 잘 된 선배', rarity:'rare', effect:'채용 정보 사전 입수', hint:1, jobBonus:8, shield:0 },
+  { id:'prof', name:'교수님 추천서', rarity:'rare', effect:'서류 전형 가산점', hint:0, jobBonus:15, shield:0 },
+  { id:'lawyer', name:'로스쿨 동기(변호사)', rarity:'rare', effect:'위기 발생 시 소송 방어', hint:0, jobBonus:5, shield:30 },
+  { id:'doctor', name:'의대 동기(의사)', rarity:'epic', effect:'위기 발생 시 의료비 방어', hint:0, jobBonus:5, shield:30 },
+  { id:'chaebol', name:'재벌가 동아리 선배', rarity:'epic', effect:'취업 서류 100% 통과 + 정보력', hint:1, jobBonus:25, shield:10 },
+  { id:'abroad', name:'유학파 인맥', rarity:'epic', effect:'글로벌 채용 정보 + 어학 인증', hint:1, jobBonus:18, shield:0 },
+];
+
+/* ---------- careers (진로 드래프트) ---------- */
+const CAREERS = [
+  { id:'doctor', name:'의사', salary:3000, protect:85, flavor:'고소득이지만 긴 수련 기간을 버텨야 했습니다.' },
+  { id:'lawyer', name:'변호사', salary:2800, protect:80, flavor:'로스쿨 학비를 감당할 수 있어야 시작할 수 있었습니다.' },
+  { id:'accountant', name:'회계사·세무사', salary:2000, protect:70, flavor:'전문 자격증으로 안정적인 수요를 확보했습니다.' },
+  { id:'civil', name:'공무원', salary:1200, protect:90, flavor:'급여는 소박해도 흔들리지 않는 안정성을 얻었습니다.' },
+  { id:'corp', name:'대기업 정규직', salary:1800, protect:55, flavor:'경쟁은 치열했지만 복지와 급여가 준수합니다.' },
+  { id:'sme', name:'중소기업 사무직', salary:900, protect:35, flavor:'배울 것은 많지만 처우는 아쉬운 자리였습니다.' },
+  { id:'selfemployed', name:'자영업(카페 사장)', salary:1100, protect:20, flavor:'내 사업을 시작했지만 경기 변동에 그대로 노출됩니다.' },
+  { id:'gig', name:'플랫폼 노동 / 프리랜서', salary:700, protect:10, flavor:'자유롭지만 다음 달 소득을 장담할 수 없습니다.' },
+];
+
+/* ---------- life events (인생 이벤트) ---------- */
+const LIFE_EVENTS = [
+  { id:'illness', title:'갑작스러운 큰 병', type:'bad', base:-300,
+    // card-based protection now runs through the active-response choice below (so a
+    // card actually gets spent, instead of silently protecting every event forever)
+    mitigate:(s)=> s.career.protect>=70,
+    mitigateText:'다행히 든든한 보장 덕분에 큰 피해 없이 넘겼습니다.',
+    hitText:'치료비로 목돈이 빠져나갔습니다.' },
+  { id:'layoff', title:'구조조정 / 실직 위기', type:'bad', base:-250,
+    mitigate:(s)=> s.career.protect>=75,
+    mitigateText:'안정적인 직군 덕분에 이번 구조조정은 비껴갔습니다.',
+    hitText:'몇 달간 소득 없이 버텨야 했습니다.' },
+  { id:'fraud', title:'투자 사기', type:'bad', base:-200,
+    mitigate:(s)=> s.stats.info>=70,
+    mitigateText:'정보력 덕분에 수상한 낌새를 미리 눈치채고 발을 뺐습니다.',
+    hitText:'솔깃한 제안에 넘어가 저축의 일부를 잃었습니다.' },
+  { id:'lawsuit', title:'억울한 소송에 휘말림', type:'bad', base:-220,
+    // no career/stat structurally deflects a lawsuit — the only way out runs
+    // through the active-response choice below (spend a card, or pay for one)
+    mitigate:()=>false,
+    mitigateText:'변호사 인맥 덕분에 소송 비용 없이 잘 해결되었습니다.',
+    hitText:'변호사 비용과 합의금으로 큰 지출이 발생했습니다.' },
+  { id:'promotion', title:'승진 & 성과급', type:'good', base:180,
+    mitigate:()=>false, mitigateText:'', hitText:'좋은 평가를 받아 두둑한 성과급을 받았습니다.' },
+  { id:'realestate', title:'부동산 가격 상승', type:'good', base:250,
+    mitigate:(s)=> s.tier.id==='soil' || s.tier.id==='bronze',
+    mitigateText:'전세/월세라 이번 상승기의 혜택은 크지 않았습니다.',
+    hitText:'보유하고 있던 집값이 올라 자산이 늘었습니다.' },
+  { id:'inherit', title:'가족의 소액 상속', type:'good', base:120,
+    mitigate:(s)=> s.tier.id==='soil',
+    mitigateText:'물려받을 자산이 애초에 많지 않았습니다.',
+    hitText:'예상치 못한 상속으로 자산이 늘었습니다.' },
+  { id:'startup', title:'부업 / 창업 시도', type:'good', base:160,
+    mitigate:(s)=> s.stats.social<30,
+    mitigateText:'인맥과 정보가 부족해 시도만큼 성과를 내지 못했습니다.',
+    hitText:'작은 부업이 뜻밖에 잘 풀렸습니다.' },
+];
+
+/* ---------- active responses to a life event ----------
+   Only defined for events where spending capital *right now* can plausibly
+   change the outcome. 'promotion' always resolves at full value on its own
+   (nothing to unlock), and 'inherit' depends purely on what family wealth
+   already existed — no card or cash spent this turn can conjure an
+   inheritance — so both are left out on purpose: some advantages are
+   convertible through action, others are just given or not. */
+const ACTIVE_RESPONSES = {
+  illness: {
+    preferredCardId: 'doctor',
+    cardLabel: c=>`🤝 ${c.name} 인맥으로 방어하기`,
+    cardText: c=>`${c.name} 인맥을 총동원해 최고의 의료진과 빠르게 연결되어 피해를 최소화했습니다.`,
+    cashLabel: cost=>`💰 ${won(cost)}을 들여 최선의 치료 받기`,
+    cashText: cost=>`망설이지 않고 ${won(cost)}을 들여 최선의 치료를 받아 후유증을 줄였습니다.` },
+  layoff: {
+    cardLabel: c=>`🤝 ${c.name} 인맥으로 재취업 루트 찾기`,
+    cardText: c=>`${c.name} 인맥이 곧장 다음 자리를 소개해 줘 공백을 최소화했습니다.`,
+    cashLabel: cost=>`💰 ${won(cost)}을 들여 재교육받기`,
+    cashText: cost=>`${won(cost)}을 들여 재교육을 받으며 공백기를 버텨냈습니다.` },
+  fraud: {
+    cardLabel: c=>`🤝 ${c.name} 인맥에게 미리 확인하기`,
+    cardText: c=>`${c.name} 인맥을 통해 미리 위험 신호를 전달받아 피해를 막았습니다.`,
+    cashLabel: cost=>`💰 ${won(cost)}을 들여 전문가 자문 구하기`,
+    cashText: cost=>`${won(cost)}을 들여 전문가 자문을 구해 피해를 최소화했습니다.` },
+  lawsuit: {
+    preferredCardId: 'lawyer',
+    cardLabel: c=>`🤝 ${c.name} 인맥으로 방어하기`,
+    cardText: c=>`${c.name} 인맥을 실제로 동원해 소송을 유리하게 마무리했습니다.`,
+    cashLabel: cost=>`💰 ${won(cost)}을 들여 변호사 선임하기`,
+    cashText: cost=>`${won(cost)}을 들여 실력 있는 변호사를 직접 선임해 피해를 줄였습니다.` },
+  realestate: {
+    cardLabel: c=>`🤝 ${c.name} 인맥으로 급매 정보 얻기`,
+    cardText: c=>`${c.name} 인맥에게 급매물 정보를 미리 얻어 상승분을 더 누렸습니다.`,
+    cashLabel: cost=>`💰 ${won(cost)}을 추가로 투입하기`,
+    cashText: cost=>`${won(cost)}을 추가로 끌어모아 투자를 늘려 상승분을 더 누렸습니다.` },
+  startup: {
+    cardLabel: c=>`🤝 ${c.name} 인맥으로 사업 확장하기`,
+    cardText: c=>`${c.name} 인맥의 도움으로 사업을 예상보다 크게 키웠습니다.`,
+    cashLabel: cost=>`💰 ${won(cost)}을 추가로 투입하기`,
+    cashText: cost=>`${won(cost)}을 추가로 투입해 사업을 궤도에 올렸습니다.` },
+};
+
+/* ---------- badges ---------- */
+const BADGES = [
+  { id:'culture', name:'문화애호가', cond:(s)=> s.stats.culture>=80, desc:'문화자본 80 이상 달성' },
+  { id:'social', name:'인맥왕', cond:(s)=> s.stats.social>=80 || s.cards.length>=4, desc:'폭넓은 네트워크 구축' },
+  { id:'info', name:'정보통', cond:(s)=> s.stats.info>=80, desc:'정보력 80 이상 달성' },
+  { id:'csat', name:'만점 수험생', cond:(s)=> s.csatCorrect===s.csatTotal && s.csatTotal>0, desc:'수능 미니게임 만점' },
+  { id:'ncs', name:'NCS 마스터', cond:(s)=> s.ncsCorrect===s.ncsTotal && s.ncsTotal>0, desc:'NCS 미니게임 만점' },
+  { id:'crisis', name:'위기관리의 신', cond:(s)=> s.eventLog.length>0 && s.eventLog.every(e=> e.type!=='bad' || e.mitigated), desc:'모든 위기를 방어' },
+  { id:'escape', name:'흙수저 탈출', cond:(s)=> s.tier.id==='soil' && TIER_RANK[s.finalTierId] <= 2, desc:'최하위 출발 → 상위 계층 진입' },
+  { id:'locked', name:'계층 고착 관찰자', cond:(s)=> s.tier.id===s.finalTierId, desc:'시작 계층과 최종 계층이 동일' },
+  { id:'finish', name:'완주자', cond:()=> true, desc:'게임을 끝까지 플레이' },
+];
+
+/* ---------- question banks (모두 오리지널 창작 문항) ---------- */
+const CSAT_BANK = [
+  { cat:'사회불평등', q:"다음 중 '상대적 빈곤'에 대한 설명으로 가장 적절한 것은?",
+    choices:['생존에 필요한 최소한의 소득도 벌지 못하는 상태','한 사회의 평균적인 생활 수준에 비해 현저히 낮은 소득 수준에 있는 상태','모든 사회 구성원의 소득이 완전히 동일한 상태','소득이 전혀 없는 상태'],
+    answer:1, explain:'상대적 빈곤은 그 사회의 중위소득 등 평균적 생활수준을 기준으로 판단하며, 절대적 빈곤과 구분됩니다.' },
+  { cat:'사회불평등', q:'지니계수에 대한 설명으로 옳지 않은 것은?',
+    choices:['0에 가까울수록 소득분배가 평등하다','1에 가까울수록 소득 불평등이 심하다','로렌츠 곡선과 대각선 사이의 면적을 이용해 계산한다','특정 계층의 자산 규모를 절대적인 금액으로 나타낸 지표이다'],
+    answer:3, explain:'지니계수는 소득 분배의 불평등 정도를 0~1 사이의 상대적 지표로 나타낸 것으로, 절대적 자산 금액을 뜻하지 않습니다.' },
+  { cat:'사회정의', q:'다음 사례에서 강조하는 정의의 실질적 기준으로 가장 적절한 것은? "입사 시험 성적과 무관하게, 부양가족이 많고 생계가 어려운 지원자에게 채용 시 가산점을 준다."',
+    choices:['업적','능력','필요','노력'],
+    answer:2, explain:"사회적 약자의 처지를 고려해 자원을 배분하는 것은 '필요'를 기준으로 한 정의관에 해당합니다." },
+  { cat:'사회정의', q:"'기회의 평등'에 대한 설명으로 가장 적절한 것은?",
+    choices:['모든 사람에게 동일한 결과를 보장하는 것이다','출발선의 조건을 사후에 강제로 맞추는 것이다','경쟁에 참여할 기회 자체를 동등하게 보장하는 것이다','완전히 같은 정책적 결론으로만 이어진다'],
+    answer:2, explain:"기회의 평등은 '결과'가 아니라 경쟁에 참여할 '기회' 자체의 형식적 동등함을 보장하는 개념입니다." },
+  { cat:'경제', q:'어느 나라의 소득 5분위 배율이 2010년 4.5배에서 2020년 6.2배로 변화했다. 이에 대한 해석으로 가장 적절한 것은?',
+    choices:['상위 20%와 하위 20% 간 소득 격차가 줄어들었다','상위 20%와 하위 20% 간 소득 격차가 커졌다','국민 전체의 소득이 감소했다','하위 20%의 소득이 상위 20%보다 많아졌다'],
+    answer:1, explain:'소득 5분위 배율은 상위 20% 평균소득을 하위 20% 평균소득으로 나눈 값으로, 커질수록 소득 격차가 심화됨을 의미합니다.' },
+  { cat:'경제', q:"시장경제에서 '기회비용'의 의미로 가장 적절한 것은?",
+    choices:['어떤 선택을 위해 지불한 화폐 비용의 총합','하나를 선택함으로써 포기하게 되는 것 중 가장 가치가 큰 것','모든 대안을 선택했을 때 얻는 이익의 합','정부가 부과하는 세금'],
+    answer:1, explain:'기회비용은 하나의 대안을 선택함으로써 포기해야 하는 다른 대안들 중 가장 가치가 큰 것을 의미합니다.' },
+  { cat:'핵심개념', q:"부르디외가 제시한 '문화자본'에 해당하는 사례로 가장 거리가 먼 것은?",
+    choices:['클래식 음악을 감상하고 즐기는 취향과 안목','명문대 학위증','부모에게 물려받은 예금과 부동산','어릴 때부터 몸에 밴 교양 있는 말투'],
+    answer:2, explain:'예금과 부동산은 경제자본에 해당합니다. 문화자본은 취향·학력·언어습관 등 문화적 소양의 형태로 존재합니다.' },
+  { cat:'사회이동', q:"'세대 간 이동'의 사례로 가장 적절한 것은?",
+    choices:['같은 사람이 대리에서 부장으로 승진했다','농부의 아들이 대기업 임원이 되었다','한 회사가 다른 회사에 인수합병되었다','물가가 상승하여 실질 소득이 감소했다'],
+    answer:1, explain:'세대 간 이동은 부모 세대와 자녀 세대 사이의 계층 위치 변화를 뜻합니다. 승진 사례는 세대 내 이동입니다.' },
+  { cat:'사회이동', q:"사회 이동이 '폐쇄적'인 사회의 특징으로 가장 적절한 것은?",
+    choices:['개인의 노력과 능력에 따라 계층 상승이 비교적 자유롭다','신분이나 가문에 따라 계층 지위가 세습되고 이동이 극히 제한된다','교육 기회가 모든 계층에 균등하게 열려 있다','계층 간 이동이 활발하여 계층 구조가 유동적이다'],
+    answer:1, explain:'폐쇄적 계층 구조에서는 세습이 강하게 작동하여 개인의 노력만으로 계층 이동이 매우 어렵습니다.' },
+  { cat:'인권', q:'다음 사례가 보여주는 문제로 가장 가까운 것은? "저소득층 밀집 지역의 학교는 노후 시설과 부족한 교사 수로 다른 지역보다 학습 환경이 열악하다."',
+    choices:['신체의 자유 침해','참정권 제한','교육받을 권리(사회권)의 실질적 불평등','사생활 침해'],
+    answer:2, explain:'거주 지역에 따라 교육 여건이 크게 차이 나는 것은 교육받을 권리가 실질적으로 불평등하게 보장되는 사례입니다.' },
+  { cat:'노동', q:"'플랫폼 노동'의 특징으로 가장 적절한 것은?",
+    choices:['정규직으로서 강한 고용 안정성을 보장받는다','디지털 플랫폼을 매개로 단건 단위 일감을 수행하며 고용 안정성이 낮은 경우가 많다','반드시 노동조합에 자동 가입된다','모든 국가에서 동일한 법적 보호를 받는다'],
+    answer:1, explain:'플랫폼 노동은 앱 등을 매개로 건별 계약을 맺는 형태가 많아 전통적 고용 보호를 받기 어려운 경우가 많습니다.' },
+  { cat:'공간불평등', q:"'공간 불평등'의 사례로 가장 적절한 것은?",
+    choices:['개인의 소득 차이에 따라 소비 수준이 달라진다','수도권과 비수도권 간 의료·교육 인프라 접근성 격차가 크다','성별에 따라 임금 격차가 존재한다','세대에 따라 정치 성향이 다르다'],
+    answer:1, explain:'공간 불평등은 지역 간 자원·인프라 분포의 차이로 발생하는 불평등을 말합니다.' },
+  { cat:'문화다양성', q:"다문화 사회에서 '문화 상대주의'적 태도로 가장 적절한 것은?",
+    choices:['내 문화의 기준으로 다른 문화의 우열을 판단한다','각 문화를 그 사회의 맥락과 배경 속에서 이해하려 한다','특정 문화만이 절대적으로 옳다고 여긴다','다른 문화를 무조건 배척한다'],
+    answer:1, explain:'문화 상대주의는 각 문화를 그 사회의 고유한 맥락에서 이해하려는 태도입니다.' },
+  { cat:'복지', q:"'보편적 복지'에 대한 설명으로 옳은 것은?",
+    choices:['소득 수준과 관계없이 모든 국민에게 복지 혜택을 제공한다','저소득층에게만 제공된다','재원이 전혀 필요 없다','민간 기업만 제공할 수 있다'],
+    answer:0, explain:'보편적 복지는 소득 수준과 무관하게 모든 국민을 대상으로 제공되는 복지 방식입니다.' },
+  { cat:'핵심개념', q:'다음 주장에 대한 반박으로 가장 적절한 것은? "시험 성적은 오직 개인의 노력만을 반영하므로, 성적에 따른 보상은 완전히 공정하다."',
+    choices:['시험 준비 과정에서 가정의 경제·문화 자본이 큰 영향을 미칠 수 있다','시험은 항상 모든 사람에게 동일한 조건에서 치러진다','노력은 유전과 전혀 관계가 없다','성적은 순전히 우연에 의해서만 결정된다'],
+    answer:0, explain:'사교육 접근성 등 가정 배경이 시험 준비 과정에 실질적인 영향을 미칠 수 있다는 점이 능력주의 신화에 대한 대표적 반박입니다.' },
+  { cat:'핵심개념', q:"콜먼(Coleman)이 강조한 '사회자본'의 의미로 가장 적절한 것은?",
+    choices:['개인이 보유한 부동산과 예금의 총합','신뢰, 규범, 네트워크 등 사람들 사이의 관계에서 형성되는 자원','개인이 학교에서 취득한 자격증의 개수','국가가 보유한 외환보유고'],
+    answer:1, explain:'사회자본은 신뢰와 네트워크처럼 사람들 사이의 관계 속에서 형성되고 활용되는 자원을 뜻합니다.' },
+  { cat:'경제', q:'독점적 시장에서 나타날 수 있는 현상으로 가장 적절한 것은?',
+    choices:['다수의 판매자 간 자유로운 경쟁으로 가격이 낮아진다','소수 기업이 시장을 지배하여 가격 결정력을 갖고 소비자 후생이 감소할 수 있다','모든 기업이 동일한 품질의 상품을 동일 가격에 판매한다','신규 기업의 진입이 항상 자유롭다'],
+    answer:1, explain:'독점 시장에서는 소수 기업이 가격 결정력을 가져 소비자 후생이 감소할 위험이 있습니다.' },
+  { cat:'사회변화', q:"다음 중 '양극화'를 완화하기 위한 정책으로 가장 적절하지 않은 것은?",
+    choices:['취약계층에 대한 교육 바우처 지원 확대','누진세를 통한 소득 재분배 강화','특정 계층에게만 정보 접근을 제한하는 제도 도입','사회 안전망(실업급여, 기초생활보장 등) 확충'],
+    answer:2, explain:'정보 접근을 제한하는 것은 오히려 정보격차와 불평등을 심화시키는 방향입니다.' },
+];
+
+const NCS_BANK = [
+  { cat:'수리능력', q:'이번 달 급여 300만원 중 20%를 저축하고, 남은 금액의 30%를 월세로 지출한다. 월세로 지출하는 금액은?',
+    choices:['60만원','72만원','84만원','90만원'], answer:1, explain:'저축 후 남은 금액 240만원의 30%는 72만원입니다.' },
+  { cat:'수리능력', q:'원가 8,000원인 상품에 25% 이익을 붙여 정가를 매긴 뒤, 정가에서 20% 할인해 팔았다. 실제 판매가는?',
+    choices:['7,500원','8,000원','8,500원','9,000원'], answer:1, explain:'정가는 10,000원이고, 20% 할인하면 8,000원으로 공교롭게 원가와 같아집니다.' },
+  { cat:'자료해석', q:'기획팀 5명(평균 연봉 4,000만원)과 영업팀 10명(평균 연봉 3,500만원)의 인건비 총합은?',
+    choices:['4억 5천만원','5억원','5억 5천만원','6억원'], answer:2, explain:'2억(5×4,000만) + 3억 5천만(10×3,500만) = 5억 5천만원입니다.' },
+  { cat:'문제해결', q:'A,B,C,D 네 사람이 한 줄로 서 있다. [B는 A보다 앞], [D는 B 바로 앞], [C는 맨 앞이 아님], [A는 맨 뒤]일 때 맨 앞에 선 사람은?',
+    choices:['A','B','C','D'], answer:3, explain:'A가 맨 뒤(4번째)이고 D가 B 바로 앞이어야 하므로 D-B-C-A 순서만 모든 조건을 만족합니다.' },
+  { cat:'문제해결', q:'"모든 신입사원은 오리엔테이션에 참석한다. 민수는 오리엔테이션에 참석하지 않았다." 이로부터 반드시 참인 것은?',
+    choices:['민수는 신입사원이 아니다','민수는 신입사원이다','민수는 오리엔테이션을 싫어한다','알 수 없다'], answer:0, explain:"전제의 대우 명제('참석하지 않았다면 신입사원이 아니다')에 따라 반드시 참입니다." },
+  { cat:'자원관리', q:'예산 500만원 중 인쇄비 120만원, 장소 대여비 200만원, 다과비 50만원을 썼다. 홍보물(1건당 80만원)을 최대 몇 건 만들 수 있는가?',
+    choices:['0건','1건','2건','3건'], answer:1, explain:'남은 예산은 130만원이므로 80만원짜리 홍보물은 1건만 제작할 수 있습니다.' },
+  { cat:'자원관리', q:'예산 300만원으로 A(150만),B(100만),C(90만),D(70만) 중 최대한 많은 항목을 사려 한다. 살 수 있는 최대 개수는?',
+    choices:['2개','3개','4개','살 수 없다'], answer:1, explain:'B+C+D=260만원으로 예산 안에서 3개를 살 수 있고, A를 포함하면 항상 300만원을 넘깁니다.' },
+  { cat:'의사소통', q:'공문 "본 사업의 익월 예산 집행 내역을 알려드립니다"에서 순화가 필요한 표현은?',
+    choices:['본','사업','익월','내역'], answer:2, explain:"'익월'은 어려운 한자어이므로 '다음 달'로 순화하는 것이 적절합니다." },
+  { cat:'의사소통', q:'다음 글의 중심 내용으로 가장 적절한 것은? "학벌만을 기준으로 채용하면 실제 직무 역량이 뛰어난 인재를 놓칠 위험이 있다. 따라서 직무 중심 평가가 필요하다."',
+    choices:['학벌은 채용에서 가장 중요한 기준이다','직무 역량 중심의 채용 방식 도입이 필요하다','신입사원 채용은 불필요하다','채용 기준은 공개해서는 안 된다'], answer:1, explain:'글쓴이는 학벌 중심 채용의 한계를 지적하며 직무 역량 중심 평가를 제안하고 있습니다.' },
+  { cat:'정보능력', q:'스프레드시트에서 특정 조건을 만족하는 값들의 합계를 구할 때 사용하는 함수로 가장 적절한 것은?',
+    choices:['AVERAGE','SUMIF','COUNT','IF'], answer:1, explain:'SUMIF는 조건을 만족하는 셀들의 값을 합산하는 함수입니다.' },
+  { cat:'수리능력', q:'시험 응시자 100명 중 합격률이 35%였다. 합격자 중 60%가 남성이라면, 합격한 여성의 수는?',
+    choices:['12명','14명','16명','18명'], answer:1, explain:'합격자 35명 중 40%가 여성이므로 14명입니다.' },
+  { cat:'수리능력', q:'빨간 공 3개, 파란 공 2개가 든 주머니에서 1개를 꺼낼 때 파란 공일 확률은?',
+    choices:['20%','30%','40%','50%'], answer:2, explain:'전체 5개 중 파란 공 2개이므로 확률은 2/5=40%입니다.' },
+  { cat:'자료해석', q:'다섯 지원자 점수(갑88, 을92, 병79, 정95, 무85) 중 상위 2명만 합격이면, 합격 커트라인 점수는?',
+    choices:['79점','85점','88점','92점'], answer:3, explain:'상위 2명은 정(95)과 을(92)이므로 커트라인은 92점입니다.' },
+  { cat:'자원관리', q:'서울에서 부산까지 KTX로 2시간 40분 걸린다. 오전 9시 15분 출발이면 도착 예정 시각은?',
+    choices:['11시 35분','11시 45분','11시 55분','12시 5분'], answer:2, explain:'9시 15분에 2시간 40분을 더하면 11시 55분입니다.' },
+  { cat:'의사소통', q:'다음 중 어법상 가장 자연스러운 문장은?',
+    choices:['이 자료는 여러분에게 참고가 됬으면 합니다','이 자료가 여러분께 참고가 되었으면 합니다','이 자료는 여러분에게 참고가 되어졌으면 좋겠다','이 자료는 여러분에게 도움이 됬으면 좋겠습니다'], answer:1, explain:"'됬으면'은 잘못된 표기이며, '되었으면(됐으면)'이 바른 표기입니다." },
+  { cat:'자료해석', q:'어느 회사 매출액이 2023년 10억, 2024년 12억, 2025년 15억이었다. 2024년 대비 2025년 매출 성장률은?',
+    choices:['20%','25%','30%','33%'], answer:1, explain:'(15억-12억)/12억 = 25%입니다.' },
+  { cat:'수리능력', q:'상품 X,Y를 1:2 비율로 섞어 총 300개를 만들려 한다. X는 몇 개 필요한가?',
+    choices:['80개','90개','100개','120개'], answer:2, explain:'전체 3등분(100개씩) 중 X는 1등분이므로 100개입니다.' },
+  { cat:'문제해결', q:'"이 회사의 모든 팀장은 리더십 교육을 이수했다. 지훈은 리더십 교육을 이수하지 않았다." 이로부터 반드시 참인 것은?',
+    choices:['지훈은 팀장이다','지훈은 팀장이 아니다','지훈은 신입사원이다','알 수 없다'], answer:1, explain:'대우 명제에 따라 리더십 교육을 이수하지 않았다면 팀장이 아닙니다.' },
+];
+
+/* =========================================================
+   engine: state
+   ========================================================= */
+const AVATARS = ['🧑','👩','🧑‍🦱','👩‍🦳','🧕','🧑‍🦲'];
+const STAGE_ORDER = ['roulette','childhood','infogap','prep','csat','network','ncs'];
+const STAGE_LABEL = { roulette:'출생', childhood:'유년기', infogap:'정보격차', prep:'입시투자', csat:'수능', network:'네트워크', ncs:'취업' };
+
+/* `game` orchestrates the classroom flow across several 조(teams): each team
+   plays phase 1 (roulette→...→ncs) in turn, then all teams draft careers in
+   score order, then a class-wide ranking is shown. A solo player is simply
+   totalTeams===1, which degenerates gracefully to one continuous playthrough. */
+var game = null; // intentionally `var` so it is inspectable as window.game from the console
+function freshGame(){ return { totalTeams:1, teams:[], careerPool:[], draftOrder:[], draftPointer:0 }; }
+
+var state = null; // intentionally `var` (not `let`) so it is inspectable as window.state from the console
+function freshState(teamNum){
+  return {
+    teamNum: teamNum||1, teamName:`${teamNum||1}조`, avatar:AVATARS[0],
+    tier:null, siblings:0, startCashActual:0,
+    cash:0, stats:{culture:0,social:0,info:0}, hints:0,
+    missionsChosen:[],
+    infoResults:[],
+    prepTier:null,
+    csatQueue:[], csatIndex:0, csatCorrect:0, csatTotal:0,
+    universityTier:null,
+    cards:[],
+    ncsQueue:[], ncsIndex:0, ncsCorrect:0, ncsTotal:0,
+    draftScore:0, diceTiebreak:0,
+    career:null,
+    eventLog:[],
+    finalTierId:null, badges:[],
+  };
+}
+function startTeamTurn(teamNum){
+  state = freshState(teamNum);
+  goStage('teamstart');
+}
+
+/* ---------- small helpers ---------- */
+function toast(msg){
+  const zone = $('#toastZone');
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg;
+  zone.appendChild(el);
+  setTimeout(()=> el.remove(), 3000);
+}
+function confettiBurst(n=26){
+  const zone = $('#confettiZone');
+  const colors = ['var(--accent)','var(--cap-econ)','var(--cap-culture)','var(--cap-social)','var(--cap-info)'];
+  for(let i=0;i<n;i++){
+    const s = document.createElement('i');
+    s.style.left = (Math.random()*100)+'vw';
+    s.style.background = pick(colors);
+    s.style.animationDuration = (1.6+Math.random()*1.2)+'s';
+    s.style.animationDelay = (Math.random()*0.4)+'s';
+    s.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
+    zone.appendChild(s);
+    setTimeout(()=> s.remove(), 3400);
+  }
+}
+function addCash(n){ state.cash = Math.round(state.cash + n); }
+/* How big a cost looks relative to the family's current total wealth — the
+   same 100만원 tuition bill is "0.01%, doesn't matter" for a diamond family
+   and "10%, a real sacrifice" for a soil family. Shown next to costs so the
+   gap is felt at every purchase decision, not just on the roulette screen. */
+function pctOfWealth(cost, pool){
+  const base = pool!=null ? pool : state.cash;
+  if(base<=0) return '—';
+  const pct = (cost/base)*100;
+  if(pct < 0.01) return '<0.01%';
+  if(pct < 1) return pct.toFixed(2)+'%';
+  if(pct < 10) return pct.toFixed(1)+'%';
+  return Math.round(pct)+'%';
+}
+/* Endgame tier thresholds sit well BELOW their matching starting tier
+   (see SES_TIERS above), on purpose: three life-event rounds of salary and
+   quiz bonuses can only add up to roughly a few thousand 만원, which is
+   nothing against a silver/gold/diamond starting pool — so the rich reliably
+   stay classified in (or near) their starting tier no matter what they do.
+   For soil/bronze starters, that same few-thousand swing is comparable to or
+   bigger than their whole starting pool, so it can visibly move them up one
+   tier — rarely two — which is the intended "mobility exists, but has a
+   ceiling" shape. */
+function tierForCash(cash){
+  if(cash>=250000) return 'diamond';
+  if(cash>=50000) return 'gold';
+  if(cash>=9000) return 'silver';
+  if(cash>=2000) return 'bronze';
+  return 'soil';
+}
+function awardBadgesInline(){
+  const before = new Set(state.badges.map(b=>b.id));
+  const now = BADGES.filter(b=> b.cond(state));
+  now.forEach(b=>{ if(!before.has(b.id)) { state.badges.push(b); } });
+}
+
+/* ---------- HUD & stepper ---------- */
+const HUD_HIDDEN_STAGES = new Set(['title','teamsetup','draftboard','ranking']);
+function renderHud(){
+  const hud = $('#hud');
+  if(!state || !state.tier || HUD_HIDDEN_STAGES.has(currentStage)){ hud.classList.add('hud-hide'); return; }
+  hud.classList.remove('hud-hide');
+  const teamProgress = game && game.totalTeams>1 ? `<span class="hud-name">${game.teams.length+1}/${game.totalTeams}조 진행 중</span>` : '';
+  hud.innerHTML = `
+    <span class="hud-id"><span class="hud-avatar">${state.avatar}</span><span>${escapeHtml(state.teamName)}</span></span>
+    <span class="hud-name">${state.tier.name}</span>
+    ${teamProgress}
+    <span class="hud-stats">
+      <span class="chip chip-cash">💰 ${won(state.cash)}</span>
+      <span class="chip chip-culture">📚 문화 ${state.stats.culture}</span>
+      <span class="chip chip-social">🤝 사회 ${state.stats.social}</span>
+      <span class="chip chip-info">🛰️ 정보 ${state.stats.info}</span>
+      ${state.hints>0 ? `<span class="chip chip-econ">💡 힌트 ${state.hints}</span>` : ''}
+    </span>`;
+}
+function renderStepper(){
+  const el = $('#stepper');
+  if(!state || !state.tier || !STAGE_ORDER.includes(currentStage)){ el.classList.add('hud-hide'); return; }
+  el.classList.remove('hud-hide');
+  const idx = STAGE_ORDER.indexOf(currentStage);
+  el.innerHTML = STAGE_ORDER.map((s,i)=>{
+    const cls = i<idx ? 'done' : (i===idx ? 'now':'');
+    return `<span class="step-dot ${cls}" title="${STAGE_LABEL[s]}"></span>`;
+  }).join('');
+}
+
+/* ---------- navigation ---------- */
+var currentStage = 'title';
+const RENDERERS = {};
+function goStage(name){
+  currentStage = name;
+  renderHud(); renderStepper();
+  RENDERERS[name]();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* =========================================================
+   stage: title
+   ========================================================= */
+RENDERERS.title = function(){
+  $('#stage-root').innerHTML = `
+    <div class="hero-track" aria-hidden="true">
+      <svg viewBox="0 0 580 150" xmlns="http://www.w3.org/2000/svg">
+        <text x="555" y="16" font-size="20" text-anchor="middle">🏁</text>
+        <line x1="555" y1="24" x2="555" y2="144" style="stroke:var(--ink)" stroke-width="3" stroke-dasharray="6 5" opacity="0.5"/>
+        <line x1="460" y1="30" x2="555" y2="30" style="stroke:var(--cap-info)" stroke-width="2" stroke-dasharray="4 4" opacity="0.4"/>
+        <circle class="hero-dot" cx="460" cy="30" r="7" style="fill:var(--cap-info)"/>
+        <line x1="380" y1="58" x2="555" y2="58" style="stroke:var(--cap-econ)" stroke-width="2" stroke-dasharray="4 4" opacity="0.4"/>
+        <circle class="hero-dot" cx="380" cy="58" r="7" style="fill:var(--cap-econ)"/>
+        <line x1="290" y1="86" x2="555" y2="86" style="stroke:var(--cap-social)" stroke-width="2" stroke-dasharray="4 4" opacity="0.4"/>
+        <circle class="hero-dot" cx="290" cy="86" r="7" style="fill:var(--cap-social)"/>
+        <line x1="190" y1="114" x2="555" y2="114" style="stroke:var(--cap-culture)" stroke-width="2" stroke-dasharray="4 4" opacity="0.4"/>
+        <circle class="hero-dot" cx="190" cy="114" r="7" style="fill:var(--cap-culture)"/>
+        <line x1="80" y1="142" x2="555" y2="142" style="stroke:var(--ink-faint)" stroke-width="2" stroke-dasharray="4 4" opacity="0.4"/>
+        <circle class="hero-dot" cx="80" cy="142" r="7" style="fill:var(--ink-faint)"/>
+      </svg>
+      <p class="hero-caption">같은 결승선, 다른 출발선</p>
+    </div>
+    <span class="eyebrow">🎲 통합사회 수업용 사회 이동 시뮬레이션</span>
+    <h1 class="stage-title display">인생게임: 아비투스</h1>
+    <div class="stage-desc">
+      <p>교실 PC 한 대로 여러 조가 순서대로 태어나 자랍니다. 부모의 자산, 문화적 환경, 인맥은 룰렛으로 결정되고, 그 위에서 학업·취업·인생의 위기를 헤쳐 나가야 합니다.</p>
+      <p>가장 부유한 가문과 가장 가난한 가문의 출발 자산은 최대 <b>400배</b>까지 차이 납니다 — 이 격차가 이후 선택에 어떤 그림자를 드리우는지 직접 확인해 보세요.</p>
+      <p>같은 노력을 기울여도 출발선이 다르면 결과가 어떻게 달라지는지, 미션과 랜덤 문제은행을 통해 직접 체험하고, 마지막엔 전체 조 랭킹으로 비교해 보세요. 혼자 연습하고 싶다면 1개 조로도 플레이할 수 있습니다.</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnStart">▶ 시작하기</button>
+    </div>
+    <details class="panel">
+      <summary>📖 게임 설명 더 보기</summary>
+      <div class="panel-body">
+        <h4>진행 순서</h4>
+        <ul>
+          <li><b>조 편성</b> — 몇 개 조가 참여할지 정하고, 조마다 순서대로 아래 과정을 밟습니다.</li>
+          <li><b>출생 룰렛</b> — 부모의 경제·문화·사회 자본이 무작위로 정해집니다.</li>
+          <li><b>유년기 미션</b> — 제한된 돈과 3개의 시간 슬롯으로 문화자본을 쌓습니다.</li>
+          <li><b>정보격차 이벤트</b> — 정보력·인맥에 따라 기회가 열리거나 닫힙니다.</li>
+          <li><b>입시 투자</b> — 감당할 수 있는 만큼 사교육에 투자해 힌트를 얻습니다.</li>
+          <li><b>수능 미니게임</b> — 문제은행에서 무작위 출제, 힌트로 응시를 도울 수 있어요.</li>
+          <li><b>대학 네트워크</b> — 진학한 대학 수준에 따라 인맥 카드를 뽑습니다.</li>
+          <li><b>취업 NCS 미니게임</b> — 역시 무작위 문제은행, 인맥 카드가 가산점을 줍니다.</li>
+          <li><b>전체 조 드래프트</b> — 모든 조가 끝나면 점수 순으로 직업을 하나씩 고릅니다.</li>
+          <li><b>인생 이벤트</b> — 질병·소송·행운 등 무작위 사건을 맞닥뜨립니다. 배경이 이미 막아주는 경우도 있지만, 그렇지 않을 땐 인맥 카드를 쓰거나 돈을 들여 직접 대응할지 선택해야 합니다 — 단, 그 카드도 그 돈도 애초에 없다면 선택지는 없습니다.</li>
+          <li><b>전체 결산</b> — 조별 순위와 계층 이동 지수를 확인하고 이론과 연결합니다.</li>
+        </ul>
+        <p>문제은행은 매번 무작위로 섞여 나오므로, 여러 판을 다시 플레이해도 새롭게 즐길 수 있습니다.</p>
+      </div>
+    </details>
+    <details class="panel">
+      <summary>🏫 선생님 안내 (학습 목표 · 교육과정 연계)</summary>
+      <div class="panel-body">
+        <h4>학습 목표</h4>
+        <ul>
+          <li>사회 계층의 양극화가 개인의 노력만으로 설명되지 않는 구조적 현상임을 이해한다.</li>
+          <li>부르디외의 아비투스 개념과 경제·문화·사회 자본이 상호작용하는 방식을 파악한다.</li>
+          <li>교육격차·정보격차가 계층 재생산에 미치는 영향을 사례를 통해 조사·토론한다.</li>
+        </ul>
+        <h4>2022 개정 교육과정 연계 (고등학교 통합사회Ⅱ)</h4>
+        <ul>
+          <li><b>[10통사2-02-01]</b> 정의의 의미와 실질적 기준(업적·능력·필요)을 탐구한다.</li>
+          <li><b>[10통사2-02-02]</b> 다양한 정의관을 개인과 공동체의 관계 차원에서 비교한다.</li>
+          <li><b>[10통사2-02-03]</b> 사회 계층의 양극화, 공간 불평등, 사회적 약자 차별 사례를 조사한다.</li>
+        </ul>
+        <p style="font-size:12.5px;color:var(--ink-faint)">※ 중학교 자유학기 진로·사회 수업에도 난이도를 낮춰 활용할 수 있습니다.</p>
+        <h4>추천 활용법 (40~50분 기준, 4개 조 기준)</h4>
+        <ul>
+          <li>모둠 편성 후 교실 PC/화면 한 대로 조별 순서대로 진행(조당 약 5~7분) → 전체 드래프트와 인생 이벤트(10분) → 랭킹 확인 및 토론(10분)</li>
+          <li>기기가 여러 대라면 조별로 각자 진행하되, 조 이름에 실제 모둠명을 적게 하면 몰입도가 높아집니다.</li>
+          <li>혼자 복습용으로 쓰려면 조 수를 1로 설정해 개인 플레이로 진행할 수 있습니다.</li>
+        </ul>
+        <h4>토론 질문 예시</h4>
+        <ul>
+          <li>가장 먼저 직업을 고른 조와 가장 늦게 고른 조를 갈랐던 결정적 차이는 무엇이었나요?</li>
+          <li>최종 자산 중 몇 %가 순전히 '운(출생)' 덕분이라고 생각하나요?</li>
+          <li>현실에서 교육격차·정보격차를 줄이기 위한 정책에는 어떤 것이 있을까요?</li>
+        </ul>
+      </div>
+    </details>`;
+  $('#btnStart').addEventListener('click', ()=> goStage('teamsetup'));
+};
+
+/* =========================================================
+   stage: teamsetup (how many 조 are playing)
+   ========================================================= */
+RENDERERS.teamsetup = function(){
+  $('#stage-root').innerHTML = `
+    <span class="eyebrow">STEP 0 · 조 편성</span>
+    <h2 class="stage-title display">몇 개 조로 진행할까요?</h2>
+    <div class="stage-desc">
+      <p>교실 PC 한 대로 여러 조가 <b>순서대로</b> 번갈아 플레이하고, 모든 조가 끝나면 전체 랭킹을 확인합니다.</p>
+      <p>혼자 연습해보고 싶다면 1을 입력하세요 — 개인 플레이 모드로 바로 진행됩니다.</p>
+    </div>
+    <div class="field"><label for="teamCountInput">참여 조 수 (1~8)</label><input id="teamCountInput" type="number" min="1" max="8" value="4" /></div>
+    <div class="btn-row"><button class="btn btn-primary" id="btnBegin">게임 시작하기</button></div>`;
+  $('#btnBegin').addEventListener('click', ()=>{
+    let n = parseInt($('#teamCountInput').value, 10);
+    if(!Number.isFinite(n) || n<1) n = 1;
+    if(n>8) n = 8;
+    game = freshGame();
+    game.totalTeams = n;
+    startTeamTurn(1);
+  });
+};
+
+/* =========================================================
+   stage: teamstart (per-team intro: name & avatar)
+   ========================================================= */
+RENDERERS.teamstart = function(){
+  $('#stage-root').innerHTML = `
+    <span class="eyebrow">STEP 0 · ${state.teamNum}번째 순서</span>
+    <h2 class="stage-title display">${state.teamNum}조 차례입니다</h2>
+    <p class="stage-desc">${game.totalTeams>1 ? '이 조의 이름을 정하고, 이 조를 대표할 아바타를 골라주세요.' : '외형은 취향껏 골라도 됩니다. 진짜 승부는 지금부터 시작되는 \'운\'에서 갈립니다.'}</p>
+    <div class="field"><label for="nickInput">조 이름</label><input id="nickInput" maxlength="12" placeholder="${state.teamNum}조" /></div>
+    <div class="field" style="margin-bottom:6px"><label>아바타</label></div>
+    <div class="avatar-grid" id="avatarGrid">
+      ${AVATARS.map((a,i)=>`<button type="button" class="avatar-opt ${i===0?'selected':''}" data-i="${i}">${a}</button>`).join('')}
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" id="btnRoll">🎡 운명의 룰렛 돌리러 가기</button></div>`;
+  let avatarIdx = 0;
+  $$('.avatar-opt').forEach(b=> b.addEventListener('click', ()=>{
+    $$('.avatar-opt').forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected'); avatarIdx = Number(b.dataset.i);
+  }));
+  $('#btnRoll').addEventListener('click', ()=>{
+    const nick = $('#nickInput').value.trim();
+    state.teamName = nick || `${state.teamNum}조`;
+    state.avatar = AVATARS[avatarIdx];
+    goStage('roulette');
+  });
+};
+
+/* =========================================================
+   stage: roulette (birth SES) + sibling dice
+   ========================================================= */
+RENDERERS.roulette = function(){
+  const total = SES_TIERS.reduce((s,t)=>s+t.weight,0);
+  let cum = 0;
+  const stops = SES_TIERS.map(t=>{ const start = cum/total*360; cum += t.weight; const end = cum/total*360; return {t,start,end}; });
+  const gradient = stops.map(s=> `${s.t.color} ${s.start}deg ${s.end}deg`).join(', ');
+
+  $('#stage-root').innerHTML = `
+    <span class="eyebrow">STEP 1 · 출생 룰렛</span>
+    <h2 class="stage-title display">어떤 가문에서 태어날까요?</h2>
+    <p class="stage-desc">현실의 자산 분포를 단순화해 반영한 확률입니다. 버튼을 눌러 룰렛을 돌려보세요.</p>
+    <div class="roulette-zone">
+      <div class="roulette-wrap">
+        <div class="roulette-pin"></div>
+        <div class="roulette-wheel" id="wheel" style="background:conic-gradient(${gradient})"></div>
+        <div class="roulette-hub"></div>
+      </div>
+      <div class="legend">
+        ${SES_TIERS.map(t=>`<span class="legend-item"><span class="legend-dot" style="background:${t.color}"></span>${t.name} ${t.weight}%</span>`).join('')}
+      </div>
+      <div id="wealthTicker" class="wealth-ticker">?</div>
+      <button class="btn btn-primary" id="btnSpin">🎡 룰렛 돌리기</button>
+    </div>
+    <div id="rouletteResult"></div>`;
+
+  $('#btnSpin').addEventListener('click', function(){
+    this.disabled = true;
+    const result = weightedPick(SES_TIERS);
+    const stop = stops.find(s=> s.t.id===result.id);
+    const targetAngle = (stop.start+stop.end)/2;
+    const rotation = 360*5 + (360-targetAngle);
+    const wheel = $('#wheel');
+    wheel.style.transform = `rotate(${rotation}deg)`;
+
+    const ticker = $('#wealthTicker');
+    ticker.classList.add('rolling');
+    let ticks = 0;
+    const tickHandle = setInterval(()=>{
+      const t = pick(SES_TIERS);
+      ticker.textContent = won(t.startCash);
+      ticker.style.color = t.color;
+      ticks++;
+    }, 80);
+
+    setTimeout(()=>{ clearInterval(tickHandle); revealBirth(result); }, 3300);
+  });
+
+  function revealBirth(tier){
+    state.tier = tier;
+    state.cash = tier.startCash;
+    state.stats = { culture:tier.culture, social:tier.social, info:tier.info };
+    renderHud();
+    const ticker = $('#wealthTicker');
+    ticker.classList.remove('rolling');
+    ticker.classList.add('landed');
+    ticker.textContent = `당첨! ${won(tier.startCash)}`;
+    ticker.style.color = tier.color;
+    const burstSize = { diamond:60, gold:44, silver:26, bronze:10, soil:0 }[tier.id];
+    if(burstSize>0) confettiBurst(burstSize);
+    $('#rouletteResult').innerHTML = `
+      <div class="reveal-card">
+        <div class="eyebrow" style="color:${tier.color}">🏠 ${tier.name}</div>
+        <p style="margin:4px 0 10px"><b>부모 직업</b> ${tier.parentJob} &middot; <b>거주 환경</b> ${tier.home}</p>
+        <p style="margin:0 0 14px;color:var(--ink-soft)">${tier.flavor}</p>
+        <div class="dice-row">
+          <div class="die" id="die">🎲</div>
+          <div id="diceText" style="font-weight:700">형제자매 수를 굴려볼까요?</div>
+        </div>
+        <div class="btn-row"><button class="btn" id="btnDice">주사위 굴리기</button></div>
+      </div>`;
+    $('#btnDice').addEventListener('click', function(){
+      this.disabled = true;
+      const die = $('#die');
+      die.classList.add('rolling');
+      const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+      let t = 0;
+      const roll = setInterval(()=>{ die.textContent = pick(faces); t++; if(t>10){ clearInterval(roll); finishDice(); } }, 80);
+    });
+  }
+
+  function finishDice(){
+    const roll = 1+Math.floor(Math.random()*6);
+    const siblings = Math.max(0, roll-3);
+    state.siblings = siblings;
+    if(siblings>0){
+      const before = state.cash;
+      state.cash = Math.round(state.cash * (1 - 0.06*siblings));
+      toast(`형제자매 ${siblings}명과 자원을 나눠, 시작 자산이 ${won(before-state.cash)} 줄었습니다.`);
+    }
+    state.startCashActual = state.cash; // snapshot right after birth, before any spending — used for the "다른 가문이었다면" comparison at the end
+    renderHud();
+    $('#die').classList.remove('rolling');
+    $('#die').textContent = '🎲';
+    $('#diceText').innerHTML = siblings===0
+      ? '외동입니다. 부모님의 자원을 온전히 물려받습니다.'
+      : `형제자매가 <b>${siblings}명</b> 있습니다. 자원을 나누어 써야 합니다.`;
+    $('#stage-root').insertAdjacentHTML('beforeend', `
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnToChild">다음: 유년기로 →</button>
+      </div>`);
+    $('#btnToChild').addEventListener('click', ()=> goStage('childhood'));
+  }
+};
+
+/* =========================================================
+   stage: childhood missions (문화자본 미션 보드)
+   ========================================================= */
+RENDERERS.childhood = function(){
+  const MAX_SLOTS = 3;
+  let chosen = [];
+
+  function affordable(m){ return state.cash - spentTotal() >= m.cost; }
+  function spentTotal(){ return chosen.reduce((s,id)=> s + CHILD_MISSIONS.find(m=>m.id===id).cost, 0); }
+
+  function draw(){
+    $('#stage-root').innerHTML = `
+      <span class="eyebrow">STEP 2 · 유년기</span>
+      <h2 class="stage-title display">문화자본 미션 보드</h2>
+      <p class="stage-desc">시간 슬롯은 3개뿐입니다. 지금 가진 ${won(state.cash)} 안에서 최대 3가지를 골라보세요. (무료 항목도 있어요)</p>
+      <div class="mission-slots">${Array.from({length:MAX_SLOTS}).map((_,i)=>`<span class="slot ${i<chosen.length?'used':''}"></span>`).join('')}</div>
+      <div class="choice-grid" id="missionGrid">
+        ${CHILD_MISSIONS.map(m=>{
+          const sel = chosen.includes(m.id);
+          const dis = !sel && (chosen.length>=MAX_SLOTS || !affordable(m));
+          return `<button type="button" class="choice-card ${sel?'selected':''}" data-id="${m.id}" ${dis?'disabled':''}>
+            <span class="choice-title">${m.title}</span>
+            <span class="choice-meta">
+              <span class="tag">${m.cost>0?won(m.cost):'무료'}</span>
+              ${m.cost>0?`<span class="tag">가문 자산의 ${pctOfWealth(m.cost, state.cash)}</span>`:''}
+              <span class="tag">문화자본 +${m.culture}</span>
+              ${m.info>0?`<span class="tag">정보력 +${m.info}</span>`:''}
+            </span>
+            <span class="choice-meta">${m.note}</span>
+          </button>`;
+        }).join('')}
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" id="btnNext">다음: 정보격차 이벤트 →</button></div>`;
+
+    $$('#missionGrid .choice-card').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.dataset.id;
+        if(chosen.includes(id)){ chosen = chosen.filter(x=>x!==id); }
+        else if(chosen.length<MAX_SLOTS && affordable(CHILD_MISSIONS.find(m=>m.id===id))){ chosen.push(id); }
+        draw();
+      });
+    });
+    $('#btnNext').addEventListener('click', ()=>{
+      chosen.forEach(id=>{
+        const m = CHILD_MISSIONS.find(x=>x.id===id);
+        addCash(-m.cost);
+        state.stats.culture = clamp(state.stats.culture + m.culture, 0, 100);
+        state.stats.info = clamp(state.stats.info + m.info, 0, 100);
+      });
+      state.missionsChosen = chosen;
+      renderHud();
+      goStage('infogap');
+    });
+  }
+  draw();
+};
+
+/* =========================================================
+   stage: info gap events (정보격차)
+   ========================================================= */
+RENDERERS.infogap = function(){
+  const events = shuffle(INFO_EVENTS).slice(0,3);
+  const results = events.map(ev=>{
+    const has = state.stats[ev.need] >= ev.threshold;
+    if(has){
+      if(ev.have.hint) state.hints += ev.have.hint;
+      if(ev.have.cash) addCash(ev.have.cash);
+    }
+    return { ev, has };
+  });
+  state.infoResults = results;
+  renderHud();
+
+  $('#stage-root').innerHTML = `
+    <span class="eyebrow">STEP 3 · 정보격차</span>
+    <h2 class="stage-title display">정보는 공평하게 오지 않습니다</h2>
+    <p class="stage-desc">가진 정보력·사회자본에 따라 같은 기회도 다르게 다가옵니다.</p>
+    ${results.map(r=>`
+      <div class="event-card ${r.has?'good':'bad'}">
+        <div class="event-title">${r.has ? '✅ 기회를 포착했습니다' : '❌ 기회를 놓쳤습니다'}</div>
+        <p style="margin:0">${r.has ? r.ev.have.text : r.ev.miss.text}</p>
+      </div>`).join('')}
+    <div class="btn-row"><button class="btn btn-primary" id="btnNext">다음: 입시 투자 →</button></div>`;
+  $('#btnNext').addEventListener('click', ()=> goStage('prep'));
+};
+
+/* =========================================================
+   stage: exam prep investment
+   ========================================================= */
+RENDERERS.prep = function(){
+  let chosenId = null;
+  function draw(){
+    $('#stage-root').innerHTML = `
+      <span class="eyebrow">STEP 4 · 입시 투자</span>
+      <h2 class="stage-title display">수능 준비, 어떻게 하시겠어요?</h2>
+      <p class="stage-desc">지금 가진 돈은 ${won(state.cash)}입니다. 투자할수록 힌트와 점수 배율이 커집니다.</p>
+      <div class="choice-grid">
+        ${PREP_TIERS.map(p=>{
+          const dis = state.cash < p.cost;
+          const sel = chosenId===p.id;
+          return `<button type="button" class="choice-card ${sel?'selected':''}" data-id="${p.id}" ${dis?'disabled':''}>
+            <span class="choice-title">${p.name}${p.exclusive?' 🔒':''}</span>
+            <span class="choice-meta">
+              <span class="tag">${p.cost>0?won(p.cost):'무료'}</span>
+              ${p.cost>0?`<span class="tag">가문 자산의 ${pctOfWealth(p.cost, state.cash)}</span>`:''}
+              <span class="tag">힌트 ${p.hints}개</span><span class="tag">배율 ×${p.mult.toFixed(2)}</span>
+            </span>
+            <span class="choice-meta">${p.desc}${p.exclusive && dis ? ' (가문 자산이 부족해 이 선택지 자체가 보이지 않는 사람도 있습니다)' : ''}</span>
+          </button>`;
+        }).join('')}
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" id="btnNext" ${chosenId?'':'disabled'}>다음: 수능 미니게임 →</button></div>`;
+    $$('.choice-card').forEach(btn=> btn.addEventListener('click', ()=>{ chosenId = btn.dataset.id; draw(); }));
+    $('#btnNext').addEventListener('click', ()=>{
+      const tier = PREP_TIERS.find(p=>p.id===chosenId);
+      addCash(-tier.cost);
+      state.prepTier = tier;
+      state.hints += tier.hints;
+      renderHud();
+      goStage('csat');
+    });
+  }
+  draw();
+};
+
+/* =========================================================
+   shared: quiz engine (used by csat & ncs stages)
+   ========================================================= */
+const QUIZ_CFG = {
+  csat: { bank:CSAT_BANK, n:5, time:25, title:'수능 미니게임 · 통합사회', eyebrow:'STEP 5 · 수능', next:'network',
+    intro:'문제은행에서 무작위로 5문항이 출제됩니다. 힌트는 오답 하나를 지워줍니다.' },
+  ncs:  { bank:NCS_BANK,  n:5, time:30, title:'NCS 미니게임 · 직업기초능력', eyebrow:'STEP 7 · 취업', next:null,
+    intro:'수리·문제해결·자원관리·의사소통 영역에서 무작위 출제됩니다.' },
+};
+let quizTimerHandle = null;
+function stopQuizTimer(){ if(quizTimerHandle){ clearInterval(quizTimerHandle); quizTimerHandle=null; } }
+
+function startQuiz(kind){
+  const cfg = QUIZ_CFG[kind];
+  state[kind+'Queue'] = shuffle(cfg.bank).slice(0, cfg.n);
+  state[kind+'Index'] = 0;
+  state[kind+'Correct'] = 0;
+  state[kind+'Total'] = cfg.n;
+  renderQuizQuestion(kind);
+}
+
+function renderQuizQuestion(kind){
+  stopQuizTimer();
+  const cfg = QUIZ_CFG[kind];
+  const queue = state[kind+'Queue'];
+  const idx = state[kind+'Index'];
+  if(idx >= queue.length){ finishQuiz(kind); return; }
+  const q = queue[idx];
+  let removedWrong = [];
+  let timeLeft = cfg.time;
+  let answered = false;
+
+  $('#stage-root').innerHTML = `
+    <span class="eyebrow">${cfg.eyebrow}</span>
+    <h2 class="stage-title display">${cfg.title}</h2>
+    <div class="quiz-head">
+      <span class="quiz-progress">${idx+1} / ${queue.length} 문항 &middot; <span class="tag">${q.cat}</span></span>
+      <span class="timer mono" id="timer">${timeLeft}s</span>
+    </div>
+    <p class="quiz-prompt">${escapeHtml(q.q)}</p>
+    <div class="choice-grid" id="optGrid">
+      ${q.choices.map((c,i)=>`<button type="button" class="choice-card quiz-option" data-i="${i}">${String.fromCharCode(9312+i)} ${escapeHtml(c)}</button>`).join('')}
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-sm" id="btnHint" ${state.hints>0?'':'disabled'}>💡 힌트 사용 (${state.hints}개 남음)</button>
+    </div>
+    <div id="quizFooter"></div>`;
+
+  function lockAndReveal(chosenIdx, timedOut){
+    if(answered) return;
+    answered = true;
+    stopQuizTimer();
+    const correct = chosenIdx === q.answer;
+    if(correct) state[kind+'Correct']++;
+    $$('#optGrid .quiz-option').forEach((btn,i)=>{
+      btn.disabled = true;
+      if(i===q.answer) btn.classList.add('correct');
+      else if(i===chosenIdx) btn.classList.add('wrong');
+    });
+    $('#btnHint').disabled = true;
+    let speedNote = '';
+    if(correct && !timedOut){
+      const bonus = Math.round((timeLeft/cfg.time) * 8);
+      if(bonus>0){ addCash(bonus); renderHud(); speedNote = ` (스피드 보너스 +${won(bonus)})`; }
+    }
+    $('#quizFooter').innerHTML = `
+      <div class="explain-box">
+        <b>${timedOut ? '⏰ 시간 초과!' : (correct ? '✅ 정답입니다!'+speedNote : '❌ 오답입니다.')}</b><br>${escapeHtml(q.explain)}
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" id="btnNextQ">${idx+1<queue.length?'다음 문제 →':'결과 확인 →'}</button></div>`;
+    $('#btnNextQ').addEventListener('click', ()=>{ state[kind+'Index']++; renderQuizQuestion(kind); });
+  }
+
+  $$('#optGrid .quiz-option').forEach(btn=>{
+    btn.addEventListener('click', ()=> lockAndReveal(Number(btn.dataset.i), false));
+  });
+  $('#btnHint').addEventListener('click', ()=>{
+    if(state.hints<=0 || answered) return;
+    const wrongLeft = $$('#optGrid .quiz-option').map((b,i)=>i).filter(i=> i!==q.answer && !removedWrong.includes(i));
+    if(wrongLeft.length===0) return;
+    const kill = pick(wrongLeft);
+    removedWrong.push(kill);
+    state.hints--;
+    const btn = $(`#optGrid .quiz-option[data-i="${kill}"]`);
+    btn.disabled = true; btn.style.opacity = '0.3'; btn.style.textDecoration='line-through';
+    renderHud();
+    $('#btnHint').textContent = `💡 힌트 사용 (${state.hints}개 남음)`;
+    if(state.hints<=0) $('#btnHint').disabled = true;
+  });
+
+  quizTimerHandle = setInterval(()=>{
+    timeLeft--;
+    const t = $('#timer');
+    if(t){ t.textContent = timeLeft+'s'; if(timeLeft<=8) t.classList.add('low'); }
+    if(timeLeft<=0){ lockAndReveal(-1, true); }
+  }, 1000);
+}
+
+function finishQuiz(kind){
+  stopQuizTimer();
+  const cfg = QUIZ_CFG[kind];
+  const correct = state[kind+'Correct'];
+  const total = state[kind+'Total'];
+  awardBadgesInline();
+  let extra = '';
+  if(kind==='csat'){
+    const weighted = correct * (state.prepTier ? state.prepTier.mult : 1);
+    let uni;
+    if(weighted>=5.5) uni = {label:'최상위권 대학', tier:3};
+    else if(weighted>=4) uni = {label:'상위권 대학', tier:2};
+    else if(weighted>=2.5) uni = {label:'중위권 대학', tier:1};
+    else uni = {label:'전문대 / 재도전', tier:0};
+    state.universityTier = uni;
+    extra = `<p style="margin-top:10px">준비 배율(×${(state.prepTier?state.prepTier.mult:1).toFixed(2)})을 반영한 결과, <b>${uni.label}</b>에 진학했습니다.</p>`;
+  } else {
+    extra = `<p style="margin-top:10px">이 점수는 진로 드래프트에서 순위 산정에 반영됩니다.</p>`;
+  }
+  $('#stage-root').innerHTML = `
+    <span class="eyebrow">${cfg.eyebrow}</span>
+    <h2 class="stage-title display">${kind==='csat'?'수능 결과':'NCS 결과'}</h2>
+    <p class="stage-desc">${cfg.bank===CSAT_BANK?'통합사회':'직업기초능력'} 문제은행에서 <b>${correct} / ${total}</b>문항을 맞혔습니다.</p>
+    ${extra}
+    <div class="btn-row"><button class="btn btn-primary" id="btnNext">계속하기 →</button></div>`;
+  $('#btnNext').addEventListener('click', ()=>{
+    if(cfg.next) goStage(cfg.next);
+    else finishPhase1ForTeam();
+  });
+}
+
+RENDERERS.csat = function(){ startQuiz('csat'); };
+RENDERERS.ncs = function(){ startQuiz('ncs'); };
+
+/* =========================================================
+   stage: campus network cards
+   ========================================================= */
+const NET_DRAW_BY_TIER = [
+  { draws:1, weights:{common:85, rare:15, epic:0} },
+  { draws:2, weights:{common:65, rare:30, epic:5} },
+  { draws:3, weights:{common:40, rare:40, epic:20} },
+  { draws:4, weights:{common:20, rare:40, epic:40} },
+];
+RENDERERS.network = function(){
+  const uniTier = state.universityTier ? state.universityTier.tier : 0;
+  const cfgD = NET_DRAW_BY_TIER[uniTier];
+  const pool = { common:NETWORK_CARDS.filter(c=>c.rarity==='common'), rare:NETWORK_CARDS.filter(c=>c.rarity==='rare'), epic:NETWORK_CARDS.filter(c=>c.rarity==='epic') };
+  const drawn = [];
+  for(let i=0;i<cfgD.draws;i++){
+    const roll = Math.random()*100;
+    let rarity = 'common';
+    if(roll < cfgD.weights.epic) rarity = 'epic';
+    else if(roll < cfgD.weights.epic + cfgD.weights.rare) rarity = 'rare';
+    const options = pool[rarity].filter(c=> !drawn.some(d=>d.id===c.id));
+    drawn.push(pick(options.length? options : pool[rarity]));
+  }
+  drawn.forEach(c=>{
+    state.cards.push({...c, used:false}); // clone — NETWORK_CARDS entries are shared across teams, so
+                                           // per-team "used" flags must live on a private copy, not the master object
+    if(c.hint) state.hints += c.hint;
+  });
+  renderHud();
+  awardBadgesInline();
+
+  $('#stage-root').innerHTML = `
+    <span class="eyebrow">STEP 6 · 대학 네트워크</span>
+    <h2 class="stage-title display">캠퍼스에서 얻은 인맥</h2>
+    <p class="stage-desc">${state.universityTier?state.universityTier.label:'대학'} 진학 결과, 인맥 카드 ${drawn.length}장을 뽑았습니다. 대학 등급이 높을수록 희귀한 인맥을 만날 확률이 커집니다.</p>
+    <div class="card-grid">
+      ${drawn.map(c=>`
+        <div class="net-card net-card-${c.rarity}">
+          <div class="rarity rarity-${c.rarity}">${c.rarity==='epic'?'★ EPIC':c.rarity==='rare'?'◆ RARE':'· COMMON'}</div>
+          <div class="choice-title">${c.name}</div>
+          <div class="choice-meta">${c.effect}</div>
+        </div>`).join('')}
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" id="btnNext">다음: 취업 NCS 미니게임 →</button></div>`;
+  $('#btnNext').addEventListener('click', ()=> goStage('ncs'));
+};
+
+/* =========================================================
+   phase-1 → phase-2 handoff: called once a team finishes the
+   NCS quiz. Either send the next 조 into phase 1, or — once every
+   조 is done — compute the cross-team draft order.
+   ========================================================= */
+function finishPhase1ForTeam(){
+  game.teams.push(state);
+  if(game.teams.length < game.totalTeams){
+    goStage('teaminterstitial');
+  } else {
+    computeDraftOrder();
+    goStage('draftboard');
+  }
+}
+RENDERERS.teaminterstitial = function(){
+  const doneNum = game.teams.length;
+  $('#stage-root').innerHTML = `
+    <span class="eyebrow">STEP 0 · 조 교대</span>
+    <h2 class="stage-title display">${doneNum}조 완료!</h2>
+    <p class="stage-desc">자리를 다음 조에게 넘겨주세요. 총 ${game.totalTeams}조 중 ${doneNum}조가 출생부터 취업 준비까지 마쳤습니다.</p>
+    <div class="btn-row"><button class="btn btn-primary" id="btnNext">${doneNum+1}조 시작하기 →</button></div>`;
+  $('#btnNext').addEventListener('click', ()=> startTeamTurn(doneNum+1));
+};
+
+function computeDraftOrder(){
+  game.teams.forEach(t=>{
+    const uniBonus = { 0:0, 1:10, 2:20, 3:30 }[t.universityTier?t.universityTier.tier:0];
+    const cardBonus = t.cards.reduce((s,c)=> s + c.jobBonus, 0);
+    t.draftScore = Math.round(t.ncsCorrect*10 + uniBonus + cardBonus);
+    t.diceTiebreak = 1 + Math.floor(Math.random()*6);
+  });
+  game.draftOrder = game.teams.map((t,i)=>i).sort((a,b)=>{
+    const ta = game.teams[a], tb = game.teams[b];
+    return (tb.draftScore - ta.draftScore) || (tb.diceTiebreak - ta.diceTiebreak);
+  });
+  game.draftPointer = 0;
+  game.careerPool = [...CAREERS];
+}
+
+/* =========================================================
+   stage: draftboard — cross-team draft order reveal
+   ========================================================= */
+RENDERERS.draftboard = function(){
+  const rows = game.draftOrder.map((idx,rank)=>{
+    const t = game.teams[idx];
+    return `<tr><td>${rank+1}순위</td><td>${t.avatar} ${escapeHtml(t.teamName)}</td><td class="mono">${t.draftScore}점</td><td>${t.universityTier?t.universityTier.label:'-'}</td><td class="mono">🎲${t.diceTiebreak}</td></tr>`;
+  }).join('');
+  $('#stage-root').innerHTML = `
+    <span class="eyebrow">STEP 8 · 진로 드래프트</span>
+    <h2 class="stage-title display">드래프트 순서가 정해졌습니다</h2>
+    <p class="stage-desc">NCS 점수 + 진학한 대학 등급 + 인맥 가산점 순으로 정렬했습니다. 동점은 주사위로 정했습니다. 점수가 높은 조부터 원하는 직업을 먼저 고릅니다.</p>
+    <div class="table-wrap"><table class="data-table"><thead><tr><th>순위</th><th>조</th><th>점수</th><th>대학</th><th>동점 보정</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="btn-row"><button class="btn btn-primary" id="btnNext">1순위부터 직업 선택 시작 →</button></div>`;
+  $('#btnNext').addEventListener('click', ()=>{
+    state = game.teams[game.draftOrder[game.draftPointer]];
+    goStage('draftpick');
+  });
+};
+
+/* =========================================================
+   stage: draftpick — the current team in draft order chooses
+   a career from the shared, shrinking pool
+   ========================================================= */
+RENDERERS.draftpick = function(){
+  state = game.teams[game.draftOrder[game.draftPointer]];
+  renderHud();
+  const rank = game.draftPointer+1;
+  $('#stage-root').innerHTML = `
+    <span class="eyebrow">STEP 8 · 진로 드래프트 · ${rank}순위</span>
+    <h2 class="stage-title display">${state.avatar} ${escapeHtml(state.teamName)}, 직업을 고르세요</h2>
+    <p class="stage-desc">앞 순위가 이미 고른 직업은 목록에서 사라집니다. 남은 ${game.careerPool.length}개 중 하나를 선택하세요.</p>
+    <div class="choice-grid" id="careerGrid">
+      ${game.careerPool.map(c=>`<button type="button" class="choice-card" data-id="${c.id}">
+        <span class="choice-title">${c.name}</span>
+        <span class="choice-meta"><span class="tag">소득 ${won(c.salary)}/기</span><span class="tag">위기방어력 ${c.protect}</span></span>
+      </button>`).join('')}
+    </div>`;
+  $$('#careerGrid .choice-card').forEach(btn=> btn.addEventListener('click', ()=>{
+    const chosen = game.careerPool.find(c=>c.id===btn.dataset.id);
+    game.careerPool = game.careerPool.filter(c=>c.id!==chosen.id);
+    state.career = chosen;
+    toast(`${state.teamName}, ${chosen.name}(으)로 진로를 결정했습니다.`);
+    goStage('events');
+  }));
+};
+
+/* =========================================================
+   stage: life events (인생 이벤트, 3 rounds) — runs once per
+   team right after that team drafts a career
+   ========================================================= */
+const ROUND_LABEL = ['청년기 (20대 후반)', '장년기 (30대)', '중년기 (40대)'];
+RENDERERS.events = function(){
+  const deck = shuffle(LIFE_EVENTS).slice(0,3);
+  let round = 0;
+
+  function draw(){
+    if(round >= 3){
+      $('#stage-root').innerHTML = `
+        <span class="eyebrow">STEP 9 · 인생 이벤트</span>
+        <h2 class="stage-title display">세 번의 굴곡을 지나왔습니다</h2>
+        <p class="stage-desc">${state.teamName}의 선택과 운을 모두 반영해 정산할 차례입니다.</p>
+        <div class="btn-row"><button class="btn btn-primary" id="btnNext">정산 결과 보기 →</button></div>`;
+      $('#btnNext').addEventListener('click', ()=> goStage('teamsettle'));
+      return;
+    }
+    const ev = deck[round];
+    const income = state.career.salary;
+    addCash(income);
+    renderHud();
+
+    function resolveOutcome(opts){
+      if(opts.cost) addCash(-opts.cost);
+      addCash(opts.delta);
+      const mitigated = ev.type==='bad' ? opts.reduced : !opts.reduced;
+      state.eventLog.push({ id:ev.id, title:ev.title, type:ev.type, mitigated, delta:opts.delta });
+      renderHud();
+      const outcomeGood = ev.type==='bad' ? opts.reduced : !opts.reduced;
+      const title = opts.titleOverride || (ev.type==='bad'
+        ? (opts.reduced?'🛡️ 위기를 방어했습니다':'⚠️ 위기가 닥쳤습니다')
+        : (opts.reduced?'🌤️ 기회를 다 살리지 못했습니다':'🍀 좋은 일이 생겼습니다'));
+      $('#stage-root').innerHTML = `
+        <span class="eyebrow">STEP 9 · 인생 이벤트 · ${ROUND_LABEL[round]}</span>
+        <h2 class="stage-title display">${ev.title}</h2>
+        <div class="event-card good">
+          <div class="event-title">💼 ${state.career.name} 소득</div>
+          <p style="margin:0">이번 시기 소득으로 <span class="delta pos">+${won(income)}</span>가 쌓였습니다.</p>
+        </div>
+        ${opts.cost ? `<div class="event-card">
+          <div class="event-title">🎯 ${opts.costLabel}</div>
+          <p style="margin:0"><span class="delta neg">-${won(opts.cost)}</span> 투입했습니다.</p>
+        </div>` : ''}
+        <div class="event-card ${outcomeGood?'good':'bad'}">
+          <div class="event-title">${title}</div>
+          <p style="margin:0 0 6px">${opts.narrative}</p>
+          <span class="delta ${opts.delta>=0?'pos':'neg'}">${opts.delta>=0?'+':''}${won(opts.delta)}</span>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" id="btnNext">다음 →</button></div>`;
+      $('#btnNext').addEventListener('click', ()=>{ round++; draw(); });
+    }
+
+    const passiveReduced = ev.mitigate(state);
+    const passiveIsBest = ev.type==='bad' ? passiveReduced : !passiveReduced;
+    const active = ACTIVE_RESPONSES[ev.id];
+
+    // Background already gave the best possible outcome here (or this event has
+    // no active response defined), so spending capital would change nothing —
+    // resolve it silently, the same way it always has.
+    if(passiveIsBest || !active){
+      const delta = ev.type==='bad'
+        ? (passiveReduced?Math.round(ev.base*0.15):ev.base)
+        : (passiveReduced?Math.round(ev.base*0.35):ev.base);
+      resolveOutcome({ delta, reduced:passiveReduced, narrative: passiveReduced?ev.mitigateText:ev.hitText });
+      return;
+    }
+
+    // Otherwise your background alone leaves you exposed — but you may still be
+    // able to buy your way to the better outcome, if you have the capital for it.
+    const card = (active.preferredCardId && state.cards.find(c=> c.id===active.preferredCardId && !c.used))
+      || state.cards.find(c=> c.shield>0 && !c.used);
+    const cashCost = Math.round(Math.abs(ev.base)*0.4);
+    const canCash = state.cash >= cashCost;
+
+    $('#stage-root').innerHTML = `
+      <span class="eyebrow">STEP 9 · 인생 이벤트 · ${ROUND_LABEL[round]}</span>
+      <h2 class="stage-title display">${ev.title}</h2>
+      <div class="event-card good">
+        <div class="event-title">💼 ${state.career.name} 소득</div>
+        <p style="margin:0">이번 시기 소득으로 <span class="delta pos">+${won(income)}</span>가 쌓였습니다.</p>
+      </div>
+      <p class="stage-desc" style="margin:14px 0 10px">${ev.type==='bad' ? '이 위기, 어떻게 대응하시겠어요?' : '이 기회를 어떻게 살리시겠어요?'}</p>
+      <div class="choice-grid">
+        <button class="choice-card" id="btnCard" ${!card?'disabled':''}>
+          <div class="choice-title">${card ? active.cardLabel(card) : '🔒 인맥 카드 없음'}</div>
+          <div class="choice-meta">${card ? '보유한 인맥 카드를 소모합니다 (재사용 불가)' : '동원할 수 있는 인맥 카드가 없습니다'}</div>
+        </button>
+        <button class="choice-card" id="btnCash" ${!canCash?'disabled':''}>
+          <div class="choice-title">${active.cashLabel(cashCost)}</div>
+          <div class="choice-meta">${canCash ? `가진 자산의 ${pctOfWealth(cashCost)}` : `자산 부족 (${won(cashCost)} 필요)`}</div>
+        </button>
+        <button class="choice-card" id="btnPassive">
+          <div class="choice-title">${ev.type==='bad'?'🤷 그냥 감수하기':'🍃 흐름에 맡기기'}</div>
+          <div class="choice-meta">아무것도 쓰지 않고 지금까지 쌓아온 배경에 맡깁니다</div>
+        </button>
+      </div>`;
+
+    if(card) $('#btnCard').addEventListener('click', ()=>{
+      card.used = true;
+      const delta = ev.type==='bad' ? Math.round(ev.base*0.15) : ev.base;
+      resolveOutcome({ delta, reduced:true, narrative: active.cardText(card),
+        titleOverride: ev.type==='bad' ? `🛡️ ${card.name} 인맥으로 위기를 방어했습니다` : `🍀 ${card.name} 인맥 덕분에 기회를 온전히 잡았습니다` });
+    });
+    if(canCash) $('#btnCash').addEventListener('click', ()=>{
+      const delta = ev.type==='bad' ? Math.round(ev.base*0.15) : ev.base;
+      resolveOutcome({ delta, reduced:true, narrative: active.cashText(cashCost), cost:cashCost, costLabel:'자산 투입',
+        titleOverride: ev.type==='bad' ? '🛡️ 자산을 투입해 위기를 막았습니다' : '🍀 자산을 투입해 기회를 온전히 잡았습니다' });
+    });
+    $('#btnPassive').addEventListener('click', ()=>{
+      const delta = ev.type==='bad' ? ev.base : Math.round(ev.base*0.35);
+      resolveOutcome({ delta, reduced:passiveReduced, narrative: ev.type==='bad'?ev.hitText:ev.mitigateText });
+    });
+  }
+  draw();
+};
+
+/* =========================================================
+   stage: teamsettle — this team's personal settlement, then
+   hand off to the next team's draft turn (or to the class ranking)
+   ========================================================= */
+function counterfactualTable(s){
+  // Use the tier's raw startCash (not the post-sibling-split startCashActual) so the
+  // player's own tier row reproduces the actual final cash exactly — the sibling split
+  // is intentionally excluded from every row here (see disclaimer below), so the delta
+  // must be measured against the same unsplit baseline it's added back onto.
+  const earnedDelta = s.cash - s.tier.startCash;
+  const rows = SES_TIERS.map(t=>{
+    const hypoCash = Math.max(0, t.startCash + earnedDelta);
+    const hypoTier = tierById(tierForCash(hypoCash));
+    const isActual = t.id === s.tier.id;
+    return `<tr${isActual?' style="font-weight:800;background:var(--accent-soft)"':''}>
+      <td>${isActual?'👉 ':''}${t.name}</td>
+      <td class="mono">${won(hypoCash)}</td>
+      <td>${hypoTier.name}</td>
+    </tr>`;
+  }).join('');
+  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>출생 가문</th><th>같은 선택·같은 운이었다면 최종 자산</th><th>도달 계층</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+RENDERERS.teamsettle = function(){
+  state.finalTierId = tierForCash(state.cash);
+  const finalTier = tierById(state.finalTierId);
+  const mobility = TIER_RANK[state.tier.id] - TIER_RANK[state.finalTierId];
+  awardBadgesInline();
+  const mobClass = mobility>0?'mobility-up':(mobility<0?'mobility-down':'mobility-flat');
+  const mobText = mobility>0 ? `▲ 상승 이동 (${mobility}단계)` : (mobility<0 ? `▼ 하강 이동 (${Math.abs(mobility)}단계)` : '● 계층 고착 (출발과 동일)');
+  const isLast = game.draftPointer+1 >= game.draftOrder.length;
+
+  $('#stage-root').innerHTML = `
+    <div class="final-hero">
+      <div style="font-size:40px">${state.avatar}</div>
+      <div class="eyebrow">STEP 10 · ${escapeHtml(state.teamName)} 정산 완료</div>
+      <h2 class="final-title display">${escapeHtml(state.teamName)}의 인생 결산</h2>
+      <p class="mono" style="font-size:22px;font-weight:700;margin:4px 0">${won(state.cash)}</p>
+      <p style="color:var(--ink-soft);margin:0">${state.tier.name} 출생 → ${finalTier.name} 도달 · 최종 직업 <b>${state.career.name}</b></p>
+      <span class="mobility-pill ${mobClass}">${mobText}</span>
+    </div>
+    ${state.badges.length? `<div class="badge-row">${state.badges.map(b=>`<span class="badge-pill" title="${b.desc}">🏅 ${b.name}</span>`).join('')}</div>` : ''}
+    <div class="statbar-wrap"><div class="statbar-label"><span>문화자본</span><span>${state.stats.culture}</span></div><div class="statbar-track"><div class="statbar-fill" style="width:${state.stats.culture}%;background:var(--cap-culture)"></div></div></div>
+    <div class="statbar-wrap"><div class="statbar-label"><span>사회자본</span><span>${state.stats.social}</span></div><div class="statbar-track"><div class="statbar-fill" style="width:${state.stats.social}%;background:var(--cap-social)"></div></div></div>
+    <div class="statbar-wrap"><div class="statbar-label"><span>정보력</span><span>${state.stats.info}</span></div><div class="statbar-track"><div class="statbar-fill" style="width:${state.stats.info}%;background:var(--cap-info)"></div></div></div>
+    <p style="font-size:14px;color:var(--ink-soft)">수능 ${state.csatCorrect}/${state.csatTotal} · NCS ${state.ncsCorrect}/${state.ncsTotal} · 인맥 카드 ${state.cards.length}장</p>
+
+    <details class="panel" open>
+      <summary>🔁 만약 다른 가문에서 태어났다면?</summary>
+      <div class="panel-body">
+        <p>당신이 실제로 내린 선택과 겪은 운(미션·입시·퀴즈 점수·인생 이벤트)은 그대로 두고, <b>출생 가문만</b> 바꿔봤을 때의 결과입니다.</p>
+        ${counterfactualTable(state)}
+        <p style="font-size:12px;color:var(--ink-faint)">※ 형제자매 수에 따른 자산 분할 효과는 계산을 단순화하기 위해 제외했습니다.</p>
+      </div>
+    </details>
+
+    <div class="btn-row"><button class="btn btn-primary" id="btnNext">${isLast? '전체 랭킹 보기 →' : '다음 조 직업 선택 →'}</button></div>`;
+
+  $('#btnNext').addEventListener('click', ()=>{
+    if(isLast){ goStage('ranking'); }
+    else { game.draftPointer++; goStage('draftpick'); }
+  });
+};
+
+/* =========================================================
+   leaderboard (localStorage, per-browser only — spans sessions)
+   ========================================================= */
+function saveClassRun(){
+  try{
+    const key = 'habitusLeaderboard';
+    const prev = JSON.parse(localStorage.getItem(key) || '[]');
+    game.teams.forEach(t=>{
+      prev.push({
+        name: t.teamName, avatar: t.avatar,
+        startTier: t.tier.name, finalTier: tierById(t.finalTierId).name,
+        cash: t.cash, mobility: TIER_RANK[t.tier.id]-TIER_RANK[t.finalTierId],
+        ts: Date.now(),
+      });
+    });
+    localStorage.setItem(key, JSON.stringify(prev.slice(-100)));
+  }catch(e){ /* localStorage unavailable — skip silently */ }
+}
+function loadBoard(){
+  try{ return JSON.parse(localStorage.getItem('habitusLeaderboard') || '[]').sort((a,b)=> b.cash-a.cash).slice(0,12); }
+  catch(e){ return []; }
+}
+
+/* =========================================================
+   stage: class-wide ranking + debrief
+   ========================================================= */
+const CONCEPT_MAP = [
+  ['출생 룰렛', '귀속 지위 (achieved 아닌 ascribed status)'],
+  ['유년기 문화자본 미션', "부르디외의 '문화자본' (체화된 취향·언어·교양)"],
+  ['정보격차 이벤트', '정보 불평등이 기회의 불평등으로 이어지는 과정'],
+  ['대학 네트워크 카드', "콜먼(Coleman)의 '사회자본' (신뢰·네트워크 자원)"],
+  ['진로 드래프트', '학벌·인맥에 따른 노동시장 진입 순서의 차등'],
+  ['인생 이벤트의 대응 선택지', '자본이 행위주체성(agency)으로 전환되는 방식 — 같은 위기 앞에서도 누구는 카드나 돈으로 "선택"하고, 누구는 그럴 자원이 없어 감수할 수밖에 없습니다'],
+];
+RENDERERS.ranking = function(){
+  const ranked = [...game.teams].sort((a,b)=> b.cash-a.cash);
+  saveClassRun();
+  confettiBurst(40);
+  const board = loadBoard();
+  const medal = i => i===0?'🥇':(i===1?'🥈':(i===2?'🥉':`${i+1}위`));
+
+  $('#stage-root').innerHTML = `
+    <div class="final-hero">
+      <div class="eyebrow">STEP 10 · 최종 결산</div>
+      <h1 class="final-title display">${game.totalTeams>1? '전체 조 랭킹' : '인생 결산'}</h1>
+      <p style="color:var(--ink-soft);margin:0">${game.totalTeams}개 조가 모두 인생을 살아냈습니다.</p>
+    </div>
+
+    <div class="table-wrap"><table class="data-table"><thead><tr><th></th><th>조</th><th>출발 → 도착</th><th>최종 자산</th><th>이동</th><th>뱃지</th></tr></thead><tbody>
+      ${ranked.map((t,i)=>{
+        const mob = TIER_RANK[t.tier.id]-TIER_RANK[t.finalTierId];
+        const mobStr = mob>0?`▲${mob}`:(mob<0?`▼${Math.abs(mob)}`:'●');
+        return `<tr><td>${medal(i)}</td><td>${t.avatar} ${escapeHtml(t.teamName)}</td><td>${t.tier.name} → ${tierById(t.finalTierId).name}</td><td class="mono">${won(t.cash)}</td><td>${mobStr}</td><td>${t.badges.map(b=>`<span class="tag" title="${b.desc}">${b.name}</span>`).join(' ')}</td></tr>`;
+      }).join('')}
+    </tbody></table></div>
+
+    <details class="panel" open>
+      <summary>🧠 이 게임과 아비투스 이론 연결하기</summary>
+      <div class="panel-body">
+        <p>부르디외는 <b>경제자본·문화자본·사회자본</b>이 어우러져 개인의 습관과 취향, 즉 <b>아비투스</b>를 형성하고, 이 아비투스가 다시 학업·직업 성과라는 '결과'로 이어지며 계층을 재생산한다고 보았습니다.</p>
+        <div class="diagram">
+          <span class="diagram-box" style="border-color:var(--cap-econ);color:var(--cap-econ)">경제자본</span>
+          <span class="diagram-arrow">→</span>
+          <span class="diagram-box" style="border-color:var(--cap-culture);color:var(--cap-culture)">문화자본</span>
+          <span class="diagram-arrow">→</span>
+          <span class="diagram-box" style="border-color:var(--accent);color:var(--accent)">아비투스</span>
+          <span class="diagram-arrow">→</span>
+          <span class="diagram-box" style="border-color:var(--cap-social);color:var(--cap-social)">사회자본</span>
+          <span class="diagram-arrow">→</span>
+          <span class="diagram-box" style="border-color:var(--cap-info);color:var(--cap-info)">생애 결과</span>
+        </div>
+        <h4>게임 속 장치 ↔ 사회학 개념</h4>
+        <div class="table-wrap"><table class="data-table"><thead><tr><th>게임 속 장치</th><th>연결되는 개념</th></tr></thead><tbody>
+          ${CONCEPT_MAP.map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('')}
+        </tbody></table></div>
+        <p style="font-size:12.5px;color:var(--ink-faint)">참고: Bourdieu의 자본 이론, Coleman의 사회자본론, Akee 외의 부모소득-자녀성과 연구 등을 교육용으로 단순화했습니다. 실제 사회는 이 게임보다 훨씬 더 복잡한 변수들이 얽혀 있습니다.</p>
+      </div>
+    </details>
+
+    <details class="panel">
+      <summary>🏫 교실 토론 질문</summary>
+      <div class="panel-body">
+        <ul>
+          <li>가장 먼저 직업을 고른 조와 가장 늦게 고른 조를 갈랐던 결정적 차이는 무엇이었나요?</li>
+          <li>최종 자산 중 몇 %가 '운(출생)' 덕분이고, 몇 %가 '선택과 노력' 덕분이라고 생각하나요?</li>
+          <li>[10통사2-02-03]이 말하는 '사회 계층의 양극화'를 이 게임은 어떤 장치로 표현했나요?</li>
+          <li>교육격차·정보격차를 줄이기 위해 학교나 국가가 할 수 있는 일은 무엇일까요?</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="panel">
+      <summary>🏆 이 브라우저의 누적 기록판 (${board.length}건)</summary>
+      <div class="panel-body">
+        ${board.length? `<div class="table-wrap"><table class="data-table"><thead><tr><th>조</th><th>출발</th><th>도착</th><th>자산</th><th>이동</th></tr></thead><tbody>
+          ${board.map(r=>`<tr><td>${r.avatar} ${escapeHtml(r.name)}</td><td>${r.startTier}</td><td>${r.finalTier}</td><td class="mono">${won(r.cash)}</td><td>${r.mobility>0?'▲'+r.mobility:(r.mobility<0?'▼'+Math.abs(r.mobility):'●')}</td></tr>`).join('')}
+        </tbody></table></div>
+        <p style="font-size:12px;color:var(--ink-faint)">이 기록은 이 브라우저에만, 지금까지 플레이한 모든 판에 걸쳐 누적됩니다. 다른 반/기기와 비교하려면 이 화면을 캡처해 공유해 보세요.</p>` : ''}
+      </div>
+    </details>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnReplay">🔁 처음부터 다시하기</button>
+    </div>`;
+
+  $('#btnReplay').addEventListener('click', ()=>{ game = null; state = null; goStage('title'); });
+};
+
+/* =========================================================
+   boot
+   ========================================================= */
+document.addEventListener('DOMContentLoaded', ()=>{ goStage('title'); });
+</script>
+</body>
+</html>
+

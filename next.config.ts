@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
           source: "/newforeignpolicy",
           destination: "/newforeignpolicy.html",
         },
+        {
+          source: "/habitussim",
+          destination: "/habitus_sim.html",
+        },
       ],
       afterFiles: [],
       fallback: [],

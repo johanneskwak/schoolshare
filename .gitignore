@@ -27,3 +27,6 @@ supabase/.branches
 supabase/.temp
 
 .vercel
+
+# claude code personal overrides
+.claude/settings.local.json
