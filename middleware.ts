@@ -12,6 +12,6 @@ export const config = {
     // resolve after middleware, not before). Any classroom-game .html file under public/
     // is public by design (join-code access, no account), so .html joins the
     // asset-extension exclusion group rather than being listed one file at a time.
-    "/((?!_next/static|_next/image|favicon.ico|api/schools/search|newforeignpolicy|habitussim|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/schools/search|newforeignpolicy|habitussim|thenewhabitus|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html)$).*)",
   ],
 };

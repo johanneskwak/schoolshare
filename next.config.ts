@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
           source: "/habitussim",
           destination: "/habitus_sim.html",
         },
+        {
+          source: "/thenewhabitus",
+          destination: "/thenewhabitus.html",
+        },
       ],
       afterFiles: [],
       fallback: [],
