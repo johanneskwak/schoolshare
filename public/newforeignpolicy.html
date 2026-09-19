@@ -201,7 +201,11 @@ const NUKE_WIN=60, PEACE_WIN=80, EXPOSE_AT=40;
 const COUNTRIES=[{n:'아르곤국',t:'강대국',c:'#3F6E8C'},{n:'크림슨국',t:'강대국',c:'#A3503F'},
  {n:'사파이어국',t:'중견국',c:'#3E8175'},{n:'앰버국',t:'중견국',c:'#B5872C'},
  {n:'미스트국',t:'약소국',c:'#7C6E9B'},{n:'테라국',t:'약소국',c:'#6E7F46'}];
-const POOL5=['아르곤국','크림슨국','사파이어국','미스트국','테라국'];
+const POOLS={
+ 2:['아르곤국','미스트국'],
+ 3:['아르곤국','사파이어국','미스트국'],
+ 4:['아르곤국','크림슨국','사파이어국','미스트국'],
+ 5:['아르곤국','크림슨국','사파이어국','미스트국','테라국']};
 const COLOR=Object.fromEntries(COUNTRIES.map(c=>[c.n,c.c]));
 const CARDS=[
  {k:'평화',cls:'pe',d:'군축에 동참한다 · 평화 +2~+7, 핵개발국이 많을수록 이득이 준다'},
@@ -262,6 +266,23 @@ function keyScreen(msg){el(`<div class="narrow"><h1>선생님 1회 설정</h1>
 function home(msg){el(`<div class="narrow">
   <h1>핵확산 시뮬레이션</h1>
   <p class="muted small">중학교 3학년 사회 · 국제사회의 갈등과 협력 · 15턴</p>${msg?eb(msg):''}
+  <details style="margin-top:10px"><summary class="small" style="cursor:pointer;font-weight:600">게임 설명 보기</summary>
+    <div class="panel" style="margin-top:9px">
+    <p class="small" style="margin:0 0 .6rem"><b>목표</b> — 매 회의(턴)마다 대표부는 <b>평화 / 중립 / 핵개발</b> 카드 중 하나를 냅니다.
+      평화 포인트 ${PEACE_WIN}을 먼저 채우면 <b>영세중립국으로 승리</b>, 핵 포인트 ${NUKE_WIN}을 혼자 먼저 채우면 <b>단독 핵보유로 승리</b>합니다.
+      단, 두 나라가 같은 회의에서 핵을 완성하면 핵전쟁으로 전원 패배하고, 같은 회의에 둘 다 달성되면 평화가 이깁니다.</p>
+    <p class="small" style="margin:0 0 .6rem"><b>매 회의 카드</b><br>
+      · 평화 — 그 회의의 핵개발국 수가 적을수록 이득이 크며, 평화 +2~+7<br>
+      · 중립 — 평화 +4 · 핵 +2, 강대국의 압박을 피할 수 있음<br>
+      · 핵개발 — 핵 +6, 위장 외교로 평화도 +3</p>
+    <p class="small" style="margin:0 0 .6rem"><b>등급과 특수 카드</b><br>
+      · 강대국 — 압박 카드 3장. 한 나라를 지목해 그 나라가 낸 카드에 따라 보상/피해<br>
+      · 중견국·약소국 — 첩보 카드 3장. 한 나라를 조사해 핵 포인트를 확인하고, 핵개발국이면 공격 성공<br>
+      · 약소국 — 호소 카드 2회. 게임 중 두 번, 30초 동안 전체에게 연설 가능</p>
+    <p class="small" style="margin:0">모든 나라는 평화 5점에서 시작하며, 핵 포인트가 ${EXPOSE_AT}을 넘으면 핵실험이 탐지되어
+      모든 나라의 평화 포인트가 깎입니다. 제5차·제10차 회의 후에는 안전보장이사회가 소집되어
+      투표로 정한 한 나라를 사찰해 핵 포인트를 깎고 공개합니다.</p>
+    </div></details>
   <hr class="rule"><h2>학생용</h2>
   <div class="field"><label for="jc">모둠 입장 코드 (숫자 4자리)</label>
     <input id="jc" inputmode="numeric" maxlength="4" placeholder="1234"></div>
@@ -282,7 +303,10 @@ function newGame(msg){el(`<div class="narrow"><h1>새 게임 만들기</h1>${msg
   <div class="field"><label for="cd">교사 코드 (4자 이상, 직접 정하세요)</label><input id="cd" placeholder="sahoe34"></div>
   <div class="field"><label for="tc">모둠 수</label><select id="tc">
     <option value="6">6모둠 — 강대국2 · 중견국2 · 약소국2</option>
-    <option value="5">5모둠 — 강대국2 · 중견국1 · 약소국2</option></select></div>
+    <option value="5">5모둠 — 강대국2 · 중견국1 · 약소국2</option>
+    <option value="4">4모둠 — 강대국2 · 중견국1 · 약소국1</option>
+    <option value="3">3모둠 — 강대국1 · 중견국1 · 약소국1</option>
+    <option value="2">2모둠 — 강대국1 · 약소국1</option></select></div>
   <button class="btn wide" id="mk">만들기</button>
   <p class="small muted" style="margin-top:13px">교사 코드는 잊으면 게임을 이어갈 수 없으니 적어두세요.</p></div>`);
   on('mk',async()=>{const code=val('cd').trim();
@@ -391,10 +415,12 @@ function drawTeacher(code){
 
   <hr class="rule">
   <h2>대표부별 카드 잔량</h2>
-  <table class="t"><tr><th>국가</th><th>등급</th><th>압박</th><th>첩보</th></tr>
+  <table class="t"><tr><th>국가</th><th>등급</th><th>압박</th><th>첩보</th><th>호소</th></tr>
     ${teams.map(t=>`<tr><td>${esc(t.country)}</td><td>${esc(t.tier)}</td>
       <td>${t.tier==='강대국'?t.sanctions_left+'장':'–'}</td>
-      <td>${t.tier!=='강대국'?t.spy_left+'장':'–'}</td></tr>`).join('')}</table>
+      <td>${t.tier!=='강대국'?t.spy_left+'장':'–'}</td>
+      <td>${t.tier==='약소국'?'2회':'–'}</td></tr>`).join('')}</table>
+  <p class="small muted" style="margin-top:6px">호소 카드는 서버에 기록되지 않습니다. 약소국 대표부가 사용을 선언하면 의장이 직접 확인해 주세요.</p>
 
   <hr class="rule">
   <details><summary class="small muted" style="cursor:pointer">대표부 접속 QR · 신임장 인쇄</summary>
@@ -475,7 +501,8 @@ function printCards(teams){
 /* ── 국가 배정 룰렛 ── */
 function drawSetup(code,teams){
   const taken=new Set(teams.filter(t=>t.country).map(t=>t.country));
-  const pool=(teams.length===5?COUNTRIES.filter(c=>POOL5.includes(c.n)):COUNTRIES).filter(c=>!taken.has(c.n));
+  const restrict=POOLS[teams.length];
+  const pool=(restrict?COUNTRIES.filter(c=>restrict.includes(c.n)):COUNTRIES).filter(c=>!taken.has(c.n));
   const nx=teams.find(t=>!t.country);
   const R=138,C=148,n=pool.length;
   const sec=pool.map((c,i)=>{const a0=(i/n)*2*Math.PI-Math.PI/2,a1=((i+1)/n)*2*Math.PI-Math.PI/2,m=(a0+a1)/2;
