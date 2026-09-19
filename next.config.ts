@@ -12,6 +12,16 @@ const nextConfig: NextConfig = {
           destination: "/newforeignpolicy.html",
         },
         {
+          source: "/",
+          has: [
+            {
+              type: "host",
+              value: "internationalpolicy.vercel.app",
+            },
+          ],
+          destination: "/newforeignpolicy.html",
+        },
+        {
           source: "/habitussim",
           destination: "/habitus_sim.html",
         },
