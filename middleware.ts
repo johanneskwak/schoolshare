@@ -1,7 +1,18 @@
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
+// internationalpolicy.vercel.app is a dedicated alias for the nuclear-sim
+// classroom game, so its root should land straight on the game instead of
+// the TeacherTown login screen. Handled here (not via next.config rewrites)
+// because rewrites resolve after middleware, so the auth check below would
+// still catch "/" first.
 export async function middleware(request: NextRequest) {
+  if (
+    request.nextUrl.pathname === "/" &&
+    request.headers.get("host") === "internationalpolicy.vercel.app"
+  ) {
+    return NextResponse.redirect(new URL("/newforeignpolicy", request.url));
+  }
   return updateSession(request);
 }
 
