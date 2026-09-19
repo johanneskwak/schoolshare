@@ -338,7 +338,7 @@ function drawTeacher(code){
         <span>／ 전 ${g.max_turns}차 · ${PHASE_KO[g.phase]}</span></div>
       <div class="sub">${esc(g.title||'')} · 의장 코드 ${esc(code)}</div></div></div>
     ${g.round_no>1?`<div class="stats">
-      <div class="stat pe"><b>${Math.max(0,6-g.last_k)}</b><span>평화 이득</span></div>
+      <div class="stat pe"><b>${Math.max(2,7-g.last_k)}</b><span>평화 이득</span></div>
       <div class="stat nu"><b>${g.last_k}</b><span>핵개발 국가</span></div>
       <div class="memo">지난 회의 기준<br>어느 나라인지는 비공개</div></div>`:''}
   </div>
@@ -545,7 +545,7 @@ function drawStudent(join,g,st){
        <div class="v">${st.nuke_pts}</div><div class="of">목표 ${NUKE_WIN} · ${EXPOSE_AT} 넘으면 들킴</div>
        <div class="mini-bar"><i style="width:${Math.min(100,st.nuke_pts/NUKE_WIN*100)}%;background:var(--nuke)"></i></div></div>
    </div>
-   ${g.round_no>1?`<div class="note">지난 회의에서 <b>핵개발 ${g.last_k}곳</b> → 평화 이득 <b>+${Math.max(0,6-g.last_k)}</b>.
+   ${g.round_no>1?`<div class="note">지난 회의에서 <b>핵개발 ${g.last_k}곳</b> → 평화 이득 <b>+${Math.max(2,7-g.last_k)}</b>.
      누가 골랐는지는 비공개입니다.</div>`:''}
    ${(st.exposed||[]).length?`<div class="err"><b>핵실험이 탐지된 나라</b> — ${st.exposed.map(esc).join(', ')}</div>`:''}
    ${(st.spy_results||[]).length?`<h2 style="margin-top:16px">첩보 보고</h2><div class="log">
