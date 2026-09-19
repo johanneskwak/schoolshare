@@ -9,40 +9,52 @@
   --paper:#E6EAED; --card:#F4F6F7; --ink:#12212E; --ink-2:#4C6069; --rule:#A6B2BB;
   --chamber:#16283A; --gold:#A8873C;
   --peace:#2E6E9E; --nuke:#B0402C; --neu:#8A9499;
-  --r:2px;
+  --r:4px;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--paper);color:var(--ink);
+body{background:radial-gradient(ellipse 1200px 640px at 50% -12%,#EEF1F3 0%,var(--paper) 60%) var(--paper) fixed;
+  color:var(--ink);
   font-family:'IBM Plex Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
   font-size:16px;line-height:1.55;font-variant-numeric:tabular-nums;-webkit-text-size-adjust:100%}
 .disp{font-family:'Black Han Sans',sans-serif;font-weight:400;letter-spacing:-.01em}
-h1{font-family:'Black Han Sans',sans-serif;font-size:1.7rem;margin:0 0 .3rem;font-weight:400}
+h1{font-family:'Black Han Sans',sans-serif;font-size:1.7rem;margin:0 0 .3rem;font-weight:400;letter-spacing:-.01em}
 h2{font-family:'Black Han Sans',sans-serif;font-size:1.05rem;margin:0 0 .6rem;font-weight:400}
 .wrap{max-width:1120px;margin:0 auto;padding:18px 18px 72px}
-.narrow{max-width:500px}
+.narrow{max-width:500px;background:#fff;border:1px solid var(--rule);border-radius:8px;
+  padding:30px 32px 32px;margin:44px auto;
+  box-shadow:0 1px 2px rgba(18,33,46,.05),0 18px 40px -22px rgba(18,33,46,.22)}
+.narrow h1{position:relative;padding-bottom:14px;margin-bottom:14px}
+.narrow h1::after{content:'';position:absolute;left:0;bottom:0;width:34px;height:3px;background:var(--gold)}
 .muted{color:var(--ink-2)} .small{font-size:.82rem}
 hr.rule{border:0;border-top:1px solid var(--rule);margin:24px 0}
 a{color:var(--peace)}
 
 button{font:inherit;cursor:pointer;border-radius:var(--r)}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--peace);outline-offset:2px}
-.btn{background:var(--ink);color:#fff;border:1px solid var(--ink);padding:.6rem 1.05rem;font-weight:500}
-.btn:hover{background:#1B333D}
+.btn{background:var(--ink);color:#fff;border:1px solid var(--ink);padding:.65rem 1.1rem;font-weight:500;
+  transition:background .15s ease,transform .07s ease,box-shadow .15s ease}
+.btn:hover{background:#1B333D;box-shadow:0 4px 14px -6px rgba(18,33,46,.45)}
+.btn:active{transform:translateY(1px)}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
-.btn.ghost:hover{background:#D7DEE1}
+.btn.ghost:hover{background:#D7DEE1;box-shadow:none}
 .btn.danger{background:var(--nuke);border-color:var(--nuke)}
-.btn:disabled{opacity:.34;cursor:not-allowed}
+.btn:disabled{opacity:.34;cursor:not-allowed;box-shadow:none;transform:none}
 .btn.wide{width:100%}
 .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-input,select{font:inherit;padding:.58rem .7rem;border:1px solid var(--rule);border-radius:var(--r);background:#fff;width:100%;color:var(--ink)}
+input,select{font:inherit;padding:.6rem .7rem;border:1px solid var(--rule);border-radius:var(--r);background:#fff;
+  width:100%;color:var(--ink);transition:border-color .15s ease,box-shadow .15s ease}
+input:hover,select:hover{border-color:#8C9AA4}
+input:focus,select:focus{border-color:var(--peace);box-shadow:0 0 0 3px rgba(47,111,143,.14)}
 label{display:block;font-size:.84rem;color:var(--ink-2);margin:0 0 .25rem}
 .field{margin-bottom:13px}
-.panel{background:var(--card);border:1px solid var(--rule);border-radius:var(--r);padding:15px}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:var(--r);padding:15px;
+  box-shadow:0 1px 0 rgba(18,33,46,.03)}
 .err{background:#F4DED9;border-left:3px solid var(--nuke);color:#7C2C1E;padding:.6rem .8rem;margin:12px 0;font-size:.9rem}
 .note{background:var(--card);border-left:3px solid var(--peace);padding:.6rem .8rem;margin:12px 0;font-size:.9rem}
 .resolution{border:1px solid var(--gold);border-top:4px solid var(--gold);background:#FBF8F1;
-  border-radius:var(--r);padding:15px 17px;margin-top:14px}
+  border-radius:var(--r);padding:15px 17px;margin-top:14px;
+  box-shadow:0 10px 26px -18px rgba(110,90,34,.6)}
 .resolution h2{color:#6E5A22;letter-spacing:.02em}
 .ballot{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
 .ballot button{flex:1;min-width:180px;padding:.75rem 1rem;background:#fff;border:1px solid var(--rule);
@@ -52,9 +64,10 @@ label{display:block;font-size:.84rem;color:var(--ink-2);margin:0 0 .25rem}
 .ballot small{display:block;font-weight:400;color:var(--ink-2);font-size:.74rem;margin-top:2px}
 
 /* ── 헤더 ── */
-.banner{background:var(--chamber);color:#EEF2F4;border-radius:var(--r);
+.banner{background:linear-gradient(155deg,#1B3247,var(--chamber) 60%);color:#EEF2F4;border-radius:var(--r);
   border-bottom:3px solid var(--gold);padding:14px 18px;display:flex;
-  justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:4px}
+  justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:4px;
+  box-shadow:0 8px 22px -14px rgba(18,33,46,.55)}
 .banner .seal{flex:0 0 auto}
 .banner .ttl{display:flex;align-items:center;gap:13px}
 .banner .turn{font-family:'Black Han Sans',sans-serif;font-size:1.7rem;line-height:1.05}
@@ -66,7 +79,8 @@ label{display:block;font-size:.84rem;color:var(--ink-2);margin:0 0 .25rem}
 .hdr .turn span{color:var(--ink-2);font-size:1.1rem}
 .hdr .sub{font-size:.8rem;color:var(--ink-2);margin-top:2px}
 .stats{display:flex;gap:10px;align-items:flex-start}
-.stat{text-align:center;border:1px solid var(--rule);border-radius:var(--r);padding:6px 14px 7px;background:#fff;min-width:96px}
+.stat{text-align:center;border:1px solid var(--rule);border-radius:var(--r);padding:6px 14px 7px;background:#fff;
+  min-width:96px;box-shadow:0 2px 6px -3px rgba(18,33,46,.15)}
 .stat b{font-family:'Black Han Sans',sans-serif;font-size:2.4rem;line-height:1;display:block}
 .stat span{font-size:.72rem;color:var(--ink-2);display:block;margin-top:2px;white-space:nowrap}
 .stat.nu{border-color:var(--nuke)} .stat.nu b{color:var(--nuke)}
@@ -93,7 +107,7 @@ label{display:block;font-size:.84rem;color:var(--ink-2);margin:0 0 .25rem}
 .lane.colhead{font-size:.72rem;color:var(--ink-2);letter-spacing:.03em;padding:0 0 7px;
   border-bottom:2px solid var(--ink)}
 .plate{background:#FAFBFB;border:1px solid #97A6B0;border-top:3px solid var(--pc,#888);
-  border-radius:1px;padding:6px 9px 5px;box-shadow:0 1px 0 rgba(18,33,46,.16)}
+  border-radius:1px;padding:6px 9px 5px;box-shadow:0 2px 5px -2px rgba(18,33,46,.22)}
 .plate .cty{font-family:'Black Han Sans',sans-serif;font-size:1.08rem;line-height:1.1;letter-spacing:.01em}
 .plate .tier{font-size:.66rem;color:var(--ink-2);letter-spacing:.04em;margin-top:1px}
 .gauges{display:flex;flex-direction:column;gap:4px}
@@ -129,12 +143,16 @@ label{display:block;font-size:.84rem;color:var(--ink-2);margin:0 0 .25rem}
 .mini-bar i{display:block;height:100%}
 .choices{display:grid;gap:10px;margin-top:4px}
 .choice{border:1px solid var(--rule);border-left:6px solid var(--rule);background:#fff;
-  border-radius:var(--r);padding:14px 16px;text-align:left;width:100%;transition:transform .07s}
-.choice:active{transform:scale(.99)}
+  border-radius:var(--r);padding:14px 16px;text-align:left;width:100%;
+  transition:transform .07s,box-shadow .15s ease,border-color .15s ease}
+.choice:hover:not(:disabled){box-shadow:0 6px 18px -10px rgba(18,33,46,.35);border-color:#8C9AA4}
+.choice:active:not(:disabled){transform:scale(.99)}
 .choice .t{font-family:'Black Han Sans',sans-serif;font-size:1.25rem;line-height:1.2}
 .choice .d{font-size:.83rem;color:var(--ink-2);margin-top:1px}
 .choice.pe{border-left-color:var(--peace)} .choice.ne{border-left-color:var(--neu)}
 .choice.nu{border-left-color:var(--nuke)}
+.choice.pe:hover:not(:disabled){box-shadow:0 6px 18px -10px rgba(47,111,143,.4)}
+.choice.nu:hover:not(:disabled){box-shadow:0 6px 18px -10px rgba(176,64,44,.4)}
 .choice:disabled{opacity:.4}
 .state{text-align:center;padding:34px 14px}
 .state .k{font-family:'Black Han Sans',sans-serif;font-size:1.9rem;line-height:1.2}
@@ -186,14 +204,14 @@ const COUNTRIES=[{n:'아르곤국',t:'강대국',c:'#3F6E8C'},{n:'크림슨국',
 const POOL5=['아르곤국','크림슨국','사파이어국','미스트국','테라국'];
 const COLOR=Object.fromEntries(COUNTRIES.map(c=>[c.n,c.c]));
 const CARDS=[
- {k:'평화',cls:'pe',d:'군축에 동참한다 · 핵개발국이 많을수록 이득이 준다'},
- {k:'중립',cls:'ne',d:'관망한다 · 평화 +4, 핵 +2 · 강대국의 지목을 피할 수 있다'},
+ {k:'평화',cls:'pe',d:'군축에 동참한다 · 평화 +2~+7, 핵개발국이 많을수록 이득이 준다'},
+ {k:'중립',cls:'ne',d:'관망한다 · 평화 +4, 핵 +2 · 강대국의 압박을 피할 수 있다'},
  {k:'핵개발',cls:'nu',d:'몰래 핵무장을 추진한다 · 핵 +6, 위장 외교로 평화도 +3'}];
 const PHASE_KO={setup:'개회 준비',negotiation:'비공식 협의',submit:'표결',result:'결과 발표',ended:'폐회'};
 const VICTORY={
- '강대국':{p:'지목 카드 2장 — 한 나라를 지목한다. 결과는 그 나라가 그 턴에 무엇을 골랐느냐로 갈린다. 핵개발이면 상대 핵 −10 · 우리 평화 +10. 평화면 상대 평화 −5 · 우리 평화 −4(외교적 고립). 중립이면 헛방으로 우리 평화 −10.'},
- '중견국':{p:'첩보 카드 2장 — 한 나라를 조사한다. 그 나라가 핵개발을 골랐다면 우리 평화 +5, 아니면 −5. 성패와 관계없이 그 나라의 핵 포인트를 알게 된다.'},
- '약소국':{p:'첩보 카드 2장 (중견국과 같은 방식) · 호소 카드 1회 — 게임 중 한 번, 30초 동안 전체에게 연설할 수 있다 (다른 나라 발언 금지, 선생님께 선언).'}};
+ '강대국':{p:'압박 카드 3장 — 한 나라를 압박한다. 결과는 그 나라가 그 턴에 무엇을 골랐느냐로 갈린다. 핵개발이면 상대 핵 −10 · 우리 평화 +10. 평화면 상대 평화 −5 · 우리 평화 −4(외교적 고립). 중립이면 헛방으로 우리 평화 −10.'},
+ '중견국':{p:'첩보 카드 3장 — 한 나라를 조사한다. 그 나라가 핵개발을 골랐다면 상대 핵 −5 · 우리 평화 +5. 평화를 골랐다면 상대 평화 −3 · 우리 평화 −2. 중립이면 헛방으로 우리 평화 −5. 성패와 관계없이 그 나라의 핵 포인트를 알게 된다.'},
+ '약소국':{p:'첩보 카드 3장 (중견국과 같은 방식) · 호소 카드 2회 — 게임 중 두 번, 30초 동안 전체에게 연설할 수 있다 (다른 나라 발언 금지, 선생님께 선언).'}};
 
 const H=()=>Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
 const setH=o=>{location.hash=new URLSearchParams({...H(),...o}).toString();};
@@ -373,7 +391,7 @@ function drawTeacher(code){
 
   <hr class="rule">
   <h2>대표부별 카드 잔량</h2>
-  <table class="t"><tr><th>국가</th><th>등급</th><th>지목</th><th>첩보</th></tr>
+  <table class="t"><tr><th>국가</th><th>등급</th><th>압박</th><th>첩보</th></tr>
     ${teams.map(t=>`<tr><td>${esc(t.country)}</td><td>${esc(t.tier)}</td>
       <td>${t.tier==='강대국'?t.sanctions_left+'장':'–'}</td>
       <td>${t.tier!=='강대국'?t.spy_left+'장':'–'}</td></tr>`).join('')}</table>
@@ -418,7 +436,7 @@ function resultHTML(g){const r=lastR;
      어느 나라가 핵개발을 골랐는지는 공개되지 않습니다.</div>
    ${ne.length?`<div class="err"><b>핵실험 탐지</b> — ${ne.map(esc).join(', ')}.
      핵개발이 드러났고, <b>다른 모든 나라의 평화 포인트가 ${r.shock} 깎였습니다.</b></div>`:''}
-   ${sc.length?`<table class="t" style="margin:10px 0"><tr><th>지목한 나라</th><th>대상</th><th>결과</th></tr>
+   ${sc.length?`<table class="t" style="margin:10px 0"><tr><th>압박한 나라</th><th>대상</th><th>결과</th></tr>
      ${sc.map(x=>`<tr><td>${esc(x.actor)}</td><td>${esc(x.target)}</td>
        <td class="${x.result==='제재 적중'?'hit':'miss'}">${
          x.result==='제재 적중'?'제재 적중 · 우리 +10 · 상대 핵 −10'
@@ -436,7 +454,7 @@ function printCards(teams){
     <div class="jc">입장 코드 <b>${esc(t.join_code)}</b></div>
     <div class="s"><b>우리의 특권</b><br>${v.p}</div>
     <div class="s"><b>승리 조건</b><br>평화 포인트 80 → 영세중립국으로 승리.
-      (평화 이득 = 6 − 그 회의의 핵개발국 수. 모든 나라는 5점에서 시작.)<br>
+      (평화 이득 = 7 − 그 회의의 핵개발국 수, 최소 2 · 최대 7. 모든 나라는 5점에서 시작.)<br>
       핵 포인트 60 → 우리만 완성했을 때 승리. 두 나라가 같은 회의에서 완성하면 핵전쟁으로 전원 패배.<br>
       둘이 같은 턴에 달성되면 평화가 이긴다.</div>
     <div class="w">다른 나라에 보여주지 마세요.</div></div>`;}).join('');
@@ -484,9 +502,9 @@ function drawSetup(code,teams){
     <div class="row" style="margin-top:10px"><button class="btn ghost" id="bPrint">신임장 인쇄</button></div>
     <div class="panel" style="margin-top:14px"><h2>등급별 특권</h2>
       <table class="t"><tr><th>등급</th><th>특권</th></tr>
-      <tr><td>강대국</td><td>지목 카드 2장 (핵 +10 / 평화 −4 / 중립 −10)</td></tr>
-      <tr><td>중견국</td><td>첩보 카드 2장</td></tr>
-      <tr><td>약소국</td><td>첩보 카드 2장 · 호소 카드 1회</td></tr></table></div>
+      <tr><td>강대국</td><td>압박 카드 3장 (핵 +10 / 평화 −4 / 중립 −10)</td></tr>
+      <tr><td>중견국</td><td>첩보 카드 3장 (핵 +5 / 평화 −2 / 중립 −5)</td></tr>
+      <tr><td>약소국</td><td>첩보 카드 3장 · 호소 카드 2회</td></tr></table></div>
       <p class="small muted" style="margin:.5rem 0 0">모든 나라는 평화 5점을 갖고 시작합니다.</p>
   </div></div>`);
   on('bPrint',()=>printCards(teams));
@@ -534,7 +552,7 @@ function drawStudent(join,g,st){
      ${st.spy_results.map(x=>`<div>제${x.round}차 · ${esc(x.country)} — 그때 선택 <b>${esc(x.card||'?')}</b>,
        핵 포인트 <b>${x.pts}</b> <span class="${x.delta>0?'hit':'miss'}">${x.delta>0?'+':''}${x.delta}</span></div>`).join('')}</div>`:''}
    ${(st.sanction_results||[]).length?`<h2 style="margin-top:16px">제재 기록</h2><div class="log">
-     ${st.sanction_results.map(x=>`<div>제${x.round}차 · ${esc(x.country)} 지목 —
+     ${st.sanction_results.map(x=>`<div>제${x.round}차 · ${esc(x.country)} 압박 —
        <span class="${x.result==='제재 적중'?'hit':'miss'}">${
          x.result==='제재 적중'?'제재 적중 +10':x.result==='봉쇄'?'외교적 고립 −4':'헛방 −10'}</span></div>`).join('')}</div>`:''}`;
 
@@ -544,21 +562,22 @@ function drawStudent(join,g,st){
   if(g.phase==='submit'&&!st.my_card){
     const rs=st.roster||[];
     const sanc=(me.tier==='강대국'&&st.sanctions_left>0)?`<div class="panel" style="margin:12px 0;border-left:4px solid var(--nuke)">
-      <h2 style="margin-bottom:.2rem">지목 카드 · ${st.sanctions_left}장 남음</h2>
-      <p class="small muted" style="margin:.2rem 0 .5rem">한 나라를 지목합니다.
+      <h2 style="margin-bottom:.2rem">압박 카드 · ${st.sanctions_left}장 남음</h2>
+      <p class="small muted" style="margin:.2rem 0 .5rem">한 나라를 압박합니다.
         결과는 그 나라가 <b>이번 회의에서 무엇을 냈느냐</b>로 갈립니다.</p>
       <table class="t" style="margin-bottom:.6rem"><tr><th>상대가 고른 카드</th><th>결과</th></tr>
         <tr><td>핵개발</td><td class="hit">상대 핵 −10 · 우리 평화 +10</td></tr>
         <tr><td>평화</td><td>상대 평화 −5 · 우리 평화 −4</td></tr>
         <tr><td>중립</td><td class="miss">헛방 · 우리 평화 −10</td></tr></table>
-      <p class="small muted" style="margin:0 0 .6rem">상대는 지목당한 사실을 모릅니다.
+      <p class="small muted" style="margin:0 0 .6rem">상대는 압박당한 사실을 모릅니다.
         앞서가는 나라를 누르는 데 쓸 수도 있지만, 그 카드로 핵을 잡았다면 +10이었습니다.</p>
       <select id="sanc"><option value="">쓰지 않음</option>
-        ${rs.map(t=>`<option value="${t.id}">${esc(t.country)} 지목</option>`).join('')}</select></div>`:'';
+        ${rs.map(t=>`<option value="${t.id}">${esc(t.country)} 압박</option>`).join('')}</select></div>`:'';
     const spy=(me.tier!=='강대국'&&st.spy_left>0)?`<div class="panel" style="margin:12px 0;border-left:4px solid var(--peace)">
       <h2 style="margin-bottom:.2rem">첩보 카드 · ${st.spy_left}장 남음</h2>
       <p class="small muted" style="margin:.2rem 0 .6rem">조사한 나라가 이번 회의에서 핵개발을 골랐다면
-        <b>우리 평화 +5</b>, 아니면 <b>−5</b>. 성패와 관계없이 그 나라의 핵 포인트를 알게 됩니다.
+        <b>상대 핵 −5 · 우리 평화 +5</b>. 평화를 골랐다면 <b>상대 평화 −3 · 우리 평화 −2</b>.
+        중립이면 헛방으로 <b>우리 평화 −5</b>. 성패와 관계없이 그 나라의 핵 포인트를 알게 됩니다.
         그 정보를 강대국에 넘길지는 우리가 정합니다.</p>
       <select id="spy"><option value="">쓰지 않음</option>
         ${rs.map(t=>`<option value="${t.id}">${esc(t.country)} 조사</option>`).join('')}</select></div>`:'';
@@ -569,10 +588,10 @@ function drawStudent(join,g,st){
       <details style="margin-top:14px" open><summary class="small muted" style="cursor:pointer">점수표</summary>
         <div style="margin-top:9px"><table class="t">
     <tr><th>카드</th><th>평화 포인트</th><th>핵 포인트</th></tr>
-    <tr><td>평화</td><td><b>+6 − (그 회의의 핵개발국 수)</b></td><td>–</td></tr>
+    <tr><td>평화</td><td><b>+7 − (그 회의의 핵개발국 수), 최소 +2</b></td><td>–</td></tr>
     <tr><td>중립</td><td>+4</td><td>+2</td></tr>
     <tr><td>핵개발</td><td>+3</td><td>+6</td></tr></table>
-    <p class="small muted">모든 나라는 평화 5점을 갖고 시작합니다. 핵개발국이 한 곳 늘 때마다 평화 이득이 1씩 줄어듭니다.<br>
+    <p class="small muted">모든 나라는 평화 5점을 갖고 시작합니다. 핵개발국이 한 곳 늘 때마다 평화 이득이 1씩 줄어들되, 최소 +2는 보장됩니다.<br>
       어떤 나라의 핵 포인트가 ${EXPOSE_AT}을 넘으면 핵실험이 탐지되어 <b>다른 모든 나라의 평화 포인트가 8 깎입니다</b>
       (같은 회의에서 두 곳이면 16).<br>
       핵 ${NUKE_WIN}을 먼저 채우면 이기지만, 두 나라가 같은 회의에서 완성하면 핵전쟁으로 모두 패배합니다.
@@ -582,7 +601,7 @@ function drawStudent(join,g,st){
       const k=b.dataset.k,a=document.getElementById('sanc'),s=document.getElementById('spy');
       const tg=a&&a.value?a.value:null, sp=s&&s.value?s.value:null;
       let m=`'${k}' 카드를 냅니다.`;
-      if(tg)m+=`\n제재 지목: ${a.options[a.selectedIndex].text.replace(' 지목','')}`;
+      if(tg)m+=`\n제재 압박: ${a.options[a.selectedIndex].text.replace(' 압박','')}`;
       if(sp)m+=`\n첩보 조사: ${s.options[s.selectedIndex].text.replace(' 조사','')}`;
       if(!confirm(m+'\n번복할 수 없습니다.'))return;
       app.querySelectorAll('.choice').forEach(x=>x.disabled=true);
@@ -602,10 +621,10 @@ function drawStudent(join,g,st){
 
   el(head+body+`<hr class="rule"><table class="t">
     <tr><th>카드</th><th>평화 포인트</th><th>핵 포인트</th></tr>
-    <tr><td>평화</td><td><b>+6 − (그 회의의 핵개발국 수)</b></td><td>–</td></tr>
+    <tr><td>평화</td><td><b>+7 − (그 회의의 핵개발국 수), 최소 +2</b></td><td>–</td></tr>
     <tr><td>중립</td><td>+4</td><td>+2</td></tr>
     <tr><td>핵개발</td><td>+3</td><td>+6</td></tr></table>
-    <p class="small muted">모든 나라는 평화 5점을 갖고 시작합니다. 핵개발국이 한 곳 늘 때마다 평화 이득이 1씩 줄어듭니다.<br>
+    <p class="small muted">모든 나라는 평화 5점을 갖고 시작합니다. 핵개발국이 한 곳 늘 때마다 평화 이득이 1씩 줄어들되, 최소 +2는 보장됩니다.<br>
       어떤 나라의 핵 포인트가 ${EXPOSE_AT}을 넘으면 핵실험이 탐지되어 <b>다른 모든 나라의 평화 포인트가 8 깎입니다</b>
       (같은 회의에서 두 곳이면 16).<br>
       핵 ${NUKE_WIN}을 먼저 채우면 이기지만, 두 나라가 같은 회의에서 완성하면 핵전쟁으로 모두 패배합니다.
