@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { UnitActions } from '../hooks/useUnitActions';
-import { indexTiles, key, UNIT_TYPES, unitTargets } from '../lib/rules';
+import { indexTiles, key, unitTargets } from '../lib/rules';
 import { useGameStore } from '../store/gameStore';
 import { FACTIONS, type GameSnapshot, type Tile, type Unit } from '../types/game';
-import { UnitActionButtons } from './UnitActionButtons';
 
 // 2:1 아이소메트릭 투영 (문명2 / 조조전 방식)
 //   screenX = (x - y) * TW/2,  screenY = (x + y) * TH/2
@@ -24,7 +23,7 @@ function readZoom(): number {
   }
 }
 
-const IMPROVEMENT_ICON = { farm: '🌾', port: '⚓', railway: '🛤️', factory: '🏭' } as const;
+const IMPROVEMENT_ICON = { farm: '🌾', port: '⚓', railway: '🛤️', factory: '🏭', library: '📚' } as const;
 const sprite = (name: string) => `/sprites/${name}.png`;
 
 function isoCenter(x: number, y: number, mapH: number) {
@@ -89,6 +88,7 @@ export function GameMap({
   const active = selectedUnit && selectedUnit.owner_id === userId && !selectedUnit.acted && canAct && actions ? selectedUnit : undefined;
   const targets = useMemo(() => (active ? unitTargets(active, tileIndex, units) : null), [active, tileIndex, units]);
   const showMoves = targets && unitMode !== 'attack' ? targets.moves : null;
+  const wonderAt = useMemo(() => new Map(snapshot.wonders.map((w) => [key(w.x, w.y), w])), [snapshot.wonders]);
   const combatTiles = useMemo(
     () => new Set((snapshot.last_log ?? []).filter((e) => e.type === 'combat').map((e) => key(e.x as number, e.y as number))),
     [snapshot.last_log],
@@ -142,8 +142,6 @@ export function GameMap({
     if (u) select(selectedUnit?.id === u.id ? { kind: 'tile', x, y } : { kind: 'unit', id: u.id });
     else select({ kind: 'tile', x, y });
   };
-
-  const menuPos = active ? c(active.x, active.y) : null;
 
   return (
     <div className="relative rounded-lg bg-[#0b1a2e] shadow-inner">
@@ -227,7 +225,9 @@ export function GameMap({
                   {combatTiles.has(k) && (
                     <polygon points={diamond(cx, cy, 3)} fill="#ef4444" fillOpacity={0.15} stroke="#ef4444" strokeOpacity={0.5} strokeWidth={1} pointerEvents="none" />
                   )}
-                  {isMove && <polygon points={diamond(cx, cy, 2)} fill="#facc15" fillOpacity={0.32} pointerEvents="none" />}
+                  {isMove && (
+                    <polygon points={diamond(cx, cy, 2)} fill="#fde047" fillOpacity={0.5} stroke="#fef08a" strokeWidth={1.4} pointerEvents="none" />
+                  )}
                   {isAttack && (
                     <polygon points={diamond(cx, cy, 2)} fill="#ef4444" fillOpacity={unitMode === 'attack' ? 0.6 : 0.42} stroke="#fca5a5" strokeWidth={unitMode === 'attack' ? 1.5 : 0} pointerEvents="none" />
                   )}
@@ -247,7 +247,20 @@ export function GameMap({
                   <g key={`c${t.x},${t.y}`} pointerEvents="none">
                     <ellipse cx={cx} cy={cy + 3} rx={TW / 2.3} ry={TH / 2.6} fill="url(#foot-shadow)" />
                     <image href={sprite(t.is_capital ? 'capital' : 'city')} x={cx - w / 2} y={cy - w * 0.8 + 4} width={w} height={w} />
-                    <g transform={`translate(${cx},${cy + TH / 2 - 1})`}>
+                    {t.improvement === 'library' && (
+                    <text x={cx - 22} y={cy - 6} fontSize={11}>
+                      📚
+                    </text>
+                  )}
+                  {wonderAt.get(key(t.x, t.y)) && (
+                    <g transform={`translate(${cx + 18},${cy - w * 0.62})`}>
+                      <circle r={9} fill="#78350f" stroke="#fbbf24" strokeWidth={1.2} />
+                      <text y={4} textAnchor="middle" fontSize={11}>
+                        {wonderAt.get(key(t.x, t.y))!.icon}
+                      </text>
+                    </g>
+                  )}
+                  <g transform={`translate(${cx},${cy + TH / 2 - 1})`}>
                       <rect x={-25} y={-8} width={50} height={11} rx={2} fill={owner} fillOpacity={0.92} stroke="#1c1917" strokeWidth={0.6} />
                       <text y={0.5} textAnchor="middle" fontSize={7.5} fontWeight={700} fill="#fff">
                         {t.is_capital ? '★ ' : ''}
@@ -343,26 +356,6 @@ export function GameMap({
             })}
           </svg>
 
-          {/* 이동 후 행동 메뉴 (유닛 옆 팝업) */}
-          {active && menuPos && actions && (
-            <div
-              className="absolute z-10 w-52 rounded-lg border border-amber-600/70 bg-stone-900/95 p-2 shadow-2xl"
-              style={{ left: (menuPos.cx + 22) * zoom, top: Math.max(4, (menuPos.cy - 40) * zoom) }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="mb-1.5 flex items-center justify-between text-xs">
-                <span className="font-bold text-amber-300">
-                  {UNIT_TYPES[active.kind].name} · 이동 {active.moves_left}
-                </span>
-                <button onClick={() => select(null)} className="text-stone-400 hover:text-white" aria-label="닫기">
-                  ✕
-                </button>
-              </div>
-              {unitMode !== 'attack' && active.moves_left > 0 && <p className="mb-1.5 text-[11px] text-stone-400">노란 칸을 누르면 바로 이동해요.</p>}
-              <UnitActionButtons unit={active} snapshot={snapshot} actions={actions} canAct={canAct} compact />
-              {actions.error && <p className="mt-1 text-[11px] text-red-400">{actions.error}</p>}
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -28,6 +28,8 @@ export const UNIT_TYPES: Record<UnitKind, UnitType> = {
   hero_napoleon:    { name: '나폴레옹',     icon: '👑', attack: 8, defense: 6, moves: 3, initiative: 8, range: 1, cost: 60, naval: false, hero: true,  faction: 'france',  requires: null },
   hero_robespierre: { name: '로베스피에르', icon: '📜', attack: 2, defense: 4, moves: 2, initiative: 5, range: 1, cost: 40, naval: false, hero: true,  faction: 'france',  requires: 'enlightenment' },
   hero_watt:        { name: '제임스 와트',  icon: '⚙️', attack: 0, defense: 3, moves: 2, initiative: 3, range: 1, cost: 40, naval: false, hero: true,  faction: 'britain', requires: null },
+  // 도서관 완공 때만 등장 (생산 불가)
+  scholar:          { name: '학자',         icon: '📖', attack: 0, defense: 1, moves: 1, initiative: 1, range: 1, cost: 999, naval: false, hero: true, faction: null,      requires: null },
 };
 
 export const TERRAIN: Record<Terrain, { name: string; color: string; yields: string }> = {
@@ -44,6 +46,7 @@ export const IMPROVEMENTS: Record<Improvement, { name: string; cost: number; des
   port:    { name: '항구', cost: 15, desc: '골드 +2 (바다 인접)' },
   railway: { name: '철도', cost: 15, desc: '망치 +1 (증기기관)' },
   factory: { name: '공장', cost: 30, desc: '망치 +3 (도시, 증기기관)' },
+  library: { name: '도서관', cost: 35, desc: '혁신 +2 · 지식인 합류 (도시, 계몽사상)' },
 };
 
 export const chebyshev = (ax: number, ay: number, bx: number, by: number) =>
@@ -108,6 +111,7 @@ export function producibleUnits(me: RoomPlayer, myUnits: Unit[], leaders: Leader
     // 링컨: 어느 진영이든 시민군 징집 가능
     if (t.faction && t.faction !== me.faction && !(k === 'militia' && leaders.includes('lincoln'))) return false;
     if (t.requires && !me.researched.includes(t.requires)) return false;
+    if (k === 'scholar') return false; // 도서관 완공으로만 등장
     if (t.hero && myUnits.some((u) => u.kind === k)) return false;
     return true;
   });
@@ -117,6 +121,7 @@ export function producibleUnits(me: RoomPlayer, myUnits: Unit[], leaders: Leader
 export function buildableImprovements(tile: Tile, me: RoomPlayer, tiles: TileIndex): Improvement[] {
   if (tile.owner_id !== me.user_id || tile.improvement || tile.terrain === 'water' || tile.terrain === 'mountain') return [];
   const steam = me.researched.includes('steam_engine');
+  const enlightened = me.researched.includes('enlightenment');
   const coastal = [-1, 0, 1].some((dx) =>
     [-1, 0, 1].some((dy) => (dx || dy) && tiles.get(key(tile.x + dx, tile.y + dy))?.terrain === 'water'),
   );
@@ -124,6 +129,7 @@ export function buildableImprovements(tile: Tile, me: RoomPlayer, tiles: TileInd
     if (i === 'port') return coastal;
     if (i === 'railway') return steam;
     if (i === 'factory') return steam && tile.is_city;
+    if (i === 'library') return enlightened && tile.is_city;
     return true;
   });
 }

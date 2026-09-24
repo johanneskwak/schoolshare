@@ -15,6 +15,8 @@ export interface UnitActions {
   foundCity: (unit: Unit) => Promise<void>;
   rest: (unit: Unit, mode: RestMode) => Promise<void>;
   upgrade: (unit: Unit) => Promise<void>;
+  /** 불가사의 즉시 건설 (망치) */
+  buildWonder: (x: number, y: number, wonderId: string) => Promise<void>;
 }
 
 const FX_MS = 1500;
@@ -103,6 +105,12 @@ export function useUnitActions(roomId: string, refetch: () => Promise<void>): Un
           if (mode !== 'wait') showFx([{ x: unit.x, y: unit.y, text: mode === 'fortify' ? '요새화' : '치유', kind: 'info' }]);
           await refetch();
           select(null);
+        }),
+      buildWonder: (x, y, wonderId) =>
+        run(async () => {
+          await api.buildWonder(roomId, x, y, wonderId);
+          showFx([{ x, y, text: '불가사의 완공!', kind: 'info' }]);
+          await refetch();
         }),
       upgrade: (unit) =>
         run(async () => {

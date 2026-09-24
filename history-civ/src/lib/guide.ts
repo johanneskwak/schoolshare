@@ -44,8 +44,8 @@ export function computeGuide(snapshot: GameSnapshot, me: RoomPlayer, pending: Ac
 
   const myCities = snapshot.tiles.filter((t) => t.is_city && t.owner_id === me.user_id);
   const producing = new Set(pending.flatMap((a) => (a.type === 'produce' ? [`${a.x},${a.y}`] : [])));
-  const hammerLeft = me.hammer - pending.reduce((s, a) => s + (a.type === 'produce' ? unitCost(a.unit_kind, leaders) : 0), 0);
-  const cheapest = Math.min(...producibleUnits(me, myUnits, leaders).map((k) => unitCost(k, leaders)));
+  const hammerLeft = me.hammer - pending.reduce((s, a) => s + (a.type === 'produce' ? unitCost(a.unit_kind, leaders, me.faction) : 0), 0);
+  const cheapest = Math.min(...producibleUnits(me, myUnits, leaders).map((k) => unitCost(k, leaders, me.faction)));
   const idleCity = hammerLeft >= cheapest ? myCities.find((c) => !producing.has(`${c.x},${c.y}`)) : undefined;
 
   const settler = idle.find((u) => u.kind === 'settler');

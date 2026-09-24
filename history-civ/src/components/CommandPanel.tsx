@@ -10,7 +10,9 @@ import {
 } from '../lib/rules';
 import { useGameStore } from '../store/gameStore';
 import { leadersOf, unitCost } from '../lib/leaders';
-import type { Action, GameSnapshot, RoomPlayer } from '../types/game';
+import { TECHS, type Action, type GameSnapshot, type RoomPlayer } from '../types/game';
+import { WONDER_DEFENSE_TURNS, wonderOptions } from '../lib/civ';
+import { InfoTooltip } from './InfoTooltip';
 import type { UnitActions } from '../hooks/useUnitActions';
 import { UnitDetailPanel } from './UnitDetailPanel';
 
@@ -54,7 +56,7 @@ export function CommandPanel({
   const myLeaders = useMemo(() => leadersOf(snapshot.leaders, me.user_id), [snapshot.leaders, me.user_id]);
 
   // 이번 턴에 이미 예약한 망치/골드 (서버는 처리 순서대로 차감하므로 초과분은 무시됨)
-  const hammerReserved = pending.reduce((s, a) => s + (a.type === 'produce' ? unitCost(a.unit_kind, myLeaders) : 0), 0);
+  const hammerReserved = pending.reduce((s, a) => s + (a.type === 'produce' ? unitCost(a.unit_kind, myLeaders, me.faction) : 0), 0);
   const goldReserved = pending.reduce(
     (s, a) => s + (a.type === 'build' ? IMPROVEMENTS[a.improvement].cost : a.type === 'spread' ? 10 : 0),
     0,
@@ -64,7 +66,7 @@ export function CommandPanel({
 
   if (selection?.kind === 'unit') {
     const u = snapshot.units.find((x) => x.id === selection.id);
-    if (u) body = <UnitDetailPanel unit={u} snapshot={snapshot} me={me} actions={actions} canAct={canAct} />;
+    if (u) body = <UnitDetailPanel unit={u} snapshot={snapshot} me={me} actions={actions} canAct={canAct} showActions={false} />;
   } else if (selection?.kind === 'tile') {
     const tile = tileIndex.get(key(selection.x, selection.y));
     if (tile) {
@@ -92,8 +94,8 @@ export function CommandPanel({
                 {producibleUnits(me, myUnits, myLeaders).map((k) => {
                   const ut = UNIT_TYPES[k];
                   const chosen = produceOrder?.type === 'produce' && produceOrder.unit_kind === k;
-                  const cost = unitCost(k, myLeaders);
-                  const afford = cost <= me.hammer - hammerReserved + (produceOrder?.type === 'produce' ? unitCost(produceOrder.unit_kind, myLeaders) : 0);
+                  const cost = unitCost(k, myLeaders, me.faction);
+                  const afford = cost <= me.hammer - hammerReserved + (produceOrder?.type === 'produce' ? unitCost(produceOrder.unit_kind, myLeaders, me.faction) : 0);
                   return (
                     <button
                       key={k}
@@ -109,6 +111,47 @@ export function CommandPanel({
               </div>
             </div>
           )}
+
+          {tile.is_city && (() => {
+            const here = snapshot.wonders.find((w) => w.x === tile.x && w.y === tile.y);
+            if (here) {
+              return (
+                <div className="rounded border border-amber-600/60 bg-amber-950/40 p-2 text-xs">
+                  <div className="font-bold text-amber-300">
+                    {here.icon} {here.name_ko}
+                  </div>
+                  <div className="text-stone-300">
+                    {here.turns_left > 0 ? `사수까지 ${here.turns_left}턴 남음 — 점령당하면 점령자에게 넘어가요.` : '방어 완료!'}
+                  </div>
+                </div>
+              );
+            }
+            if (!mine) return null;
+            return (
+              <div className="space-y-1">
+                <div className="text-sm font-bold">
+                  <InfoTooltip concept="wonder_victory">🏛️ 불가사의 (즉시 완공)</InfoTooltip>
+                </div>
+                {wonderOptions(me, tile, snapshot.wonders).map((o) => (
+                  <button
+                    key={o.id}
+                    disabled={!canAct || !o.ok || actions.busy}
+                    onClick={() => void actions.buildWonder(tile.x, tile.y, o.id)}
+                    title={o.def.desc}
+                    className="block w-full rounded border border-amber-700/60 bg-stone-900 px-2 py-1.5 text-left text-xs hover:bg-amber-950 disabled:opacity-40"
+                  >
+                    <span className="font-bold">
+                      {o.def.icon} {o.def.name}
+                    </span>{' '}
+                    🔨{o.def.hammer}
+                    {o.def.tech && ` · ${TECHS[o.def.tech].name}`}
+                    {!o.ok && <span className="block text-stone-400">({o.reason})</span>}
+                  </button>
+                ))}
+                <p className="text-[11px] text-stone-500">완공 후 이 도시를 {WONDER_DEFENSE_TURNS}턴 동안 지키면 불가사의 승리!</p>
+              </div>
+            );
+          })()}
 
           {builds.length > 0 && (
             <div className="space-y-1">

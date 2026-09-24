@@ -45,6 +45,12 @@ const ERROR_MESSAGES: Record<string, string> = {
   NOT_ENOUGH_GOLD: '골드가 부족해요.',
   NOT_IN_TERRITORY: '우리 영토 안에서만 업그레이드할 수 있어요.',
   INVALID_TARGET: '맵 밖이에요.',
+  NO_WONDER: '없는 불가사의예요.',
+  WRONG_FACTION: '우리 문명이 지을 수 없는 불가사의예요.',
+  NOT_YOUR_CITY: '우리 도시에서만 지을 수 있어요.',
+  WONDER_TAKEN: '다른 문명이 이미 완공했어요.',
+  CITY_HAS_WONDER: '이 도시엔 이미 불가사의가 있어요.',
+  NOT_ENOUGH_HAMMER: '망치가 부족해요.',
   EVENT_NOT_PENDING: '이미 결정된 사건이에요.',
   INVALID_CHOICE: '잘못된 선택이에요.',
   INVALID_AI_COUNT:'AI는 1~3명까지 고를 수 있어요.',
@@ -90,6 +96,9 @@ export const api = {
   unitRest: (roomId: string, unitId: string, mode: 'wait' | 'fortify' | 'heal') =>
     rpc<unknown>('hc_unit_rest', { p_room: roomId, p_unit: unitId, p_mode: mode }),
   unitUpgrade: (roomId: string, unitId: string) => rpc<unknown>('hc_unit_upgrade', { p_room: roomId, p_unit: unitId }),
+  buildWonder: (roomId: string, x: number, y: number, wonderId: string) =>
+    rpc<GameEvent[]>('hc_build_wonder', { p_room: roomId, p_x: x, p_y: y, p_wonder: wonderId }),
+  ackScholar: (roomId: string, scholarId: string) => rpc<void>('hc_ack_scholar', { p_room: roomId, p_scholar: scholarId }),
   chooseEvent: (roomId: string, eventId: number, choice: 'a' | 'b') =>
     rpc<unknown>('hc_choose_event', { p_room: roomId, p_event: eventId, p_choice: choice }),
   tryResolveTurn: (roomId: string, turn: number) =>

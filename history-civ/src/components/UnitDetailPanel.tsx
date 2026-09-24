@@ -1,6 +1,7 @@
 import type { UnitActions } from '../hooks/useUnitActions';
 import { indexTiles, key, UNIT_TYPES } from '../lib/rules';
 import { canUpgrade, UNIT_INFO, UPGRADES, upgradeChain } from '../lib/units';
+import { nextCityName } from '../lib/civ';
 import { FACTIONS, TECHS, type GameSnapshot, type RoomPlayer, type Unit } from '../types/game';
 import { UnitActionButtons } from './UnitActionButtons';
 
@@ -20,12 +21,15 @@ export function UnitDetailPanel({
   me,
   actions,
   canAct,
+  showActions = true,
 }: {
   unit: Unit;
   snapshot: GameSnapshot;
   me: RoomPlayer;
   actions: UnitActions;
   canAct: boolean;
+  /** false면 행동 버튼은 맵 아래 HUD에만 보인다 */
+  showActions?: boolean;
 }) {
   const t = UNIT_TYPES[unit.kind];
   const info = UNIT_INFO[unit.kind];
@@ -122,7 +126,13 @@ export function UnitDetailPanel({
         )}
       </div>
 
-      {mine && <UnitActionButtons unit={unit} snapshot={snapshot} actions={actions} canAct={canAct} />}
+      {mine && unit.kind === 'settler' && (
+        <div className="rounded bg-emerald-950/50 px-2 py-1 text-xs text-emerald-200">
+          🏗️ 다음 도시 이름: <b>{nextCityName(me.faction, snapshot.tiles, me.user_id)}</b> ({FACTIONS[me.faction].name} 도시 목록 순서)
+        </div>
+      )}
+      {mine && showActions && <UnitActionButtons unit={unit} snapshot={snapshot} actions={actions} canAct={canAct} />}
+      {mine && !showActions && !unit.acted && <p className="text-[11px] text-stone-500">행동 명령은 맵 아래 명령 바에 있어요.</p>}
       {actions.error && <p className="text-xs text-red-400">{actions.error}</p>}
     </div>
   );

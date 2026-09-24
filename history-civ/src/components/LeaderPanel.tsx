@@ -1,9 +1,19 @@
 import { LEADER_ORDER, LEADERS } from '../lib/leaders';
-import { FACTIONS, type LeaderHolder, type RoomPlayer } from '../types/game';
+import { FACTIONS, type LeaderHolder, type RoomPlayer, type ScholarHolder } from '../types/game';
 import { InfoTooltip } from './InfoTooltip';
 
 /** LeaderSystem: 역사적 인물 4명의 합류 현황과 효과 */
-export function LeaderPanel({ holders, players, meId }: { holders: LeaderHolder[]; players: RoomPlayer[]; meId: string }) {
+export function LeaderPanel({
+  holders,
+  players,
+  meId,
+  scholars = [],
+}: {
+  holders: LeaderHolder[];
+  players: RoomPlayer[];
+  meId: string;
+  scholars?: ScholarHolder[];
+}) {
   const byId = new Map(holders.map((h) => [h.leader_id, h]));
   const playerOf = new Map(players.map((p) => [p.user_id, p]));
   return (
@@ -38,6 +48,30 @@ export function LeaderPanel({ holders, players, meId }: { holders: LeaderHolder[
                   <span className="text-stone-500">등장 조건: {def.condition}</span>
                 )}
               </div>
+            </div>
+          </div>
+        );
+      })}
+      <div className="border-t border-stone-700 pt-2 text-sm font-bold">
+        <InfoTooltip concept="scholars">📚 지식인 (도서관)</InfoTooltip>
+      </div>
+      {scholars.length === 0 && <p className="text-xs text-stone-500">아직 없음 — 도시에 도서관을 지으면 합류해요.</p>}
+      {scholars.map((s) => {
+        const owner = playerOf.get(s.player_id);
+        const mine = s.player_id === meId;
+        return (
+          <div key={s.id} className={`flex gap-2 rounded p-2 text-xs ${mine ? 'bg-sky-900/40 ring-1 ring-sky-500' : 'bg-stone-900/60'}`}>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-stone-700 text-lg">{s.icon}</div>
+            <div className="min-w-0">
+              <InfoTooltip concept={{ icon: s.icon, title: `${s.name} · ${s.era}`, body: [`대표작: ${s.works}`, s.significance, `효과: ${s.effect}`] }}>
+                <span className="font-bold">{s.name}</span>
+              </InfoTooltip>
+              <div className="truncate text-stone-300">{s.works}</div>
+              {owner && (
+                <div style={{ color: FACTIONS[owner.faction].color }}>
+                  {mine ? '★ 우리 문명' : owner.nickname} (턴 {s.joined_turn})
+                </div>
+              )}
             </div>
           </div>
         );
