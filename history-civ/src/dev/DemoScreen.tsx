@@ -44,14 +44,14 @@ function buildSnapshot(): GameSnapshot {
     room: {
       id: 'demo', code: 'DEMO01', host_id: ME, status: 'playing', max_players: 2, map_width: W, map_height: H,
       turn_number: 3, turn_seconds: 60, turn_deadline: new Date(now.getTime() + 45_000).toISOString(), max_turns: 60,
-      winner_id: null, victory: null, created_at: '', updated_at: '',
+      winner_id: null, victory: null, is_solo: false, created_at: '', updated_at: '',
     },
     players: [
       { room_id: 'demo', user_id: ME, nickname: '나', seat: 0, faction: 'france', is_ready: true, has_ended_turn: false,
-        is_eliminated: false, gold: 40, food: 3, hammer: 45, innovation: 4, ideology: 12, research_target: 'enlightenment',
+        is_eliminated: false, is_ai: false, gold: 40, food: 3, hammer: 45, innovation: 4, ideology: 12, research_target: 'enlightenment',
         research_progress: 8, researched: ['steam_engine'], score: 20, joined_at: '' },
       { room_id: 'demo', user_id: FOE, nickname: '상대', seat: 1, faction: 'britain', is_ready: true, has_ended_turn: true,
-        is_eliminated: false, gold: 30, food: 1, hammer: 30, innovation: 6, ideology: 2, research_target: null,
+        is_eliminated: false, is_ai: false, gold: 30, food: 1, hammer: 30, innovation: 6, ideology: 2, research_target: null,
         research_progress: 0, researched: [], score: 18, joined_at: '' },
     ],
     tiles,

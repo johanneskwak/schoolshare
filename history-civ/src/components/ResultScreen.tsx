@@ -32,7 +32,10 @@ export function ResultScreen({
           <p className="text-xl">승자 없음</p>
         )}
         {room.victory && <p className="text-stone-400">{VICTORY_DESC[room.victory]}</p>}
-        <p className="text-sm text-stone-500">{room.turn_number}턴 진행 · 승자 보너스 +50점</p>
+        <p className="text-sm text-stone-500">
+          {room.turn_number}턴 진행 · 승자 보너스 +50점
+          {room.is_solo && ' · AI 대전은 리더보드에 기록되지 않아요'}
+        </p>
       </div>
 
       <table className="w-full text-sm">
@@ -51,6 +54,7 @@ export function ResultScreen({
             <tr key={p.user_id} className={`border-b border-stone-800 ${p.user_id === userId ? 'bg-stone-800' : ''}`}>
               <td className="py-2">{MEDAL[i] ?? i + 1}</td>
               <td>
+                {p.is_ai && <span title="AI">🤖 </span>}
                 <span style={{ color: FACTIONS[p.faction].color }}>{p.nickname}</span>
                 <span className="ml-1 text-xs text-stone-500">{FACTIONS[p.faction].name}</span>
                 {p.is_eliminated && <span className="ml-1 text-xs text-red-400">멸망</span>}

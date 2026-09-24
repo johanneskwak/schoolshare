@@ -22,7 +22,7 @@ const unit = (p: Partial<Unit>): Unit => ({
 
 const player = (p: Partial<RoomPlayer> = {}): RoomPlayer => ({
   room_id: 'r', user_id: ME, nickname: 'a', seat: 0, faction: 'france', is_ready: true, has_ended_turn: false,
-  is_eliminated: false, gold: 30, food: 0, hammer: 20, innovation: 0, ideology: 0, research_target: null,
+  is_eliminated: false, is_ai: false, gold: 30, food: 0, hammer: 20, innovation: 0, ideology: 0, research_target: null,
   research_progress: 0, researched: [], score: 0, joined_at: '', ...p,
 });
 

@@ -24,6 +24,8 @@ export interface Room {
   max_turns: number;
   winner_id: string | null;
   victory: VictoryType | null;
+  /** AI 대전(1인 프리플레이) 방 */
+  is_solo: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -37,6 +39,7 @@ export interface RoomPlayer {
   is_ready: boolean;
   has_ended_turn: boolean;
   is_eliminated: boolean;
+  is_ai: boolean;
   gold: number;
   food: number;
   hammer: number;

@@ -1,14 +1,14 @@
 // 승리 조건 진행도 (서버 hc__resolve_turn 8단계 판정과 같은 기준)
 import { TECHS, type RoomPlayer, type TechId } from '../types/game';
 
-export const CULTURE_GOAL = 100;
+export const CULTURE_GOAL = 200;
 export const SCIENCE_PATH: TechId[] = ['steam_engine', 'electrification', 'new_weapons'];
 
 export interface VictoryProgress {
   userId: string;
   /** 0~1 */
   science: number;
-  /** 0~1, 100점 이상이면서 1위여야 승리 */
+  /** 0~1, 200점 이상이면서 1위여야 승리 */
   culture: number;
   cultureLeader: boolean;
 }
@@ -42,6 +42,6 @@ export function finalRanking(players: RoomPlayer[], winnerId: string | null): Ro
 export const VICTORY_DESC = {
   conquest: '상대 문명의 수도를 모두 함락했습니다.',
   science: '증기기관 → 전기화 → 신무기 연구를 가장 먼저 완성했습니다.',
-  culture: '혁명 이념 100점 이상으로 이념 전파 1위를 달성했습니다.',
+  culture: '혁명 이념 200점 이상으로 이념 전파 1위를 달성했습니다.',
   score: '마지막 턴까지 가장 높은 승점을 얻었습니다.',
 } as const;
