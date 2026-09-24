@@ -72,7 +72,9 @@ export function DemoScreen() {
     <div className="mx-auto max-w-7xl px-4 py-4">
       <p className="mb-2 text-sm text-amber-400">데모 모드 — 서버와 연결되지 않은 화면입니다.</p>
       <div className="grid gap-3 lg:grid-cols-[1fr_20rem]">
-        <GameMap snapshot={snapshot} userId={ME} canAct />
+        <div className="min-w-0">
+          <GameMap snapshot={snapshot} userId={ME} canAct />
+        </div>
         <CommandPanel snapshot={snapshot} me={me} canAct />
       </div>
     </div>

@@ -97,7 +97,7 @@ export function GameScreen({
       </header>
 
       <div className="grid gap-3 lg:grid-cols-[1fr_20rem]">
-        <section className="space-y-2">
+        <section className="min-w-0 space-y-2">
           <GameMap snapshot={snapshot} userId={userId} canAct={canAct} />
           <div className="flex flex-wrap items-center gap-3">
             {me.is_eliminated ? (

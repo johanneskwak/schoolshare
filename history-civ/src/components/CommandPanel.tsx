@@ -57,8 +57,9 @@ export function CommandPanel({ snapshot, me, canAct }: { snapshot: GameSnapshot;
       const ordered = pending.some((a) => 'unit_id' in a && a.unit_id === u.id);
       body = (
         <div className="space-y-2">
-          <div className="text-lg font-bold">
-            {t.icon} {t.name}
+          <div className="flex items-center gap-2 text-lg font-bold">
+            <img src={`/sprites/unit_${u.kind}.png`} alt="" className="h-12 w-12 object-contain" />
+            {t.name}
           </div>
           <div className="text-xs text-stone-300">
             공격 {t.attack} · 방어 {t.defense} · 이동 {u.moves_left}/{t.moves} · 사거리 {t.range} · 선제 {t.initiative} · HP {u.hp}
@@ -119,7 +120,8 @@ export function CommandPanel({ snapshot, me, canAct }: { snapshot: GameSnapshot;
                       onClick={() => queueAction({ type: 'produce', x: tile.x, y: tile.y, unit_kind: k })}
                       className={`rounded px-2 py-1 text-left text-xs disabled:opacity-40 ${chosen ? 'bg-amber-600' : 'bg-stone-700 hover:bg-stone-600'}`}
                     >
-                      {ut.icon} {ut.name} <span className="text-stone-300">🔨{ut.cost}</span>
+                      <img src={`/sprites/unit_${k}.png`} alt="" className="mr-1 inline h-5 w-5 object-contain" />
+                      {ut.name} <span className="text-stone-300">🔨{ut.cost}</span>
                     </button>
                   );
                 })}
