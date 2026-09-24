@@ -63,6 +63,8 @@ export function HomeScreen({
   const [code, setCode] = useState('');
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [turnSeconds, setTurnSeconds] = useState(60);
+  const [aiCount, setAiCount] = useState(2);
+  const [soloSeconds, setSoloSeconds] = useState(120);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -114,6 +116,38 @@ export function HomeScreen({
           className="rounded bg-amber-500 px-4 py-2 font-bold text-stone-900 disabled:opacity-50"
         >
           방 만들기
+        </button>
+      </section>
+
+      <section className="space-y-3 rounded-lg border border-emerald-700 bg-stone-800 p-4">
+        <h2 className="font-bold">🤖 혼자 하기 (AI 대전)</h2>
+        <p className="text-xs text-stone-400">
+          AI 문명과 바로 대결합니다. 턴 종료를 누르면 AI가 즉시 움직여요. AI 대전 결과는 리더보드에 기록되지 않습니다.
+        </p>
+        <div className="flex flex-wrap gap-4 text-sm">
+          <label>
+            AI 상대{' '}
+            <select className="rounded bg-stone-700 px-2 py-1" value={aiCount} onChange={(e) => setAiCount(+e.target.value)}>
+              {[1, 2, 3].map((n) => (
+                <option key={n} value={n}>{n}명</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            턴 시간{' '}
+            <select className="rounded bg-stone-700 px-2 py-1" value={soloSeconds} onChange={(e) => setSoloSeconds(+e.target.value)}>
+              {[60, 120, 300].map((n) => (
+                <option key={n} value={n}>{n === 300 ? '5분' : `${n}초`}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <button
+          disabled={busy}
+          onClick={() => run(() => api.createSoloGame(faction, aiCount, soloSeconds))}
+          className="rounded bg-emerald-600 px-4 py-2 font-bold disabled:opacity-50"
+        >
+          AI와 게임 시작
         </button>
       </section>
 

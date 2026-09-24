@@ -15,6 +15,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   NOT_MEMBER: '이 방의 참가자가 아니에요.',
   INVALID_ACTIONS: '잘못된 명령이 포함되어 있어요.',
   TURN_ALREADY_ENDED: '이미 턴을 종료했어요.',
+  INVALID_AI_COUNT: 'AI는 1~3명까지 고를 수 있어요.',
 };
 
 export class GameApiError extends Error {
@@ -39,6 +40,8 @@ export const api = {
     rpc<void>('hc_update_lobby_state', { p_room: roomId, p_ready: ready, p_faction: faction ?? null }),
   leaveRoom: (roomId: string) => rpc<void>('hc_leave_room', { p_room: roomId }),
   startGame: (roomId: string) => rpc<void>('hc_start_game', { p_room: roomId }),
+  createSoloGame: (faction: Faction, aiCount: number, turnSeconds: number) =>
+    rpc<string>('hc_create_solo_game', { p_faction: faction, p_ai_count: aiCount, p_turn_seconds: turnSeconds }),
 
   getGameState: (roomId: string) => rpc<GameSnapshot>('hc_get_game_state', { p_room: roomId }),
   submitActions: (roomId: string, actions: Action[]) =>

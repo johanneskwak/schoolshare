@@ -84,7 +84,7 @@ export function GameScreen({
             <span title="식량">🌾 {me.food}</span>
             <span title="망치">🔨 {me.hammer}</span>
             <span title="혁신(턴당)">💡 +{me.innovation}</span>
-            <span title="혁명 이념 (100 이상 1위 → 문화 승리)">🕊️ {me.ideology}</span>
+            <span title="혁명 이념 (200 이상 1위 → 문화 승리)">🕊️ {me.ideology}</span>
             <span title="승점">⭐ {me.score}</span>
           </div>
         </div>
@@ -145,7 +145,11 @@ export function GameScreen({
           <ul className="space-y-1 rounded-lg bg-stone-800 p-3">
             {players.map((p) => (
               <li key={p.user_id} className={`flex items-center gap-2 text-sm ${p.is_eliminated ? 'line-through opacity-50' : ''}`}>
-                <span className={`h-2 w-2 rounded-full ${online.has(p.user_id) ? 'bg-green-400' : 'bg-stone-500'}`} />
+                {p.is_ai ? (
+                  <span title="AI">🤖</span>
+                ) : (
+                  <span className={`h-2 w-2 rounded-full ${online.has(p.user_id) ? 'bg-green-400' : 'bg-stone-500'}`} />
+                )}
                 <span style={{ color: FACTIONS[p.faction].color }}>{p.nickname}</span>
                 <span className="text-xs text-stone-400">⭐{p.score} 🕊️{p.ideology}</span>
                 <span className="ml-auto">{p.has_ended_turn && !p.is_eliminated ? '✅' : '⏳'}</span>
