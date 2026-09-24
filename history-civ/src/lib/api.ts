@@ -15,7 +15,9 @@ const ERROR_MESSAGES: Record<string, string> = {
   NOT_MEMBER: '이 방의 참가자가 아니에요.',
   INVALID_ACTIONS: '잘못된 명령이 포함되어 있어요.',
   TURN_ALREADY_ENDED: '이미 턴을 종료했어요.',
-  INVALID_AI_COUNT: 'AI는 1~3명까지 고를 수 있어요.',
+  EVENT_NOT_PENDING: '이미 결정된 사건이에요.',
+  INVALID_CHOICE: '잘못된 선택이에요.',
+  INVALID_AI_COUNT:'AI는 1~3명까지 고를 수 있어요.',
 };
 
 export class GameApiError extends Error {
@@ -48,6 +50,8 @@ export const api = {
     rpc<void>('hc_submit_actions', { p_room: roomId, p_actions: actions }),
   endTurn: (roomId: string, actions: Action[]) => rpc<number>('hc_end_turn', { p_room: roomId, p_actions: actions }),
   cancelEndTurn: (roomId: string) => rpc<void>('hc_cancel_end_turn', { p_room: roomId }),
+  chooseEvent: (roomId: string, eventId: number, choice: 'a' | 'b') =>
+    rpc<unknown>('hc_choose_event', { p_room: roomId, p_event: eventId, p_choice: choice }),
   tryResolveTurn: (roomId: string, turn: number) =>
     rpc<boolean>('hc_try_resolve_turn', { p_room: roomId, p_turn: turn }),
 };

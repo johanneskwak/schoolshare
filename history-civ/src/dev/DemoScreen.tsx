@@ -1,7 +1,11 @@
 // 개발 전용(?demo): 로그인/서버 없이 맵과 명령 UI를 확인하는 화면. 프로덕션 빌드에는 포함되지 않는다.
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GameMap } from '../components/GameMap';
 import { CommandPanel } from '../components/CommandPanel';
+import { EventModal } from '../components/EventModal';
+import { GuidePanel } from '../components/GuidePanel';
+import { LeaderPanel } from '../components/LeaderPanel';
+import { computeGuide } from '../lib/guide';
 import { useGameStore } from '../store/gameStore';
 import type { GameSnapshot, Terrain, Tile, Unit } from '../types/game';
 
@@ -48,35 +52,64 @@ function buildSnapshot(): GameSnapshot {
     },
     players: [
       { room_id: 'demo', user_id: ME, nickname: '나', seat: 0, faction: 'france', is_ready: true, has_ended_turn: false,
-        is_eliminated: false, is_ai: false, gold: 40, food: 3, hammer: 45, innovation: 4, ideology: 12, research_target: 'enlightenment',
+        is_eliminated: false, is_ai: false, stability: 60, gold: 40, food: 3, hammer: 45, innovation: 4, ideology: 12, research_target: 'enlightenment',
         research_progress: 8, researched: ['steam_engine'], score: 20, joined_at: '' },
       { room_id: 'demo', user_id: FOE, nickname: '상대', seat: 1, faction: 'britain', is_ready: true, has_ended_turn: true,
-        is_eliminated: false, is_ai: false, gold: 30, food: 1, hammer: 30, innovation: 6, ideology: 2, research_target: null,
+        is_eliminated: false, is_ai: false, stability: 60, gold: 30, food: 1, hammer: 30, innovation: 6, ideology: 2, research_target: null,
         research_progress: 0, researched: [], score: 18, joined_at: '' },
     ],
     tiles,
     units,
     my_actions: [],
     last_log: [{ type: 'combat', x: 12, y: 8 }, { type: 'tech_researched', tech: 'steam_engine' }],
+    leaders: [
+      { leader_id: 'napoleon', player_id: ME, joined_turn: 2 },
+      { leader_id: 'watt', player_id: FOE, joined_turn: 3 },
+    ],
+    my_events: [
+      {
+        pe_id: 1, id: 'luddite', turn: 3, title: '러다이트 운동', era: '1811년', icon: '⚙️',
+        body: '"기계가 우리 일자리를 빼앗는다!" 방직 노동자들이 밤마다 공장에 몰려가 새로 들인 기계를 부수고 있습니다.',
+        choice_a_label: '기계 파괴 진압', choice_a_desc: '군대를 보내 진압한다 · 안정도 -15, 공장 가동 유지(망치 +10)',
+        choice_b_label: '노동 조건 개선', choice_b_desc: '임금과 노동 시간을 개선한다 · 골드 -20, 혁명 이념 +10, 안정도 +15',
+      },
+    ],
   };
 }
 
 export function DemoScreen() {
   const snapshot = useGameStore((s) => s.snapshot);
+  const pending = useGameStore((s) => s.pending);
+  const select = useGameStore((s) => s.select);
+  const [showEvent, setShowEvent] = useState(true);
   useEffect(() => {
     useGameStore.getState().setSnapshot(buildSnapshot(), 0);
   }, []);
   if (!snapshot) return null;
   const me = snapshot.players[0]!;
+  const events = showEvent ? snapshot.my_events : [];
+  const guide = computeGuide({ ...snapshot, my_events: events }, me, pending);
   return (
-    <div className="mx-auto max-w-7xl px-4 py-4">
+    <div className="mx-auto max-w-[1500px] px-4 py-4">
       <p className="mb-2 text-sm text-amber-400">데모 모드 — 서버와 연결되지 않은 화면입니다.</p>
-      <div className="grid gap-3 lg:grid-cols-[1fr_20rem]">
+      <div className="grid gap-3 lg:grid-cols-[1fr_22rem]">
         <div className="min-w-0">
-          <GameMap snapshot={snapshot} userId={ME} canAct />
+          <GameMap snapshot={snapshot} userId={ME} canAct idleUnitIds={guide.idleUnitIds} />
         </div>
-        <CommandPanel snapshot={snapshot} me={me} canAct />
+        <aside className="space-y-3">
+          <GuidePanel
+            guide={guide}
+            me={me}
+            canAct
+            onFocus={() => guide.focus && guide.focus.kind !== 'research' && guide.focus.kind !== 'event' && select(guide.focus)}
+            onEndTurn={() => undefined}
+            onCancelEndTurn={() => undefined}
+          />
+          <CommandPanel snapshot={snapshot} me={me} canAct />
+          <LeaderPanel holders={snapshot.leaders} players={snapshot.players} meId={ME} />
+        </aside>
       </div>
+      {events[0] && <EventModal event={events[0]} onChoose={async () => setShowEvent(false)} onLater={() => setShowEvent(false)} />}
     </div>
   );
 }
