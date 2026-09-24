@@ -6,6 +6,10 @@ import { EventModal } from '../components/EventModal';
 import { GuidePanel } from '../components/GuidePanel';
 import { LeaderPanel } from '../components/LeaderPanel';
 import { computeGuide } from '../lib/guide';
+import { combatFx, useFxQueue, type UnitActions } from '../hooks/useUnitActions';
+import { leadersOf } from '../lib/leaders';
+import { indexTiles, key } from '../lib/rules';
+import { previewCombat, UPGRADES } from '../lib/units';
 import { useGameStore } from '../store/gameStore';
 import type { GameSnapshot, Terrain, Tile, Unit } from '../types/game';
 
@@ -33,7 +37,7 @@ function buildSnapshot(): GameSnapshot {
       });
     }
   const u = (id: string, owner: string, kind: Unit['kind'], x: number, y: number, moves: number, hp = 100): Unit =>
-    ({ id, owner_id: owner, kind, x, y, hp, moves_left: moves, created_turn: 1 });
+    ({ id, owner_id: owner, kind, x, y, hp, moves_left: moves, created_turn: 1, acted: false, fortified: false });
   const units = [
     u('00000000-0000-0000-0000-000000000001', ME, 'settler', 3, 2, 2),
     u('00000000-0000-0000-0000-000000000002', ME, 'militia', 2, 2, 2),
@@ -48,7 +52,7 @@ function buildSnapshot(): GameSnapshot {
     room: {
       id: 'demo', code: 'DEMO01', host_id: ME, status: 'playing', max_players: 2, map_width: W, map_height: H,
       turn_number: 3, turn_seconds: 60, turn_deadline: new Date(now.getTime() + 45_000).toISOString(), max_turns: 60,
-      winner_id: null, victory: null, is_solo: false, created_at: '', updated_at: '',
+      winner_id: null, victory: null, is_solo: false, action_seq: 0, created_at: '', updated_at: '',
     },
     players: [
       { room_id: 'demo', user_id: ME, nickname: '나', seat: 0, faction: 'france', is_ready: true, has_ended_turn: false,
@@ -77,7 +81,53 @@ function buildSnapshot(): GameSnapshot {
   };
 }
 
+/** 서버 없이 즉시 행동을 흉내 내는 데모용 UnitActionController (같은 전투식 사용) */
+function useLocalActions(): UnitActions {
+  const showFx = useFxQueue();
+  const patch = (fn: (s: GameSnapshot) => GameSnapshot) => {
+    const st = useGameStore.getState();
+    if (st.snapshot) st.setSnapshot(fn(st.snapshot), 0);
+  };
+  const mapUnit = (id: string, f: (u: Unit) => Unit) => patch((s) => ({ ...s, units: s.units.map((u) => (u.id === id ? f(u) : u)) }));
+  return {
+    busy: false,
+    error: null,
+    clearError: () => undefined,
+    move: async (u, x, y) => {
+      mapUnit(u.id, (v) => ({ ...v, x, y, moves_left: v.moves_left - Math.max(Math.abs(x - v.x), Math.abs(y - v.y)), fortified: false }));
+      useGameStore.getState().select({ kind: 'unit', id: u.id });
+    },
+    attack: async (u, x, y) => {
+      const s = useGameStore.getState().snapshot!;
+      const d = s.units.find((v) => v.x === x && v.y === y)!;
+      const p = previewCombat(u, d, indexTiles(s.tiles).get(key(x, y))!, leadersOf(s.leaders, u.owner_id));
+      const ahp = Math.max(0, u.hp - p.dmgAtt), dhp = Math.max(0, d.hp - p.dmgDef);
+      patch((snap) => ({
+        ...snap,
+        units: snap.units
+          .map((v) => (v.id === u.id ? { ...v, hp: ahp, acted: true, moves_left: 0 } : v.id === d.id ? { ...v, hp: dhp } : v))
+          .filter((v) => v.hp > 0),
+      }));
+      showFx(combatFx({ from: [u.x, u.y], at: [x, y], dmg_att: p.dmgAtt, dmg_def: p.dmgDef, attacker_hp: ahp, defender_hp: dhp }));
+    },
+    foundCity: async (u) => {
+      patch((s) => ({
+        ...s,
+        units: s.units.filter((v) => v.id !== u.id),
+        tiles: s.tiles.map((t) => (t.x === u.x && t.y === u.y ? { ...t, is_city: true, city_name: '리옹', city_pop: 1, owner_id: u.owner_id } : t)),
+      }));
+      showFx([{ x: u.x, y: u.y, text: '도시 건설!', kind: 'info' }]);
+    },
+    rest: async (u, mode) => {
+      mapUnit(u.id, (v) => ({ ...v, acted: true, fortified: mode === 'fortify', hp: mode === 'heal' ? Math.min(100, v.hp + 25) : v.hp, moves_left: mode === 'wait' ? v.moves_left : 0 }));
+      useGameStore.getState().select(null);
+    },
+    upgrade: async (u) => mapUnit(u.id, (v) => ({ ...v, kind: UPGRADES[v.kind]!.to, acted: true, moves_left: 0 })),
+  };
+}
+
 export function DemoScreen() {
+  const actions = useLocalActions();
   const snapshot = useGameStore((s) => s.snapshot);
   const pending = useGameStore((s) => s.pending);
   const select = useGameStore((s) => s.select);
@@ -94,7 +144,7 @@ export function DemoScreen() {
       <p className="mb-2 text-sm text-amber-400">데모 모드 — 서버와 연결되지 않은 화면입니다.</p>
       <div className="grid gap-3 lg:grid-cols-[1fr_22rem]">
         <div className="min-w-0">
-          <GameMap snapshot={snapshot} userId={ME} canAct idleUnitIds={guide.idleUnitIds} />
+          <GameMap snapshot={snapshot} userId={ME} canAct idleUnitIds={guide.idleUnitIds} actions={actions} />
         </div>
         <aside className="space-y-3">
           <GuidePanel
@@ -105,7 +155,7 @@ export function DemoScreen() {
             onEndTurn={() => undefined}
             onCancelEndTurn={() => undefined}
           />
-          <CommandPanel snapshot={snapshot} me={me} canAct />
+          <CommandPanel snapshot={snapshot} me={me} canAct actions={actions} />
           <LeaderPanel holders={snapshot.leaders} players={snapshot.players} meId={ME} />
         </aside>
       </div>

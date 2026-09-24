@@ -22,28 +22,32 @@ export function useGameSync(roomId: string, userId: string) {
   const [syncError, setSyncError] = useState<string | null>(null);
 
   // 동시에 여러 신호가 와도 fetch는 하나만 돌고, 도중에 온 신호는 한 번 더 받는 것으로 합친다.
-  const inflight = useRef(false);
+  // 진행 중이면 같은 Promise를 돌려줘서, 호출한 쪽이 "최신 스냅샷이 반영될 때까지" 기다릴 수 있게 한다.
+  const inflight = useRef<Promise<void> | null>(null);
   const again = useRef(false);
 
-  const refetch = useCallback(async () => {
+  const refetch = useCallback((): Promise<void> => {
     if (inflight.current) {
       again.current = true;
-      return;
+      return inflight.current;
     }
-    inflight.current = true;
-    try {
-      do {
-        again.current = false;
-        const sentAt = Date.now();
-        const snap = await api.getGameState(roomId);
-        store.getState().setSnapshot(snap, estimateSkew(snap.server_now, sentAt, Date.now()));
-        setSyncError(null);
-      } while (again.current);
-    } catch (e) {
-      setSyncError((e as Error).message);
-    } finally {
-      inflight.current = false;
-    }
+    const run = (async () => {
+      try {
+        do {
+          again.current = false;
+          const sentAt = Date.now();
+          const snap = await api.getGameState(roomId);
+          store.getState().setSnapshot(snap, estimateSkew(snap.server_now, sentAt, Date.now()));
+          setSyncError(null);
+        } while (again.current);
+      } catch (e) {
+        setSyncError((e as Error).message);
+      } finally {
+        inflight.current = null;
+      }
+    })();
+    inflight.current = run;
+    return run;
   }, [roomId, store]);
 
   useEffect(() => {
@@ -55,7 +59,9 @@ export function useGameSync(roomId: string, userId: string) {
         { event: 'UPDATE', schema: 'public', table: 'hc_rooms', filter: `id=eq.${roomId}` },
         ({ new: r }) => {
           const cur = store.getState().snapshot?.room;
-          if (!cur || cur.turn_number !== r.turn_number || cur.status !== r.status) void refetch();
+          // 턴·상태가 바뀌었거나 누군가 유닛을 즉시 행동시켰으면(action_seq) 스냅샷을 다시 받는다
+          if (!cur || cur.turn_number !== r.turn_number || cur.status !== r.status || cur.action_seq !== r.action_seq)
+            void refetch();
           else store.getState().patchRoom(r);
         },
       )

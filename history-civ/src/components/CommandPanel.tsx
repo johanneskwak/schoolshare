@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import {
   buildableImprovements,
-  canFoundCity,
   IMPROVEMENTS,
   indexTiles,
   key,
@@ -12,6 +11,8 @@ import {
 import { useGameStore } from '../store/gameStore';
 import { leadersOf, unitCost } from '../lib/leaders';
 import type { Action, GameSnapshot, RoomPlayer } from '../types/game';
+import type { UnitActions } from '../hooks/useUnitActions';
+import { UnitDetailPanel } from './UnitDetailPanel';
 
 function describe(a: Action, snapshot: GameSnapshot): string {
   const unit = 'unit_id' in a ? snapshot.units.find((u) => u.id === a.unit_id) : undefined;
@@ -33,11 +34,20 @@ function describe(a: Action, snapshot: GameSnapshot): string {
 }
 
 /** 선택한 유닛/칸에 따라 가능한 명령을 보여 주고, 이번 턴 명령 목록을 관리한다. */
-export function CommandPanel({ snapshot, me, canAct }: { snapshot: GameSnapshot; me: RoomPlayer; canAct: boolean }) {
+export function CommandPanel({
+  snapshot,
+  me,
+  canAct,
+  actions,
+}: {
+  snapshot: GameSnapshot;
+  me: RoomPlayer;
+  canAct: boolean;
+  actions: UnitActions;
+}) {
   const selection = useGameStore((s) => s.selection);
   const pending = useGameStore((s) => s.pending);
   const queueAction = useGameStore((s) => s.queueAction);
-  const cancelUnitAction = useGameStore((s) => s.cancelUnitAction);
   const removeActionAt = useGameStore((s) => s.removeActionAt);
   const tileIndex = useMemo(() => indexTiles(snapshot.tiles), [snapshot.tiles]);
   const myUnits = useMemo(() => snapshot.units.filter((u) => u.owner_id === me.user_id), [snapshot.units, me.user_id]);
@@ -54,40 +64,7 @@ export function CommandPanel({ snapshot, me, canAct }: { snapshot: GameSnapshot;
 
   if (selection?.kind === 'unit') {
     const u = snapshot.units.find((x) => x.id === selection.id);
-    if (u) {
-      const t = UNIT_TYPES[u.kind];
-      const ordered = pending.some((a) => 'unit_id' in a && a.unit_id === u.id);
-      body = (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-lg font-bold">
-            <img src={`/sprites/unit_${u.kind}.png`} alt="" className="h-12 w-12 object-contain" />
-            {t.name}
-          </div>
-          <div className="text-xs text-stone-300">
-            공격 {t.attack} · 방어 {t.defense} · 이동 {u.moves_left}/{t.moves} · 사거리 {t.range} · 선제 {t.initiative} · HP {u.hp}
-          </div>
-          <p className="text-xs text-stone-400">노란 칸: 이동 · 빨간 칸: 공격</p>
-          {u.kind === 'settler' && (
-            <button
-              disabled={!canAct || !canFoundCity(u, tileIndex)}
-              onClick={() => queueAction({ type: 'found_city', unit_id: u.id })}
-              title="개척자가 서 있는 칸에 새 도시를 세웁니다. 주변 1칸이 영토가 되고, 턴 종료 때 건설됩니다. (단축키 B)"
-              className="w-full rounded bg-emerald-600 px-3 py-2.5 text-base font-bold shadow ring-2 ring-emerald-300/60 disabled:opacity-40 disabled:ring-0"
-            >
-              🏗️ 도시 건설 <span className="text-xs font-normal">(B)</span>
-            </button>
-          )}
-          {u.kind === 'settler' && !canFoundCity(u, tileIndex) && (
-            <p className="text-xs text-stone-400">다른 도시와 3칸 이상 떨어진 빈 땅이어야 해요.</p>
-          )}
-          {ordered && (
-            <button onClick={() => cancelUnitAction(u.id)} className="w-full rounded border border-stone-500 px-3 py-1.5 text-sm">
-              이 유닛 명령 취소
-            </button>
-          )}
-        </div>
-      );
-    }
+    if (u) body = <UnitDetailPanel unit={u} snapshot={snapshot} me={me} actions={actions} canAct={canAct} />;
   } else if (selection?.kind === 'tile') {
     const tile = tileIndex.get(key(selection.x, selection.y));
     if (tile) {
@@ -166,7 +143,8 @@ export function CommandPanel({ snapshot, me, canAct }: { snapshot: GameSnapshot;
       </button>
 
       <div className="rounded-lg bg-stone-800 p-3">
-        <div className="mb-1 text-sm font-bold">이번 턴 명령 {pending.length}개</div>
+        <div className="mb-1 text-sm font-bold">턴 종료 때 처리할 명령 {pending.length}개</div>
+        <p className="mb-1 text-[11px] text-stone-500">생산·연구·시설·이념 전파는 턴 종료 때 모든 문명이 함께 정산돼요.</p>
         {pending.length === 0 && <p className="text-xs text-stone-400">아직 없음</p>}
         <ul className="space-y-1">
           {pending.map((a, i) => (

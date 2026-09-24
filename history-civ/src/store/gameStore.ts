@@ -5,6 +5,18 @@ import type { Action, GameEvent, GameSnapshot, Room, RoomPlayer } from '../types
 /** 맵에서 선택한 대상: 내 유닛 또는 칸(도시/시설 건설) */
 export type Selection = { kind: 'unit'; id: string } | { kind: 'tile'; x: number; y: number } | null;
 
+/** 전투 연출: 맵 위에 잠깐 떠오르는 데미지 숫자·피격 효과 */
+export interface CombatFx {
+  id: number;
+  x: number;
+  y: number;
+  text: string;
+  kind: 'damage' | 'miss' | 'kill' | 'info';
+}
+
+/** 유닛 행동 메뉴 상태 (이동 직후 또는 유닛 선택 시) */
+export type UnitMode = 'menu' | 'attack';
+
 interface GameState {
   snapshot: GameSnapshot | null;
   clockSkewMs: number;
@@ -15,6 +27,8 @@ interface GameState {
   /** 정산 결과 이벤트 (4단계 맵 애니메이션이 소비) */
   events: GameEvent[];
   selection: Selection;
+  unitMode: UnitMode;
+  fx: CombatFx[];
 
   setSnapshot: (s: GameSnapshot, clockSkewMs: number) => void;
   patchRoom: (r: Partial<Room>) => void;
@@ -26,6 +40,9 @@ interface GameState {
   removeActionAt: (index: number) => void;
   markSaved: () => void;
   select: (sel: Selection) => void;
+  setUnitMode: (m: UnitMode) => void;
+  pushFx: (fx: Omit<CombatFx, 'id'>[]) => void;
+  dropFx: (ids: number[]) => void;
   reset: () => void;
 }
 
@@ -36,7 +53,11 @@ const initial = {
   pendingDirty: false,
   events: [],
   selection: null as Selection,
+  unitMode: 'menu' as UnitMode,
+  fx: [] as CombatFx[],
 };
+
+let fxSeq = 0;
 
 export const useGameStore = create<GameState>()((set) => ({
   ...initial,
@@ -79,6 +100,9 @@ export const useGameStore = create<GameState>()((set) => ({
   removeActionAt: (index) => set((st) => ({ pending: st.pending.filter((_, i) => i !== index), pendingDirty: true })),
   markSaved: () => set({ pendingDirty: false }),
 
-  select: (selection) => set({ selection }),
+  select: (selection) => set({ selection, unitMode: 'menu' }),
+  setUnitMode: (unitMode) => set({ unitMode }),
+  pushFx: (items) => set((st) => ({ fx: [...st.fx, ...items.map((f) => ({ ...f, id: ++fxSeq }))] })),
+  dropFx: (ids) => set((st) => ({ fx: st.fx.filter((f) => !ids.includes(f.id)) })),
   reset: () => set(initial),
 }));

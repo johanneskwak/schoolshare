@@ -17,7 +17,7 @@ function grid(w: number, h: number, special: Record<string, Partial<Tile>> = {})
 }
 
 const unit = (p: Partial<Unit>): Unit => ({
-  id: 'u', owner_id: ME, kind: 'line_infantry', x: 2, y: 2, hp: 100, moves_left: 1, created_turn: 1, ...p,
+  id: 'u', owner_id: ME, kind: 'line_infantry', x: 2, y: 2, hp: 100, moves_left: 1, created_turn: 1, acted: false, fortified: false, ...p,
 });
 
 const player = (p: Partial<RoomPlayer> = {}): RoomPlayer => ({

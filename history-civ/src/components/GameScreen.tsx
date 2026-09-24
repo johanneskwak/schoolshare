@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameSync } from '../hooks/useGameSync';
+import { useFxQueue, useUnitActions } from '../hooks/useUnitActions';
 import { usePresence } from '../hooks/usePresence';
 import { useTurnTimer } from '../hooks/useTurnTimer';
 import { api } from '../lib/api';
@@ -12,7 +13,9 @@ import { FACTIONS, TECHS, type LeaderId, type TechId } from '../types/game';
 import { CommandPanel } from './CommandPanel';
 import { EventModal } from './EventModal';
 import { GameMap } from './GameMap';
+import { ConceptHint } from './ConceptHint';
 import { GuidePanel } from './GuidePanel';
+import { InfoTooltip } from './InfoTooltip';
 import { LeaderPanel } from './LeaderPanel';
 import { ResultScreen } from './ResultScreen';
 import { VictoryPanel } from './VictoryPanel';
@@ -50,6 +53,9 @@ export function GameScreen({
   const selection = useGameStore((s) => s.selection);
   const queueAction = useGameStore((s) => s.queueAction);
   const select = useGameStore((s) => s.select);
+  const setUnitMode = useGameStore((s) => s.setUnitMode);
+  const actions = useUnitActions(roomId, refetch);
+  const showFx = useFxQueue();
   const researchRef = useRef<HTMLSelectElement>(null);
   const [eventHiddenId, setEventHiddenId] = useState<number | null>(null);
 
@@ -62,6 +68,18 @@ export function GameScreen({
       void flush();
     }
   }, [left, turn, flush]);
+
+  // 턴 정산 결과(AI·다른 문명의 전투)도 맵 위에 데미지 숫자로 보여 준다
+  const shownLogTurn = useRef(0);
+  useEffect(() => {
+    if (!snapshot || turn <= 1 || shownLogTurn.current === turn) return;
+    shownLogTurn.current = turn;
+    showFx(
+      (snapshot.last_log ?? [])
+        .filter((e) => e.type === 'combat')
+        .map((e) => ({ x: e.x as number, y: e.y as number, text: `-${e.dmg_def as number}`, kind: 'damage' as const })),
+    );
+  }, [snapshot, turn, showFx]);
 
   const guide: Guide | null = useMemo(
     () => (snapshot && me ? computeGuide(snapshot, me, pending) : null),
@@ -83,21 +101,27 @@ export function GameScreen({
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || e.ctrlKey || e.metaKey || e.altKey) return;
       if (!snapshot || !me || !guide) return;
       const k = e.key.toLowerCase();
-      if (k === 'escape') select(null);
+      if (k === 'escape') {
+        if (useGameStore.getState().unitMode === 'attack') setUnitMode('menu');
+        else select(null);
+      }
       if (!canAct) return;
       if (k === 'e') void endTurn();
       if (k === 'n' && guide.idleUnitIds.length) {
         const cur = selection?.kind === 'unit' ? guide.idleUnitIds.indexOf(selection.id) : -1;
         select({ kind: 'unit', id: guide.idleUnitIds[(cur + 1) % guide.idleUnitIds.length]! });
       }
-      if (k === 'b' && selection?.kind === 'unit') {
-        const u = snapshot.units.find((x) => x.id === selection.id);
-        if (u?.kind === 'settler' && canFoundCity(u, indexTiles(snapshot.tiles))) queueAction({ type: 'found_city', unit_id: u.id });
-      }
+      const u = selection?.kind === 'unit' ? snapshot.units.find((x) => x.id === selection.id) : undefined;
+      if (!u || u.owner_id !== me.user_id || u.acted || actions.busy) return;
+      if (k === 'b' && u.kind === 'settler' && canFoundCity(u, indexTiles(snapshot.tiles))) void actions.foundCity(u);
+      if (k === 'a') setUnitMode('attack');
+      if (k === 'f') void actions.rest(u, 'fortify');
+      if (k === 'h') void actions.rest(u, 'heal');
+      if (k === 'w') void actions.rest(u, 'wait');
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [snapshot, me, guide, canAct, selection, select, endTurn, queueAction]);
+  }, [snapshot, me, guide, canAct, selection, select, endTurn, actions, setUnitMode]);
 
   if (!snapshot || !me || !guide) return <p className="p-8 text-stone-400">게임 상태를 불러오는 중…</p>;
   const { room, players } = snapshot;
@@ -122,24 +146,24 @@ export function GameScreen({
     <div className="mx-auto max-w-[1500px] space-y-3 px-4 py-4">
       <header className="space-y-2 rounded-lg bg-stone-800 px-4 py-3">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <div className="text-lg font-bold">
+          <InfoTooltip concept="turn" className="text-lg font-bold">
             턴 {room.turn_number}
             <span className="text-sm text-stone-400">/{room.max_turns}</span>
-          </div>
+          </InfoTooltip>
           <div className={`font-mono text-2xl ${urgent ? 'animate-pulse text-red-400' : 'text-amber-400'}`}>{formatClock(left)}</div>
           <div className="text-sm text-stone-300">
             턴 종료 {endedCount}/{alive.length}
           </div>
           <div className="ml-auto flex flex-wrap gap-3 text-sm">
-            <span title="골드">💰 {me.gold}</span>
-            <span title="식량">🌾 {me.food}</span>
-            <span title="망치(생산력)">🔨 {me.hammer}</span>
-            <span title="혁신(턴당 연구)">💡 +{me.innovation}</span>
-            <span title="혁명 이념 (200 이상 1위 → 문화 승리)">🕊️ {me.ideology}</span>
-            <span title="안정도: 30 미만이면 폭동으로 골드 손실, 70 이상이면 이념 +1" className={stabilityColor}>
-              ⚖️ {me.stability}
-            </span>
-            <span title="승점">⭐ {me.score}</span>
+            <InfoTooltip concept="gold">💰 {me.gold}</InfoTooltip>
+            <InfoTooltip concept="food">🌾 {me.food}</InfoTooltip>
+            <InfoTooltip concept="hammer">🔨 {me.hammer}</InfoTooltip>
+            <InfoTooltip concept="innovation">💡 +{me.innovation}</InfoTooltip>
+            <InfoTooltip concept="ideology" align="right">🕊️ 이념 {me.ideology}</InfoTooltip>
+            <InfoTooltip concept="stability" align="right" className={stabilityColor}>
+              ⚖️ 안정 {me.stability}
+            </InfoTooltip>
+            <InfoTooltip concept="score" align="right">⭐ {me.score}</InfoTooltip>
           </div>
         </div>
         <div className="h-1.5 overflow-hidden rounded bg-stone-700">
@@ -149,7 +173,7 @@ export function GameScreen({
 
       <div className="grid gap-3 lg:grid-cols-[1fr_22rem]">
         <section className="min-w-0 space-y-2">
-          <GameMap snapshot={snapshot} userId={userId} canAct={canAct} idleUnitIds={guide.idleUnitIds} />
+          <GameMap snapshot={snapshot} userId={userId} canAct={canAct} idleUnitIds={guide.idleUnitIds} actions={actions} />
           <div className="flex flex-wrap items-center gap-3">
             <label className="text-sm">
               💡 연구{' '}
@@ -209,7 +233,7 @@ export function GameScreen({
             ))}
           </ul>
 
-          <CommandPanel snapshot={snapshot} me={me} canAct={canAct} />
+          <CommandPanel snapshot={snapshot} me={me} canAct={canAct} actions={actions} />
           <LeaderPanel holders={snapshot.leaders} players={players} meId={userId} />
           <VictoryPanel room={room} players={players} />
 
@@ -230,6 +254,8 @@ export function GameScreen({
           )}
         </aside>
       </div>
+
+      <ConceptHint snapshot={snapshot} me={me} />
 
       {event && canAct && (
         <EventModal

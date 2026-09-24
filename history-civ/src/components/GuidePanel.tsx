@@ -58,7 +58,7 @@ export function GuidePanel({
           턴 종료 <span className="text-xs font-normal">(E)</span>
         </button>
       )}
-      <p className="text-center text-[11px] text-stone-500">단축키 · N 다음 유닛 · B 도시 건설 · Esc 선택 해제</p>
+      <p className="text-center text-[11px] text-stone-500">단축키 · N 다음 유닛 · A 공격 · B 도시 건설 · F 요새화 · H 휴식 · W 대기 · Esc 취소</p>
     </div>
   );
 }
