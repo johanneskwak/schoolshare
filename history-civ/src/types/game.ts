@@ -40,6 +40,8 @@ export interface RoomPlayer {
   has_ended_turn: boolean;
   is_eliminated: boolean;
   is_ai: boolean;
+  /** 사회 안정도 0~100 (30 미만: 폭동으로 골드 손실, 70 이상: 이념 +1) */
+  stability: number;
   gold: number;
   food: number;
   hammer: number;
@@ -85,6 +87,29 @@ export type Action =
 
 export type GameEvent = { type: string } & Record<string, unknown>;
 
+export type LeaderId = 'napoleon' | 'watt' | 'lincoln' | 'bismarck';
+
+export interface LeaderHolder {
+  leader_id: LeaderId;
+  player_id: string;
+  joined_turn: number;
+}
+
+/** 나에게 발생해 선택을 기다리는 역사적 사건 (hc_event_defs + 발생 정보) */
+export interface PendingEvent {
+  pe_id: number;
+  id: string;
+  turn: number;
+  title: string;
+  era: string;
+  icon: string;
+  body: string;
+  choice_a_label: string;
+  choice_a_desc: string;
+  choice_b_label: string;
+  choice_b_desc: string;
+}
+
 export interface GameSnapshot {
   server_now: string;
   room: Room;
@@ -93,6 +118,8 @@ export interface GameSnapshot {
   units: Unit[];
   my_actions: Action[] | null;
   last_log: GameEvent[] | null;
+  leaders: LeaderHolder[];
+  my_events: PendingEvent[];
 }
 
 export const FACTIONS: Record<Faction, { name: string; color: string; desc: string }> = {

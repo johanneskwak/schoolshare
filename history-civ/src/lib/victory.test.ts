@@ -4,7 +4,7 @@ import type { RoomPlayer } from '../types/game';
 
 const p = (o: Partial<RoomPlayer>): RoomPlayer => ({
   room_id: 'r', user_id: 'a', nickname: 'a', seat: 0, faction: 'france', is_ready: true, has_ended_turn: false,
-  is_eliminated: false, is_ai: false, gold: 0, food: 0, hammer: 0, innovation: 0, ideology: 0, research_target: null,
+  is_eliminated: false, is_ai: false, stability: 60, gold: 0, food: 0, hammer: 0, innovation: 0, ideology: 0, research_target: null,
   research_progress: 0, researched: [], score: 0, joined_at: '', ...o,
 });
 

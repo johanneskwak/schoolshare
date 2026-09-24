@@ -1,5 +1,5 @@
 // 서버 hc__resolve_turn 규칙의 클라이언트 미러. 미리보기용이며 최종 판정은 서버가 한다.
-import type { Faction, Improvement, RoomPlayer, TechId, Terrain, Tile, Unit, UnitKind } from '../types/game';
+import type { Faction, Improvement, LeaderId, RoomPlayer, TechId, Terrain, Tile, Unit, UnitKind } from '../types/game';
 
 export interface UnitType {
   name: string;
@@ -102,10 +102,11 @@ export function canFoundCity(unit: Unit, tiles: TileIndex): boolean {
 }
 
 /** 이 플레이어가 생산할 수 있는 유닛 (진영/기술/영웅 중복 조건). 망치 부족은 별도 표시. */
-export function producibleUnits(me: RoomPlayer, myUnits: Unit[]): UnitKind[] {
+export function producibleUnits(me: RoomPlayer, myUnits: Unit[], leaders: LeaderId[] = []): UnitKind[] {
   return (Object.keys(UNIT_TYPES) as UnitKind[]).filter((k) => {
     const t = UNIT_TYPES[k];
-    if (t.faction && t.faction !== me.faction) return false;
+    // 링컨: 어느 진영이든 시민군 징집 가능
+    if (t.faction && t.faction !== me.faction && !(k === 'militia' && leaders.includes('lincoln'))) return false;
     if (t.requires && !me.researched.includes(t.requires)) return false;
     if (t.hero && myUnits.some((u) => u.kind === k)) return false;
     return true;

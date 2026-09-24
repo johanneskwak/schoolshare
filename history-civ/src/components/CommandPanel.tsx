@@ -10,6 +10,7 @@ import {
   UNIT_TYPES,
 } from '../lib/rules';
 import { useGameStore } from '../store/gameStore';
+import { leadersOf, unitCost } from '../lib/leaders';
 import type { Action, GameSnapshot, RoomPlayer } from '../types/game';
 
 function describe(a: Action, snapshot: GameSnapshot): string {
@@ -40,9 +41,10 @@ export function CommandPanel({ snapshot, me, canAct }: { snapshot: GameSnapshot;
   const removeActionAt = useGameStore((s) => s.removeActionAt);
   const tileIndex = useMemo(() => indexTiles(snapshot.tiles), [snapshot.tiles]);
   const myUnits = useMemo(() => snapshot.units.filter((u) => u.owner_id === me.user_id), [snapshot.units, me.user_id]);
+  const myLeaders = useMemo(() => leadersOf(snapshot.leaders, me.user_id), [snapshot.leaders, me.user_id]);
 
   // 이번 턴에 이미 예약한 망치/골드 (서버는 처리 순서대로 차감하므로 초과분은 무시됨)
-  const hammerReserved = pending.reduce((s, a) => s + (a.type === 'produce' ? UNIT_TYPES[a.unit_kind].cost : 0), 0);
+  const hammerReserved = pending.reduce((s, a) => s + (a.type === 'produce' ? unitCost(a.unit_kind, myLeaders) : 0), 0);
   const goldReserved = pending.reduce(
     (s, a) => s + (a.type === 'build' ? IMPROVEMENTS[a.improvement].cost : a.type === 'spread' ? 10 : 0),
     0,
@@ -69,9 +71,10 @@ export function CommandPanel({ snapshot, me, canAct }: { snapshot: GameSnapshot;
             <button
               disabled={!canAct || !canFoundCity(u, tileIndex)}
               onClick={() => queueAction({ type: 'found_city', unit_id: u.id })}
-              className="w-full rounded bg-emerald-600 px-3 py-1.5 font-bold disabled:opacity-40"
+              title="개척자가 서 있는 칸에 새 도시를 세웁니다. 주변 1칸이 영토가 되고, 턴 종료 때 건설됩니다. (단축키 B)"
+              className="w-full rounded bg-emerald-600 px-3 py-2.5 text-base font-bold shadow ring-2 ring-emerald-300/60 disabled:opacity-40 disabled:ring-0"
             >
-              🏗️ 여기에 도시 건설
+              🏗️ 도시 건설 <span className="text-xs font-normal">(B)</span>
             </button>
           )}
           {u.kind === 'settler' && !canFoundCity(u, tileIndex) && (
@@ -109,10 +112,11 @@ export function CommandPanel({ snapshot, me, canAct }: { snapshot: GameSnapshot;
             <div className="space-y-1">
               <div className="text-sm font-bold">생산 (🔨 {me.hammer - hammerReserved} 남음)</div>
               <div className="grid grid-cols-2 gap-1">
-                {producibleUnits(me, myUnits).map((k) => {
+                {producibleUnits(me, myUnits, myLeaders).map((k) => {
                   const ut = UNIT_TYPES[k];
                   const chosen = produceOrder?.type === 'produce' && produceOrder.unit_kind === k;
-                  const afford = ut.cost <= me.hammer - hammerReserved + (produceOrder?.type === 'produce' ? UNIT_TYPES[produceOrder.unit_kind].cost : 0);
+                  const cost = unitCost(k, myLeaders);
+                  const afford = cost <= me.hammer - hammerReserved + (produceOrder?.type === 'produce' ? unitCost(produceOrder.unit_kind, myLeaders) : 0);
                   return (
                     <button
                       key={k}
@@ -121,7 +125,7 @@ export function CommandPanel({ snapshot, me, canAct }: { snapshot: GameSnapshot;
                       className={`rounded px-2 py-1 text-left text-xs disabled:opacity-40 ${chosen ? 'bg-amber-600' : 'bg-stone-700 hover:bg-stone-600'}`}
                     >
                       <img src={`/sprites/unit_${k}.png`} alt="" className="mr-1 inline h-5 w-5 object-contain" />
-                      {ut.name} <span className="text-stone-300">🔨{ut.cost}</span>
+                      {ut.name} <span className="text-stone-300">🔨{cost}{cost < ut.cost && <s className="ml-1 text-stone-500">{ut.cost}</s>}</span>
                     </button>
                   );
                 })}
