@@ -1,5 +1,5 @@
 // LeaderSystem 클라이언트 정의 — 서버 hc_leader_defs / hc__leader_passives / hc__unit_cost와 같은 규칙
-import type { LeaderHolder, LeaderId, UnitKind } from '../types/game';
+import type { Faction, LeaderHolder, LeaderId, UnitKind } from '../types/game';
 import { UNIT_TYPES } from './rules';
 
 export interface LeaderDef {
@@ -37,9 +37,10 @@ export function leadersOf(holders: LeaderHolder[], playerId: string): LeaderId[]
   return holders.filter((h) => h.player_id === playerId).map((h) => h.leader_id);
 }
 
-/** 인물 효과를 반영한 생산 비용 (서버 hc__unit_cost와 동일) */
-export function unitCost(kind: UnitKind, leaders: LeaderId[]): number {
+/** 인물·문명 효과를 반영한 생산 비용 (서버 hc__unit_cost와 동일) */
+export function unitCost(kind: UnitKind, leaders: LeaderId[], faction?: Faction): number {
   const base = UNIT_TYPES[kind].cost;
+  if (kind === 'settler' && faction === 'usa') return 20; // 미국 개척 정신
   if (kind === 'militia' && leaders.includes('lincoln')) return Math.floor(base / 2);
   if (leaders.includes('bismarck') && UNIT_TYPES[kind].attack > 0) return Math.floor((base * 3) / 4);
   return base;

@@ -16,12 +16,15 @@ export function UnitActionButtons({
   actions,
   canAct,
   compact = false,
+  inline = false,
 }: {
   unit: Unit;
   snapshot: GameSnapshot;
   actions: UnitActions;
   canAct: boolean;
   compact?: boolean;
+  /** 맵 아래 HUD용 가로 배치 */
+  inline?: boolean;
 }) {
   const unitMode = useGameStore((s) => s.unitMode);
   const setUnitMode = useGameStore((s) => s.setUnitMode);
@@ -39,7 +42,7 @@ export function UnitActionButtons({
 
   if (unitMode === 'attack') {
     return (
-      <div className="space-y-1.5">
+      <div className={inline ? 'flex flex-wrap items-center gap-1.5' : 'space-y-1.5'}>
         <div className="text-xs font-bold text-red-300">⚔️ 공격할 적을 고르세요 (맵의 빨간 칸도 가능)</div>
         {enemies.map((e) => {
           const p = previewCombat(unit, e, tiles.get(key(e.x, e.y))!, myLeaders);
@@ -48,7 +51,7 @@ export function UnitActionButtons({
               key={e.id}
               disabled={disabled}
               onClick={() => void actions.attack(unit, e.x, e.y)}
-              className="block w-full rounded border border-red-700 bg-red-950/60 px-2 py-1.5 text-left text-xs hover:bg-red-900 disabled:opacity-40"
+              className={`${inline ? '' : 'block w-full'} rounded border border-red-700 bg-red-950/60 px-2 py-1.5 text-left text-xs hover:bg-red-900 disabled:opacity-40`}
             >
               <span className="font-bold">{UNIT_TYPES[e.kind].name}</span> (HP {e.hp}) — 적 <b className="text-red-300">-{p.dmgDef}</b>
               {p.defenderDies && ' 💀격파'} / 아군 <b className="text-amber-300">-{p.dmgAtt}</b>
@@ -56,7 +59,7 @@ export function UnitActionButtons({
             </button>
           );
         })}
-        <button onClick={() => setUnitMode('menu')} className={`${btn} w-full border border-stone-500 font-normal`}>
+        <button onClick={() => setUnitMode('menu')} className={`${btn} ${inline ? '' : 'w-full'} border border-stone-500 font-normal`}>
           ← 돌아가기
         </button>
       </div>
@@ -65,7 +68,7 @@ export function UnitActionButtons({
 
   const canBuild = unit.kind === 'settler' && canFoundCity(unit, tiles);
   return (
-    <div className={`grid gap-1.5 ${compact ? 'grid-cols-2' : 'grid-cols-2'}`}>
+    <div className={inline ? 'flex flex-wrap gap-1.5' : 'grid grid-cols-2 gap-1.5'}>
       {t.attack > 0 && (
         <button
           disabled={disabled || enemies.length === 0}
@@ -81,7 +84,7 @@ export function UnitActionButtons({
           disabled={disabled || !canBuild}
           onClick={() => void actions.foundCity(unit)}
           title={canBuild ? '지금 이 자리에 도시를 세웁니다 (B)' : '다른 도시와 3칸 이상 떨어진 빈 땅이어야 해요'}
-          className={`${btn} col-span-2 bg-emerald-600 py-2 text-base ring-2 ring-emerald-300/60 hover:bg-emerald-500 disabled:ring-0`}
+          className={`${btn} ${inline ? '' : 'col-span-2 py-2 text-base'} bg-emerald-600 ring-2 ring-emerald-300/60 hover:bg-emerald-500 disabled:ring-0`}
         >
           🏗️ 도시 건설 (B)
         </button>

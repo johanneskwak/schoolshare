@@ -4,7 +4,7 @@ import { FACTIONS, type Faction } from '../types/game';
 
 export function FactionPicker({ value, onChange }: { value: Faction; onChange: (f: Faction) => void }) {
   return (
-    <div className="grid gap-2 sm:grid-cols-3">
+    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
       {(Object.keys(FACTIONS) as Faction[]).map((f) => (
         <button
           key={f}
@@ -81,7 +81,7 @@ export function HomeScreen({
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 px-4 py-10">
+    <div className="mx-auto max-w-4xl space-y-6 px-4 py-10">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">{nickname}님, 어느 문명을 이끌까요?</h1>
         <button onClick={onLeaderboard} className="shrink-0 rounded border border-stone-600 px-3 py-1.5 text-sm">

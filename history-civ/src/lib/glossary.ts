@@ -11,7 +11,8 @@ export interface Concept {
 
 export type ConceptId =
   | 'gold' | 'food' | 'hammer' | 'innovation' | 'ideology' | 'stability' | 'score'
-  | 'science_victory' | 'culture_victory' | 'conquest_victory' | 'leaders' | 'events' | 'combat' | 'turn';
+  | 'science_victory' | 'culture_victory' | 'conquest_victory' | 'wonder_victory' | 'leaders' | 'events' | 'combat' | 'turn'
+  | 'scholars';
 
 export const GLOSSARY: Record<ConceptId, Concept> = {
   gold: {
@@ -68,6 +69,16 @@ export const GLOSSARY: Record<ConceptId, Concept> = {
     icon: '⚔️', title: '정복 승리',
     body: ['상대 문명의 수도(★)를 모두 점령하면 승리합니다.', '수도를 잃은 문명은 멸망해요.'],
     intro: '상대 수도를 모두 점령하면 정복 승리예요.',
+  },
+  wonder_victory: {
+    icon: '🏛️', title: '불가사의 승리',
+    body: ['도시에서 망치를 모아 불가사의(에펠탑·빅벤·엠파이어 스테이트 빌딩·맨해튼 프로젝트·수정궁)를 완공합니다.', '완공한 도시를 10턴 동안 빼앗기지 않으면 승리!', '점령당하면 불가사의와 카운트다운이 점령자에게 넘어가 10턴부터 다시 셉니다.'],
+    intro: '불가사의를 완공한 도시를 10턴 지키면 승리해요. 다른 문명이 쳐들어올 거예요!',
+  },
+  scholars: {
+    icon: '📚', title: '도서관과 지식인',
+    body: ['도시에 도서관(계몽사상 필요, 골드 35)을 지으면 그 시대의 지식인이 합류합니다.', '볼테르·루소(프랑스), 디킨스·애덤 스미스(영국), 링컨·제퍼슨(미국), 칸트·마르크스(열강)', '지식인 1명당 혁신 +3/턴, 도서관 1곳당 혁신 +2/턴으로 연구가 빨라져요.'],
+    intro: '도서관을 지으면 볼테르·디킨스·링컨 같은 지식인이 합류해 연구를 가속해요.',
   },
   leaders: {
     icon: '👑', title: '역사적 인물',

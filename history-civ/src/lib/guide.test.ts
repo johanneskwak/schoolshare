@@ -17,7 +17,7 @@ function snap(units: Unit[], extra: Partial<GameSnapshot> = {}, cityAt = { x: 2,
       });
   return {
     server_now: '', room: {} as GameSnapshot['room'], players: [me()], tiles, units,
-    my_actions: [], last_log: null, leaders: [], my_events: [], ...extra,
+    my_actions: [], last_log: null, leaders: [], my_events: [], scholars: [], wonders: [], ...extra,
   };
 }
 function me(o: Partial<RoomPlayer> = {}): RoomPlayer {

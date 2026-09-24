@@ -18,6 +18,9 @@ import { GuidePanel } from './GuidePanel';
 import { InfoTooltip } from './InfoTooltip';
 import { LeaderPanel } from './LeaderPanel';
 import { ResultScreen } from './ResultScreen';
+import { ScholarModal } from './ScholarModal';
+import { UnitHud } from './UnitHud';
+import { WonderHud } from './WonderHud';
 import { VictoryPanel } from './VictoryPanel';
 
 const FLUSH_BEFORE_MS = 3000;
@@ -33,6 +36,10 @@ const EVENT_TEXT: Record<string, string> = {
   leader_joined: '⭐ 역사적 인물 합류',
   historic_event: '📜 역사적 사건 발생',
   event_resolved: '📜 역사적 사건 결정',
+  scholar_joined: '📚 지식인 합류',
+  wonder_built: '🏛️ 불가사의 완공',
+  wonder_captured: '🏳️ 불가사의 점령',
+  wonder_victory: '🏆 불가사의 방어 승리',
 };
 
 export function GameScreen({
@@ -138,7 +145,8 @@ export function GameScreen({
   const endedCount = alive.filter((p) => p.has_ended_turn).length;
   const pct = left === null ? 0 : Math.min(100, (left / (room.turn_seconds * 1000)) * 100);
   const urgent = left !== null && left < 10_000;
-  const event = snapshot.my_events.find((e) => e.pe_id !== eventHiddenId) ?? null;
+  const newScholar = snapshot.scholars.find((x) => x.player_id === userId && !x.seen) ?? null;
+  const event = newScholar ? null : (snapshot.my_events.find((e) => e.pe_id !== eventHiddenId) ?? null);
   const stabilityColor = me.stability < 30 ? 'text-red-400' : me.stability >= 70 ? 'text-emerald-400' : '';
   const nameOf = (id: unknown) => players.find((p) => p.user_id === id)?.nickname ?? '';
 
@@ -169,11 +177,13 @@ export function GameScreen({
         <div className="h-1.5 overflow-hidden rounded bg-stone-700">
           <div className={`h-full transition-[width] duration-300 ${urgent ? 'bg-red-500' : 'bg-amber-400'}`} style={{ width: `${pct}%` }} />
         </div>
+        <WonderHud snapshot={snapshot} userId={userId} />
       </header>
 
       <div className="grid gap-3 lg:grid-cols-[1fr_22rem]">
         <section className="min-w-0 space-y-2">
           <GameMap snapshot={snapshot} userId={userId} canAct={canAct} idleUnitIds={guide.idleUnitIds} actions={actions} />
+          <UnitHud snapshot={snapshot} userId={userId} canAct={canAct} actions={actions} />
           <div className="flex flex-wrap items-center gap-3">
             <label className="text-sm">
               💡 연구{' '}
@@ -234,7 +244,7 @@ export function GameScreen({
           </ul>
 
           <CommandPanel snapshot={snapshot} me={me} canAct={canAct} actions={actions} />
-          <LeaderPanel holders={snapshot.leaders} players={players} meId={userId} />
+          <LeaderPanel holders={snapshot.leaders} players={players} meId={userId} scholars={snapshot.scholars} />
           <VictoryPanel room={room} players={players} />
 
           {snapshot.last_log && snapshot.last_log.length > 0 && (
@@ -248,6 +258,8 @@ export function GameScreen({
                     {e.type === 'tech_researched' && ` (${TECHS[e.tech as TechId]?.name})`}
                     {e.type === 'leader_joined' && ` · ${LEADERS[e.leader as LeaderId]?.name} → ${nameOf(e.player)}`}
                     {(e.type === 'historic_event' || e.type === 'event_resolved') && ` · ${nameOf(e.player)}`}
+                    {e.type === 'scholar_joined' && ` · ${snapshot.scholars.find((x) => x.id === e.scholar)?.name ?? ''} → ${nameOf(e.player)}`}
+                    {e.type.startsWith('wonder_') && ` · ${snapshot.wonders.find((x) => x.wonder_id === e.wonder)?.name_ko ?? ''} · ${nameOf(e.player)}`}
                   </div>
                 ))}
             </div>
@@ -256,6 +268,17 @@ export function GameScreen({
       </div>
 
       <ConceptHint snapshot={snapshot} me={me} />
+
+      {newScholar && (
+        <ScholarModal
+          key={newScholar.id}
+          scholar={newScholar}
+          onClose={async () => {
+            await api.ackScholar(roomId, newScholar.id);
+            await refetch();
+          }}
+        />
+      )}
 
       {event && canAct && (
         <EventModal

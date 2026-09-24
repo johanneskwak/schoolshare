@@ -29,6 +29,8 @@ export function unlockedConcepts(s: GameSnapshot, me: RoomPlayer): ConceptId[] {
   if (s.leaders.some((l) => l.player_id === me.user_id)) out.push('leaders');
   if (s.my_events.length > 0) out.push('events');
   if (me.ideology >= 30) out.push('culture_victory');
+  if (me.researched.includes('enlightenment') || s.scholars.some((x) => x.player_id === me.user_id)) out.push('scholars');
+  if (me.researched.includes('steam_engine') || s.wonders.length > 0) out.push('wonder_victory');
   return out;
 }
 

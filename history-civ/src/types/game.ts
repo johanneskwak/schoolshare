@@ -1,14 +1,14 @@
 // DB 스키마(supabase/migrations/20260923000000_init.sql)와 1:1로 맞춘 타입
 
-export type Faction = 'france' | 'britain' | 'empire';
+export type Faction = 'france' | 'britain' | 'empire' | 'usa';
 export type RoomStatus = 'waiting' | 'playing' | 'finished';
 export type Terrain = 'plains' | 'grassland' | 'hills' | 'forest' | 'mountain' | 'water';
-export type VictoryType = 'conquest' | 'science' | 'culture' | 'score';
+export type VictoryType = 'conquest' | 'science' | 'culture' | 'score' | 'wonder';
 export type TechId = 'enlightenment' | 'rights_declaration' | 'steam_engine' | 'electrification' | 'new_weapons';
-export type Improvement = 'farm' | 'railway' | 'factory' | 'port';
+export type Improvement = 'farm' | 'railway' | 'factory' | 'port' | 'library';
 export type UnitKind =
   | 'settler' | 'militia' | 'line_infantry' | 'cavalry' | 'artillery'
-  | 'machine_gunner' | 'ironclad' | 'hero_napoleon' | 'hero_robespierre' | 'hero_watt';
+  | 'machine_gunner' | 'ironclad' | 'hero_napoleon' | 'hero_robespierre' | 'hero_watt' | 'scholar';
 
 export interface Room {
   id: string;
@@ -116,6 +116,35 @@ export interface PendingEvent {
   choice_b_desc: string;
 }
 
+/** 도서관 완공으로 합류한 지식인 (hc_scholar_defs + 합류 정보) */
+export interface ScholarHolder {
+  id: string;
+  faction: Faction;
+  ord: number;
+  name: string;
+  era: string;
+  icon: string;
+  works: string;
+  significance: string;
+  effect: string;
+  player_id: string;
+  joined_turn: number;
+  /** 내가 소개 팝업을 확인했는지 (다른 문명 것은 항상 true) */
+  seen: boolean;
+}
+
+/** 완공된 불가사의와 방어 카운트다운 */
+export interface WonderState {
+  wonder_id: string;
+  player_id: string;
+  x: number;
+  y: number;
+  built_turn: number;
+  turns_left: number;
+  name_ko: string;
+  icon: string;
+}
+
 export interface GameSnapshot {
   server_now: string;
   room: Room;
@@ -126,12 +155,15 @@ export interface GameSnapshot {
   last_log: GameEvent[] | null;
   leaders: LeaderHolder[];
   my_events: PendingEvent[];
+  scholars: ScholarHolder[];
+  wonders: WonderState[];
 }
 
 export const FACTIONS: Record<Faction, { name: string; color: string; desc: string }> = {
   france: { name: '혁명 프랑스', color: '#2563eb', desc: '값싼 시민군, 이념 +2, 나폴레옹·로베스피에르' },
   britain: { name: '산업화 영국', color: '#dc2626', desc: '생산력 +25%, 철도 보너스, 제임스 와트' },
   empire: { name: '제국주의 열강', color: '#ca8a04', desc: '식민 무역 골드, 기관총병' },
+  usa: { name: '신생 미국', color: '#0d9488', desc: '개척 정신(개척자 20), 식량 +2 · 민주주의(이념 +1), 링컨·엠파이어 스테이트 빌딩' },
 };
 
 export const TECHS: Record<TechId, { name: string; cost: number; prereq: TechId | null }> = {
@@ -147,4 +179,5 @@ export const VICTORY_NAMES: Record<VictoryType, string> = {
   science: '과학 승리',
   culture: '문화 승리',
   score: '점수 승리',
+  wonder: '불가사의 승리',
 };

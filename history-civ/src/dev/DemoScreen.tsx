@@ -5,6 +5,8 @@ import { CommandPanel } from '../components/CommandPanel';
 import { EventModal } from '../components/EventModal';
 import { GuidePanel } from '../components/GuidePanel';
 import { LeaderPanel } from '../components/LeaderPanel';
+import { UnitHud } from '../components/UnitHud';
+import { WonderHud } from '../components/WonderHud';
 import { computeGuide } from '../lib/guide';
 import { combatFx, useFxQueue, type UnitActions } from '../hooks/useUnitActions';
 import { leadersOf } from '../lib/leaders';
@@ -66,6 +68,15 @@ function buildSnapshot(): GameSnapshot {
     units,
     my_actions: [],
     last_log: [{ type: 'combat', x: 12, y: 8 }, { type: 'tech_researched', tech: 'steam_engine' }],
+    scholars: [
+      {
+        id: 'voltaire', faction: 'france', ord: 1, name: '볼테르', era: '18세기 계몽사상가', icon: '🖋️',
+        works: '《철학 서한》(1734) · 《관용론》(1763)',
+        significance: '이성과 종교적 관용, 표현의 자유를 주장하며 절대 왕정과 교회의 권위를 비판했습니다.',
+        effect: '혁신 +3/턴 (연구 가속)', player_id: ME, joined_turn: 2, seen: true,
+      },
+    ],
+    wonders: [{ wonder_id: 'big_ben', player_id: FOE, x: 13, y: 9, built_turn: 1, turns_left: 8, name_ko: '빅벤', icon: '🕰️' }],
     leaders: [
       { leader_id: 'napoleon', player_id: ME, joined_turn: 2 },
       { leader_id: 'watt', player_id: FOE, joined_turn: 3 },
@@ -122,6 +133,7 @@ function useLocalActions(): UnitActions {
       mapUnit(u.id, (v) => ({ ...v, acted: true, fortified: mode === 'fortify', hp: mode === 'heal' ? Math.min(100, v.hp + 25) : v.hp, moves_left: mode === 'wait' ? v.moves_left : 0 }));
       useGameStore.getState().select(null);
     },
+    buildWonder: async () => undefined,
     upgrade: async (u) => mapUnit(u.id, (v) => ({ ...v, kind: UPGRADES[v.kind]!.to, acted: true, moves_left: 0 })),
   };
 }
@@ -142,9 +154,15 @@ export function DemoScreen() {
   return (
     <div className="mx-auto max-w-[1500px] px-4 py-4">
       <p className="mb-2 text-sm text-amber-400">데모 모드 — 서버와 연결되지 않은 화면입니다.</p>
+      <div className="mb-2 rounded-lg bg-stone-800 p-2">
+        <WonderHud snapshot={snapshot} userId={ME} />
+      </div>
       <div className="grid gap-3 lg:grid-cols-[1fr_22rem]">
         <div className="min-w-0">
           <GameMap snapshot={snapshot} userId={ME} canAct idleUnitIds={guide.idleUnitIds} actions={actions} />
+          <div className="mt-2">
+            <UnitHud snapshot={snapshot} userId={ME} canAct actions={actions} />
+          </div>
         </div>
         <aside className="space-y-3">
           <GuidePanel
@@ -156,7 +174,7 @@ export function DemoScreen() {
             onCancelEndTurn={() => undefined}
           />
           <CommandPanel snapshot={snapshot} me={me} canAct actions={actions} />
-          <LeaderPanel holders={snapshot.leaders} players={snapshot.players} meId={ME} />
+          <LeaderPanel holders={snapshot.leaders} players={snapshot.players} meId={ME} scholars={snapshot.scholars} />
         </aside>
       </div>
       {events[0] && <EventModal event={events[0]} onChoose={async () => setShowEvent(false)} onLater={() => setShowEvent(false)} />}

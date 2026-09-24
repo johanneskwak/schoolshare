@@ -58,6 +58,11 @@ export const UNIT_INFO: Record<UnitKind, UnitInfo> = {
     traits: ['살아 있는 동안 혁명 이념 +3/턴', '전투보다 이념 전파에 쓰세요'],
     strongVs: [], weakVs: ['군사 유닛 전반'],
   },
+  scholar: {
+    role: '지식인 · 비전투', vision: 1,
+    traits: ['도서관을 완공하면 문명의 지식인과 함께 등장', '지식인 1명당 혁신 +3/턴 (연구 가속)', '공격 불가 — 도시 안에 두세요'],
+    strongVs: [], weakVs: ['모든 군사 유닛'],
+  },
   hero_watt: {
     role: '영웅 · 발명가', vision: 2,
     traits: ['살아 있는 동안 망치 +3 · 혁신 +3/턴', '공격 불가 — 도시 안에 두세요'],
