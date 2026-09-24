@@ -1,5 +1,6 @@
 import { CULTURE_GOAL, victoryProgress } from '../lib/victory';
 import { FACTIONS, type Room, type RoomPlayer } from '../types/game';
+import { InfoTooltip } from './InfoTooltip';
 
 function Bar({ value, color }: { value: number; color: string }) {
   return (
@@ -32,9 +33,9 @@ export function VictoryPanel({ room, players }: { room: Room; players: RoomPlaye
               <span className="text-stone-400">⭐{p.score}</span>
             </div>
             <div className="grid grid-cols-[3.5rem_1fr] items-center gap-x-2 gap-y-1">
-              <span className="text-stone-400">💡 과학</span>
+              <InfoTooltip concept="science_victory" className="text-stone-400">💡 과학</InfoTooltip>
               <Bar value={v.science} color="#38bdf8" />
-              <span className="text-stone-400">🕊️ 문화</span>
+              <InfoTooltip concept="culture_victory" className="text-stone-400">🕊️ 문화</InfoTooltip>
               <div className="flex items-center gap-1">
                 <Bar value={v.culture} color="#a78bfa" />
                 <span className="w-14 text-right text-stone-400">
@@ -46,7 +47,9 @@ export function VictoryPanel({ room, players }: { room: Room; players: RoomPlaye
           </div>
         );
       })}
-      <p className="text-stone-500">정복: 상대 수도(★)를 모두 함락 · {room.max_turns}턴 종료 시 승점 1위</p>
+      <p className="text-stone-500">
+        <InfoTooltip concept="conquest_victory">정복: 상대 수도(★)를 모두 함락</InfoTooltip> · {room.max_turns}턴 종료 시 승점 1위
+      </p>
     </div>
   );
 }

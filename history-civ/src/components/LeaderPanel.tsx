@@ -1,5 +1,6 @@
 import { LEADER_ORDER, LEADERS } from '../lib/leaders';
 import { FACTIONS, type LeaderHolder, type RoomPlayer } from '../types/game';
+import { InfoTooltip } from './InfoTooltip';
 
 /** LeaderSystem: 역사적 인물 4명의 합류 현황과 효과 */
 export function LeaderPanel({ holders, players, meId }: { holders: LeaderHolder[]; players: RoomPlayer[]; meId: string }) {
@@ -7,7 +8,9 @@ export function LeaderPanel({ holders, players, meId }: { holders: LeaderHolder[
   const playerOf = new Map(players.map((p) => [p.user_id, p]));
   return (
     <div className="space-y-2 rounded-lg bg-stone-800 p-3">
-      <div className="text-sm font-bold">역사적 인물</div>
+      <div className="text-sm font-bold">
+        <InfoTooltip concept="leaders">역사적 인물</InfoTooltip>
+      </div>
       {LEADER_ORDER.map((id) => {
         const def = LEADERS[id];
         const holder = byId.get(id);

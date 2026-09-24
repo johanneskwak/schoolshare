@@ -26,6 +26,8 @@ export interface Room {
   victory: VictoryType | null;
   /** AI 대전(1인 프리플레이) 방 */
   is_solo: boolean;
+  /** 즉시 행동이 일어날 때마다 증가 → 다른 화면 새로고침 신호 */
+  action_seq: number;
   created_at: string;
   updated_at: string;
 }
@@ -75,6 +77,10 @@ export interface Unit {
   hp: number;
   moves_left: number;
   created_turn: number;
+  /** 이번 턴 행동 완료 (흑백 표시) */
+  acted: boolean;
+  /** 요새화: 방어 +2, 이동하면 풀림 */
+  fortified: boolean;
 }
 
 export type Action =

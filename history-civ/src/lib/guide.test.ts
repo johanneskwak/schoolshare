@@ -27,7 +27,9 @@ function me(o: Partial<RoomPlayer> = {}): RoomPlayer {
     research_target: null, research_progress: 0, researched: [], score: 0, joined_at: '', ...o,
   };
 }
-const unit = (o: Partial<Unit>): Unit => ({ id: 'u', owner_id: ME, kind: 'militia', x: 2, y: 2, hp: 100, moves_left: 2, created_turn: 1, ...o });
+const unit = (o: Partial<Unit>): Unit => ({
+  id: 'u', owner_id: ME, kind: 'militia', x: 2, y: 2, hp: 100, moves_left: 2, created_turn: 1, acted: false, fortified: false, ...o,
+});
 
 describe('computeGuide', () => {
   it('첫 턴: 도시를 세울 수 있는 곳의 개척자가 있으면 도시 건설을 안내', () => {
@@ -40,17 +42,18 @@ describe('computeGuide', () => {
     const g = computeGuide(snap([unit({ id: 's', kind: 'settler', x: 3, y: 2 })]), me(), []);
     expect(g.title).toBe('개척자를 도시 터로 옮기세요');
   });
-  it('개척자에게 명령하면 연구 → 생산 → 정찰 순서로 안내', () => {
-    const units = [unit({ id: 's', kind: 'settler', x: 6, y: 6 }), unit({ id: 'm', x: 2, y: 3 })];
-    let pending: Action[] = [{ type: 'found_city', unit_id: 's' }];
+  it('개척자가 행동하면 연구 → 생산 → 정찰 → 턴 종료 순서로 안내', () => {
+    const settlerDone = unit({ id: 's', kind: 'settler', x: 6, y: 6, acted: true });
+    let units = [settlerDone, unit({ id: 'm', x: 2, y: 3 })];
+    let pending: Action[] = [];
     expect(computeGuide(snap(units), me(), pending).title).toBe('연구할 기술을 고르세요');
-    pending = [...pending, { type: 'research', tech: 'steam_engine' }];
+    pending = [{ type: 'research', tech: 'steam_engine' }];
     expect(computeGuide(snap(units), me(), pending).title).toBe('파리에서 생산을 고르세요');
     pending = [...pending, { type: 'produce', x: 2, y: 2, unit_kind: 'militia' }];
     const g = computeGuide(snap(units), me(), pending);
     expect(g.title).toBe('시민군을(를) 이동시켜 정찰하세요');
     expect(g.idleUnitIds).toEqual(['m']);
-    pending = [...pending, { type: 'move', unit_id: 'm', x: 3, y: 3 }];
+    units = [settlerDone, unit({ id: 'm', x: 3, y: 3, acted: true })];
     const done = computeGuide(snap(units), me(), pending);
     expect(done.title).toBe('준비 완료! 턴을 종료하세요');
     expect(done.checklist.filter((c) => c.id !== 'end').every((c) => c.done)).toBe(true);

@@ -25,13 +25,10 @@ export interface Guide {
   idleUnitIds: string[];
 }
 
-const orderedUnitIds = (pending: Action[]) =>
-  new Set(pending.flatMap((a) => ('unit_id' in a ? [a.unit_id] : [])));
-
-export function idleUnits(snapshot: GameSnapshot, me: RoomPlayer, pending: Action[]): Unit[] {
-  const ordered = orderedUnitIds(pending);
+/** 이번 턴에 아직 행동하지 않은 내 유닛 (즉시 행동 방식: acted가 아니고 움직일 수 있음) */
+export function idleUnits(snapshot: GameSnapshot, me: RoomPlayer): Unit[] {
   return snapshot.units.filter(
-    (u) => u.owner_id === me.user_id && u.moves_left > 0 && !ordered.has(u.id)
+    (u) => u.owner_id === me.user_id && !u.acted && u.moves_left > 0
       && (UNIT_TYPES[u.kind].attack > 0 || u.kind === 'settler'),
   );
 }
@@ -40,7 +37,7 @@ export function computeGuide(snapshot: GameSnapshot, me: RoomPlayer, pending: Ac
   const tiles = indexTiles(snapshot.tiles);
   const myUnits = snapshot.units.filter((u) => u.owner_id === me.user_id);
   const leaders = leadersOf(snapshot.leaders, me.user_id);
-  const idle = idleUnits(snapshot, me, pending);
+  const idle = idleUnits(snapshot, me);
 
   const hasResearch = !!me.research_target || pending.some((a) => a.type === 'research');
   const allResearched = me.researched.length >= 5;
@@ -59,7 +56,7 @@ export function computeGuide(snapshot: GameSnapshot, me: RoomPlayer, pending: Ac
     ...(snapshot.my_events.length ? [{ id: 'event' as const, label: `역사적 사건에 답하기 (${event!.title})`, done: false }] : []),
     { id: 'research', label: allResearched ? '모든 기술 연구 완료' : '연구할 기술 고르기', done: hasResearch || allResearched },
     { id: 'production', label: '도시에서 생산 고르기', done: !idleCity },
-    { id: 'units', label: idle.length ? `유닛에게 명령 내리기 (${idle.length}개 대기)` : '유닛 명령 완료', done: idle.length === 0 },
+    { id: 'units', label: idle.length ? `유닛 행동하기 (${idle.length}개 남음)` : '모든 유닛 행동 완료', done: idle.length === 0 },
     { id: 'end', label: '턴 종료 (E)', done: me.has_ended_turn },
   ];
 
@@ -78,8 +75,8 @@ export function computeGuide(snapshot: GameSnapshot, me: RoomPlayer, pending: Ac
     const canBuild = canFoundCity(settler, tiles);
     title = canBuild ? '개척자로 도시를 건설하세요' : '개척자를 도시 터로 옮기세요';
     detail = canBuild
-      ? '개척자를 선택하고 [도시 건설] 버튼(B 키)을 누르세요. 도시가 많을수록 생산·연구가 빨라집니다.'
-      : '다른 도시와 3칸 이상 떨어진 빈 땅이 필요해요. 개척자를 선택한 뒤 노란 칸을 눌러 이동하세요.';
+      ? '개척자를 선택하고 행동 메뉴의 [도시 건설](B 키)을 누르면 바로 도시가 생겨요.'
+      : '다른 도시와 3칸 이상 떨어진 빈 땅이 필요해요. 개척자를 선택한 뒤 노란 칸을 누르면 바로 이동하고, 도착하면 [도시 건설]이 켜져요.';
     focus = { kind: 'unit', id: settler.id };
   } else if (!hasResearch && !allResearched) {
     title = '연구할 기술을 고르세요';
@@ -92,7 +89,7 @@ export function computeGuide(snapshot: GameSnapshot, me: RoomPlayer, pending: Ac
   } else if (soldier) {
     const name = UNIT_TYPES[soldier.kind].name;
     title = `${name}을(를) 이동시켜 정찰하세요`;
-    detail = '유닛을 선택하면 노란 칸(이동)과 빨간 칸(공격)이 보여요. 반짝이는 유닛이 아직 명령을 받지 않은 유닛입니다. (N: 다음 유닛)';
+    detail = '유닛을 누르고 노란 칸을 누르면 바로 이동해요. 이동 후 메뉴에서 [공격]·[요새화]·[대기]를 고르세요. 반짝이는 유닛이 아직 행동하지 않은 유닛입니다. (N: 다음 유닛)';
     focus = { kind: 'unit', id: soldier.id };
   }
 
