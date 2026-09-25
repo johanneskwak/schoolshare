@@ -80,7 +80,7 @@ export function computeGuide(snapshot: GameSnapshot, me: RoomPlayer, pending: Ac
     focus = { kind: 'unit', id: settler.id };
   } else if (!hasResearch && !allResearched) {
     title = '연구할 기술을 고르세요';
-    detail = '증기기관 → 전기화 → 신무기는 과학 승리, 계몽사상 → 인권선언은 혁명 이념(문화)으로 이어집니다.';
+    detail = '증기기관 → 전기화 → 컴퓨터 → 인터넷 → AI 혁명은 과학 승리, 계몽사상 → 인권선언은 혁명 이념(문화)으로 이어집니다.';
     focus = { kind: 'research' };
   } else if (idleCity) {
     title = `${idleCity.city_name ?? '도시'}에서 생산을 고르세요`;

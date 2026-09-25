@@ -4,7 +4,10 @@ export type Faction = 'france' | 'britain' | 'empire' | 'usa';
 export type RoomStatus = 'waiting' | 'playing' | 'finished';
 export type Terrain = 'plains' | 'grassland' | 'hills' | 'forest' | 'mountain' | 'water';
 export type VictoryType = 'conquest' | 'science' | 'culture' | 'score' | 'wonder';
-export type TechId = 'enlightenment' | 'rights_declaration' | 'steam_engine' | 'electrification' | 'new_weapons';
+export type TechId =
+  | 'enlightenment' | 'rights_declaration' | 'steam_engine' | 'electrification' | 'new_weapons'
+  | 'internal_combustion' | 'computing' | 'internet' | 'ai_revolution';
+export type Difficulty = 'easy' | 'normal' | 'hard';
 export type Improvement = 'farm' | 'railway' | 'factory' | 'port' | 'library';
 export type UnitKind =
   | 'settler' | 'militia' | 'line_infantry' | 'cavalry' | 'artillery'
@@ -19,6 +22,7 @@ export interface Room {
   map_width: number;
   map_height: number;
   turn_number: number;
+  /** 0 = 시간 무제한 */
   turn_seconds: number;
   turn_deadline: string | null;
   max_turns: number;
@@ -26,6 +30,8 @@ export interface Room {
   victory: VictoryType | null;
   /** AI 대전(1인 프리플레이) 방 */
   is_solo: boolean;
+  /** AI 난이도 (솔로) */
+  difficulty: Difficulty;
   /** 즉시 행동이 일어날 때마다 증가 → 다른 화면 새로고침 신호 */
   action_seq: number;
   created_at: string;
@@ -53,6 +59,8 @@ export interface RoomPlayer {
   research_progress: number;
   researched: TechId[];
   score: number;
+  /** 외교 명성 (보스턴 차 사건 유화책 · 독립운동 후원 등) */
+  prestige?: number;
   joined_at: string;
 }
 
@@ -66,6 +74,8 @@ export interface Tile {
   city_name: string | null;
   city_pop: number;
   improvement: Improvement | null;
+  /** 도시 성벽 HP 0~100 (0이 되어야 근접 유닛이 입성·점령) */
+  city_hp: number;
 }
 
 export interface Unit {
@@ -116,10 +126,18 @@ export interface PendingEvent {
   choice_b_desc: string;
 }
 
-/** 도서관 완공으로 합류한 지식인 (hc_scholar_defs + 합류 정보) */
+export type PersonCategory = 'thinker' | 'scientist' | 'statesman' | 'economist' | 'artist';
+
+/** 연대기 위인 (hc_scholar_defs + 합류 정보). year가 없으면 옛 도서관 지식인 */
 export interface ScholarHolder {
   id: string;
-  faction: Faction;
+  faction: Faction | null;
+  category?: PersonCategory | null;
+  year?: number | null;
+  unlock_building?: BuildingId | null;
+  /** 교육용 3지선다 (정답은 서버만 안다) */
+  quiz?: { q: string; choices: string[] } | null;
+  quiz_result?: 'correct' | 'wrong' | null;
   ord: number;
   name: string;
   era: string;
@@ -145,8 +163,32 @@ export interface WonderState {
   icon: string;
 }
 
+export type BuildingId =
+  | 'library' | 'central_bank' | 'concert_hall' | 'national_theatre' | 'natural_history_museum' | 'medical_institute'
+  | 'radium_institute' | 'institute_advanced_study' | 'cinema' | 'private_investment' | 'data_lab' | 'stadium'
+  | 'federal_reserve' | 'stock_exchange';
+
+export interface CityBuilding {
+  x: number;
+  y: number;
+  building_id: BuildingId;
+  built_turn: number;
+}
+
+export type ConditionId =
+  | 'depression' | 'oil_shock' | 'cholera' | 'subprime' | 'unrest' | 'morale'
+  | 'embargo' | 'stagnation' | 'pandemic' | 'latin_market' | 'raw_materials';
+
+export interface PlayerCondition {
+  player_id: string;
+  cond_id: ConditionId;
+  until_turn: number;
+}
+
 export interface GameSnapshot {
   server_now: string;
+  /** 현재 연도 (1750 + 5 × (턴 − 1)) */
+  year: number;
   room: Room;
   players: RoomPlayer[];
   tiles: Tile[];
@@ -157,13 +199,15 @@ export interface GameSnapshot {
   my_events: PendingEvent[];
   scholars: ScholarHolder[];
   wonders: WonderState[];
+  buildings: CityBuilding[];
+  conditions: PlayerCondition[];
 }
 
 export const FACTIONS: Record<Faction, { name: string; color: string; desc: string }> = {
   france: { name: '혁명 프랑스', color: '#2563eb', desc: '값싼 시민군, 이념 +2, 나폴레옹·로베스피에르' },
-  britain: { name: '산업화 영국', color: '#dc2626', desc: '생산력 +25%, 철도 보너스, 제임스 와트' },
-  empire: { name: '제국주의 열강', color: '#ca8a04', desc: '식민 무역 골드, 기관총병' },
-  usa: { name: '신생 미국', color: '#0d9488', desc: '개척 정신(개척자 20), 식량 +2 · 민주주의(이념 +1), 링컨·엠파이어 스테이트 빌딩' },
+  britain: { name: '산업화 영국', color: '#dc2626', desc: '권리 장전(안정 +2·골드 +3), 생산력 +25%, 철도 보너스, 제임스 와트' },
+  empire: { name: '독일 (프로이센)', color: '#ca8a04', desc: '철혈 재정(식민 무역 골드), 기관총병 · 칸트·괴테·베토벤·비스마르크·아인슈타인' },
+  usa: { name: '신생 미국', color: '#0d9488', desc: '개척 정신(개척자 20), 식량 +2 · 민주주의(이념 +1), 워싱턴·제퍼슨·링컨·엠파이어 스테이트 빌딩' },
 };
 
 export const TECHS: Record<TechId, { name: string; cost: number; prereq: TechId | null }> = {
@@ -172,6 +216,10 @@ export const TECHS: Record<TechId, { name: string; cost: number; prereq: TechId 
   steam_engine: { name: '증기기관', cost: 30, prereq: null },
   electrification: { name: '전기화', cost: 60, prereq: 'steam_engine' },
   new_weapons: { name: '신무기', cost: 100, prereq: 'electrification' },
+  internal_combustion: { name: '내연기관', cost: 80, prereq: 'electrification' },
+  computing: { name: '컴퓨터', cost: 150, prereq: 'electrification' },
+  internet: { name: '인터넷', cost: 220, prereq: 'computing' },
+  ai_revolution: { name: 'AI 혁명', cost: 320, prereq: 'internet' },
 };
 
 export const VICTORY_NAMES: Record<VictoryType, string> = {

@@ -9,7 +9,8 @@ import { LEADERS } from '../lib/leaders';
 import { canFoundCity, indexTiles } from '../lib/rules';
 import { formatClock } from '../lib/time';
 import { useGameStore } from '../store/gameStore';
-import { FACTIONS, TECHS, type LeaderId, type TechId } from '../types/game';
+import { FACTIONS, TECHS, type BuildingId, type ConditionId, type LeaderId, type TechId } from '../types/game';
+import { BUILDINGS, CONDITIONS, DIFFICULTIES } from '../lib/chronicle';
 import { CommandPanel } from './CommandPanel';
 import { EventModal } from './EventModal';
 import { GameMap } from './GameMap';
@@ -37,6 +38,10 @@ const EVENT_TEXT: Record<string, string> = {
   historic_event: '📜 역사적 사건 발생',
   event_resolved: '📜 역사적 사건 결정',
   scholar_joined: '📚 지식인 합류',
+  person_joined: '🌟 위인 합류',
+  siege: '🏰 공성',
+  building_built: '🏛️ 건물 완공',
+  condition_started: '⚠️ 상태 발생',
   wonder_built: '🏛️ 불가사의 완공',
   wonder_captured: '🏳️ 불가사의 점령',
   wonder_victory: '🏆 불가사의 방어 승리',
@@ -143,7 +148,9 @@ export function GameScreen({
   const researchAction = pending.find((a) => a.type === 'research');
   const alive = players.filter((p) => !p.is_eliminated);
   const endedCount = alive.filter((p) => p.has_ended_turn).length;
-  const pct = left === null ? 0 : Math.min(100, (left / (room.turn_seconds * 1000)) * 100);
+  const unlimited = room.turn_seconds === 0;
+  const pct = left === null || unlimited ? 0 : Math.min(100, (left / (room.turn_seconds * 1000)) * 100);
+  const myConditions = (snapshot.conditions ?? []).filter((c) => c.player_id === userId);
   const urgent = left !== null && left < 10_000;
   const newScholar = snapshot.scholars.find((x) => x.player_id === userId && !x.seen) ?? null;
   const event = newScholar ? null : (snapshot.my_events.find((e) => e.pe_id !== eventHiddenId) ?? null);
@@ -158,7 +165,27 @@ export function GameScreen({
             턴 {room.turn_number}
             <span className="text-sm text-stone-400">/{room.max_turns}</span>
           </InfoTooltip>
-          <div className={`font-mono text-2xl ${urgent ? 'animate-pulse text-red-400' : 'text-amber-400'}`}>{formatClock(left)}</div>
+          <div className="rounded bg-amber-900/60 px-2 py-0.5 font-serif text-lg font-bold text-amber-200" title="1750년에 시작해 한 턴에 5년씩 흘러요">
+            📅 {snapshot.year}년
+          </div>
+          {unlimited ? (
+            <div className="text-sm text-stone-300">⏳ 시간 무제한</div>
+          ) : (
+            <div className={`font-mono text-2xl ${urgent ? 'animate-pulse text-red-400' : 'text-amber-400'}`}>{formatClock(left)}</div>
+          )}
+          {room.is_solo && (
+            <div className="text-xs text-stone-400">난이도 {DIFFICULTIES[room.difficulty ?? 'normal'].name}</div>
+          )}
+          {myConditions.map((c) => (
+            <span
+              key={c.cond_id}
+              title={CONDITIONS[c.cond_id].desc}
+              className={`rounded-full px-2 py-0.5 text-xs ${CONDITIONS[c.cond_id].good ? 'bg-emerald-900 text-emerald-200' : 'bg-red-950 text-red-200'}`}
+            >
+              {CONDITIONS[c.cond_id].icon} {CONDITIONS[c.cond_id].name}
+              {c.until_turn < 500 && ` ~${c.until_turn}턴`}
+            </span>
+          ))}
           <div className="text-sm text-stone-300">
             턴 종료 {endedCount}/{alive.length}
           </div>
@@ -171,6 +198,7 @@ export function GameScreen({
             <InfoTooltip concept="stability" align="right" className={stabilityColor}>
               ⚖️ 안정 {me.stability}
             </InfoTooltip>
+            <span title="외교 명성: 보스턴 차 사건 유화책, 독립운동 후원 등으로 올라요">🎗️ 명성 {me.prestige ?? 0}</span>
             <InfoTooltip concept="score" align="right">⭐ {me.score}</InfoTooltip>
           </div>
         </div>
@@ -258,6 +286,10 @@ export function GameScreen({
                     {e.type === 'tech_researched' && ` (${TECHS[e.tech as TechId]?.name})`}
                     {e.type === 'leader_joined' && ` · ${LEADERS[e.leader as LeaderId]?.name} → ${nameOf(e.player)}`}
                     {(e.type === 'historic_event' || e.type === 'event_resolved') && ` · ${nameOf(e.player)}`}
+                    {e.type === 'person_joined' && ` · ${snapshot.scholars.find((x) => x.id === e.scholar)?.name ?? ''} (${e.year}) → ${nameOf(e.player)}`}
+                    {e.type === 'siege' && ` · 성벽 -${e.dmg_city} (남은 ${e.city_hp})`}
+                    {e.type === 'building_built' && ` · ${BUILDINGS[e.building as BuildingId]?.name ?? ''} · ${nameOf(e.player)}`}
+                    {e.type === 'condition_started' && ` · ${CONDITIONS[e.condition as ConditionId]?.name ?? ''} · ${nameOf(e.player)}`}
                     {e.type === 'scholar_joined' && ` · ${snapshot.scholars.find((x) => x.id === e.scholar)?.name ?? ''} → ${nameOf(e.player)}`}
                     {e.type.startsWith('wonder_') && ` · ${snapshot.wonders.find((x) => x.wonder_id === e.wonder)?.name_ko ?? ''} · ${nameOf(e.player)}`}
                   </div>
@@ -273,6 +305,7 @@ export function GameScreen({
         <ScholarModal
           key={newScholar.id}
           scholar={newScholar}
+          onAnswer={(choice) => api.answerPersonQuiz(roomId, newScholar.id, choice)}
           onClose={async () => {
             await api.ackScholar(roomId, newScholar.id);
             await refetch();

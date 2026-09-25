@@ -11,7 +11,7 @@ function grid(w: number, h: number, special: Record<string, Partial<Tile>> = {})
     for (let y = 0; y < h; y++)
       out.push({
         x, y, terrain: 'plains' as Terrain, owner_id: null, is_city: false, is_capital: false,
-        city_name: null, city_pop: 0, improvement: null, ...special[key(x, y)],
+        city_name: null, city_pop: 0, improvement: null, city_hp: 100, ...special[key(x, y)],
       });
   return out;
 }
@@ -27,6 +27,26 @@ const player = (p: Partial<RoomPlayer> = {}): RoomPlayer => ({
 });
 
 describe('unitTargets', () => {
+  it('공성: 성벽이 남은 빈 적 도시는 공격 대상, HP 0이면 근접 유닛만 입성(이동) 가능', () => {
+    const city = { is_city: true, owner_id: ENEMY, city_name: '베를린', city_pop: 2 };
+    const walled = indexTiles(grid(5, 5, { [key(3, 2)]: { ...city, city_hp: 40 } }));
+    const u = unit({});
+    let r = unitTargets(u, walled, [u]);
+    expect(r.attacks.has(key(3, 2))).toBe(true);
+    expect(r.moves.has(key(3, 2))).toBe(false);
+
+    const breached = indexTiles(grid(5, 5, { [key(3, 2)]: { ...city, city_hp: 0 } }));
+    r = unitTargets(u, breached, [u]);
+    expect(r.moves.has(key(3, 2))).toBe(true);
+    expect(r.attacks.has(key(3, 2))).toBe(false);
+
+    const art = unit({ kind: 'artillery' });
+    expect(unitTargets(art, breached, [art]).moves.has(key(3, 2))).toBe(false); // 포병은 입성 불가
+    const settler = unit({ kind: 'settler' });
+    const s = unitTargets(settler, walled, [settler]);
+    expect(s.moves.has(key(3, 2)) || s.attacks.has(key(3, 2))).toBe(false);
+  });
+
   it('이동력 1이면 주변 8칸, 산·아군 칸 제외, 적 칸은 공격', () => {
     const tiles = indexTiles(grid(5, 5, { [key(1, 1)]: { terrain: 'mountain' } }));
     const u = unit({});

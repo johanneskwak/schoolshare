@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { PendingEvent } from '../types/game';
+import { FIGURE_ICONS } from '../constants/figureIcons';
+import { FigureIcon } from './FigureIcon';
 
 /** EventSystem 팝업: 역사적 맥락 + 두 가지 선택지. 선택 즉시 서버에서 자원·맵에 반영된다. */
 export function EventModal({
@@ -34,7 +36,9 @@ export function EventModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="event-title">
       <div className="w-full max-w-lg overflow-hidden rounded-xl border-2 border-amber-700 bg-[#2b2118] text-amber-50 shadow-2xl">
         <div className="flex items-center gap-4 border-b border-amber-800 bg-gradient-to-r from-amber-900 to-stone-900 px-5 py-4">
-          <div className="text-5xl drop-shadow">{event.icon}</div>
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full text-5xl drop-shadow">
+            {FIGURE_ICONS[event.id] ? <FigureIcon id={event.id} fallback={event.icon} /> : event.icon}
+          </div>
           <div>
             <div className="text-xs tracking-widest text-amber-400">역사적 사건 · {event.era}</div>
             <h2 id="event-title" className="font-serif text-2xl font-bold">

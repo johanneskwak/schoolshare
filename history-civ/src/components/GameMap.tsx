@@ -88,6 +88,11 @@ export function GameMap({
   const active = selectedUnit && selectedUnit.owner_id === userId && !selectedUnit.acted && canAct && actions ? selectedUnit : undefined;
   const targets = useMemo(() => (active ? unitTargets(active, tileIndex, units) : null), [active, tileIndex, units]);
   const showMoves = targets && unitMode !== 'attack' ? targets.moves : null;
+  const buildingCount = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const b of snapshot.buildings ?? []) m.set(key(b.x, b.y), (m.get(key(b.x, b.y)) ?? 0) + 1);
+    return m;
+  }, [snapshot.buildings]);
   const wonderAt = useMemo(() => new Map(snapshot.wonders.map((w) => [key(w.x, w.y), w])), [snapshot.wonders]);
   const combatTiles = useMemo(
     () => new Set((snapshot.last_log ?? []).filter((e) => e.type === 'combat').map((e) => key(e.x as number, e.y as number))),
@@ -247,11 +252,20 @@ export function GameMap({
                   <g key={`c${t.x},${t.y}`} pointerEvents="none">
                     <ellipse cx={cx} cy={cy + 3} rx={TW / 2.3} ry={TH / 2.6} fill="url(#foot-shadow)" />
                     <image href={sprite(t.is_capital ? 'capital' : 'city')} x={cx - w / 2} y={cy - w * 0.8 + 4} width={w} height={w} />
-                    {t.improvement === 'library' && (
-                    <text x={cx - 22} y={cy - 6} fontSize={11}>
-                      📚
-                    </text>
-                  )}
+                    {(buildingCount.get(key(t.x, t.y)) ?? 0) > 0 && (
+                      <text x={cx - 24} y={cy - 6} fontSize={10}>
+                        🏛️{buildingCount.get(key(t.x, t.y))}
+                      </text>
+                    )}
+                    {(t.city_hp ?? 100) < 100 && (
+                      <g transform={`translate(${cx - 18},${cy - w * 0.8})`}>
+                        <rect width={36} height={4} rx={1} fill="#1c1917" />
+                        <rect width={(36 * (t.city_hp ?? 100)) / 100} height={4} rx={1} fill={(t.city_hp ?? 100) > 40 ? '#f59e0b' : '#ef4444'} />
+                        <text x={18} y={-2} textAnchor="middle" fontSize={7} fontWeight={700} fill="#fff" stroke="#000" strokeWidth={0.4}>
+                          🏰 {t.city_hp}
+                        </text>
+                      </g>
+                    )}
                   {wonderAt.get(key(t.x, t.y)) && (
                     <g transform={`translate(${cx + 18},${cy - w * 0.62})`}>
                       <circle r={9} fill="#78350f" stroke="#fbbf24" strokeWidth={1.2} />

@@ -9,10 +9,10 @@ const p = (o: Partial<RoomPlayer>): RoomPlayer => ({
 });
 
 describe('scienceProgress', () => {
-  it('완료한 과학 테크 비용 + 진행 중인 과학 테크 진행량을 190 대비로 계산', () => {
+  it('완료한 과학 테크 비용 + 진행 중인 과학 테크 진행량을 780(증기기관~AI 혁명) 대비로 계산', () => {
     expect(scienceProgress(p({}))).toBe(0);
-    expect(scienceProgress(p({ researched: ['steam_engine'], research_target: 'electrification', research_progress: 19 }))).toBeCloseTo(49 / 190);
-    expect(scienceProgress(p({ researched: ['steam_engine', 'electrification', 'new_weapons'] }))).toBe(1);
+    expect(scienceProgress(p({ researched: ['steam_engine'], research_target: 'electrification', research_progress: 19 }))).toBeCloseTo(49 / 780);
+    expect(scienceProgress(p({ researched: ['steam_engine', 'electrification', 'computing', 'internet', 'ai_revolution'] }))).toBe(1);
   });
   it('문화 테크 연구는 과학 진행도에 들어가지 않는다', () => {
     expect(scienceProgress(p({ researched: ['enlightenment'], research_target: 'rights_declaration', research_progress: 30 }))).toBe(0);
@@ -27,7 +27,7 @@ describe('victoryProgress', () => {
       p({ user_id: 'c', ideology: 90, is_eliminated: true }),
     ]);
     expect(res.map((r) => r.cultureLeader)).toEqual([false, true, false]);
-    expect(res[1]!.culture).toBeCloseTo(0.3);
+    expect(res[1]!.culture).toBeCloseTo(60 / 800);
   });
 });
 
