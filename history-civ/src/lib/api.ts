@@ -54,6 +54,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   WONDER_TAKEN: '다른 문명이 이미 완공했어요.',
   CITY_HAS_WONDER: '이 도시엔 이미 불가사의가 있어요.',
   NOT_ENOUGH_HAMMER: '망치가 부족해요.',
+  CITY_BUILDING_WONDER: '이 도시는 이미 불가사의를 짓고 있어요.',
+  WONDER_IN_PROGRESS: '다른 도시에서 이미 짓고 있는 불가사의예요.',
   EVENT_NOT_PENDING: '이미 결정된 사건이에요.',
   INVALID_CHOICE: '잘못된 선택이에요.',
   INVALID_AI_COUNT: 'AI는 1~3명까지 고를 수 있어요.',
@@ -115,6 +117,7 @@ export const api = {
   unitUpgrade: (roomId: string, unitId: string) => rpc<unknown>('hc_unit_upgrade', { p_room: roomId, p_unit: unitId }),
   buildWonder: (roomId: string, x: number, y: number, wonderId: string) =>
     rpc<GameEvent[]>('hc_build_wonder', { p_room: roomId, p_x: x, p_y: y, p_wonder: wonderId }),
+  cancelWonder: (roomId: string, x: number, y: number) => rpc<void>('hc_cancel_wonder', { p_room: roomId, p_x: x, p_y: y }),
   buildBuilding: (roomId: string, x: number, y: number, building: BuildingId) =>
     rpc<GameEvent[]>('hc_build_building', { p_room: roomId, p_x: x, p_y: y, p_building: building }),
   answerPersonQuiz: (roomId: string, personId: string, choice: number) =>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canUpgrade, previewCombat, upgradeChain } from './units';
+import { canUpgrade, previewCombat, previewSiege, upgradeChain } from './units';
 import type { RoomPlayer, Tile, Unit } from '../types/game';
 
 const tile = (o: Partial<Tile> = {}): Tile => ({
@@ -52,5 +52,20 @@ describe('업그레이드 경로', () => {
     expect(canUpgrade(unit({}), me(), own)).toMatchObject({ ok: false, reason: '필요 기술 미연구' });
     expect(canUpgrade(unit({}), me({ researched: ['steam_engine', 'electrification'] }), own).ok).toBe(true);
     expect(canUpgrade(unit({ kind: 'militia', acted: true }), me(), own).ok).toBe(false);
+  });
+});
+
+describe('previewSiege (서버 hc__siege 공식)', () => {
+  const capital = tile({ is_city: true, is_capital: true, owner_id: 'enemy', city_name: '보스턴', city_pop: 1, city_hp: 100 });
+  it('포병으로 인구 1 수도를 치면 성벽 -29, 반격 없음 (DB 시뮬레이션 100→71과 일치)', () => {
+    const p = previewSiege(unit({ kind: 'artillery' }), capital);
+    expect(p.dmgCity).toBe(29);
+    expect(p.dmgAtt).toBe(0);
+    expect(p.breaches).toBe(false);
+  });
+  it('성벽이 피해보다 낮으면 붕괴, 처칠은 피해를 2/3로', () => {
+    expect(previewSiege(unit({ kind: 'artillery' }), { ...capital, city_hp: 13 }).breaches).toBe(true);
+    expect(previewSiege(unit({ kind: 'artillery' }), capital, [], new Set(['churchill'])).dmgCity).toBeLessThan(29);
+    expect(previewSiege(unit({}), capital).dmgAtt).toBeGreaterThan(0); // 근접은 반격을 받는다
   });
 });

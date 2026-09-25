@@ -8,6 +8,7 @@ import { computeGuide, type Guide } from '../lib/guide';
 import { LEADERS } from '../lib/leaders';
 import { canFoundCity, indexTiles } from '../lib/rules';
 import { formatClock } from '../lib/time';
+import { cycleCity } from '../lib/civ';
 import { useGameStore } from '../store/gameStore';
 import { FACTIONS, TECHS, type BuildingId, type ConditionId, type LeaderId, type TechId } from '../types/game';
 import { BUILDINGS, CONDITIONS, DIFFICULTIES } from '../lib/chronicle';
@@ -42,6 +43,8 @@ const EVENT_TEXT: Record<string, string> = {
   siege: '🏰 공성',
   building_built: '🏛️ 건물 완공',
   condition_started: '⚠️ 상태 발생',
+  wonder_started: '🏗️ 불가사의 공사 시작',
+  wonder_lost: '🚧 불가사의 공사 중단',
   wonder_built: '🏛️ 불가사의 완공',
   wonder_captured: '🏳️ 불가사의 점령',
   wonder_victory: '🏆 불가사의 방어 승리',
@@ -116,6 +119,14 @@ export function GameScreen({
       if (k === 'escape') {
         if (useGameStore.getState().unitMode === 'attack') setUnitMode('menu');
         else select(null);
+      }
+      // 도시 전환: [ / ] 또는 < / > (보기만 하므로 턴 종료 후에도 가능)
+      if (k === '[' || k === ']' || k === '<' || k === '>' || k === ',' || k === '.') {
+        const dir = k === ']' || k === '>' || k === '.' ? 1 : -1;
+        const cur = selection?.kind === 'tile' ? selection : null;
+        const next = cycleCity(snapshot.tiles, me.user_id, cur, dir);
+        if (next) select({ kind: 'tile', x: next.x, y: next.y });
+        return;
       }
       if (!canAct) return;
       if (k === 'e') void endTurn();

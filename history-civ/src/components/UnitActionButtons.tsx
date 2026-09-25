@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { UnitActions } from '../hooks/useUnitActions';
 import { leadersOf } from '../lib/leaders';
 import { canFoundCity, indexTiles, key, UNIT_TYPES, unitTargets } from '../lib/rules';
-import { previewCombat } from '../lib/units';
+import { previewCombat, previewSiege } from '../lib/units';
 import { useGameStore } from '../store/gameStore';
 import type { GameSnapshot, Unit } from '../types/game';
 
@@ -32,6 +32,11 @@ export function UnitActionButtons({
   const t = UNIT_TYPES[unit.kind];
   const targets = useMemo(() => unitTargets(unit, tiles, snapshot.units), [unit, tiles, snapshot.units]);
   const enemies = snapshot.units.filter((e) => targets.attacks.has(key(e.x, e.y)));
+  // 유닛이 없는 적 도시(성벽이 남은) — 공성 대상
+  const cities = snapshot.tiles.filter(
+    (c) => c.is_city && targets.attacks.has(key(c.x, c.y)) && !snapshot.units.some((e) => e.x === c.x && e.y === c.y),
+  );
+  const targetCount = enemies.length + cities.length;
   const myLeaders = leadersOf(snapshot.leaders, unit.owner_id);
   const moved = unit.moves_left < t.moves;
   const disabled = !canAct || unit.acted || actions.busy;
@@ -43,7 +48,7 @@ export function UnitActionButtons({
   if (unitMode === 'attack') {
     return (
       <div className={inline ? 'flex flex-wrap items-center gap-1.5' : 'space-y-1.5'}>
-        <div className="text-xs font-bold text-red-300">⚔️ 공격할 적을 고르세요 (맵의 빨간 칸도 가능)</div>
+        <div className="text-xs font-bold text-red-300">⚔️ 공격할 적 유닛·도시를 고르세요 (맵의 빨간 칸도 가능)</div>
         {enemies.map((e) => {
           const p = previewCombat(unit, e, tiles.get(key(e.x, e.y))!, myLeaders);
           return (
@@ -59,6 +64,23 @@ export function UnitActionButtons({
             </button>
           );
         })}
+        {cities.map((c) => {
+          const defPersons = new Set(snapshot.scholars.filter((p) => p.player_id === c.owner_id).map((p) => p.id));
+          const p = previewSiege(unit, c, myLeaders, defPersons);
+          return (
+            <button
+              key={`c${c.x},${c.y}`}
+              disabled={disabled}
+              onClick={() => void actions.attack(unit, c.x, c.y)}
+              className={`${inline ? '' : 'block w-full'} rounded border border-orange-600 bg-orange-950/60 px-2 py-1.5 text-left text-xs hover:bg-orange-900 disabled:opacity-40`}
+            >
+              <span className="font-bold">🏰 [도시 공격] {c.is_capital ? '★ ' : ''}{c.city_name}</span> (성벽 {c.city_hp ?? 100}) — 적 방어력{' '}
+              <b className="text-red-300">-{p.dmgCity}</b>
+              {p.breaches && ' 🧱성벽 붕괴 → 근접 유닛 입성 가능'} / 아군 <b className="text-amber-300">-{p.dmgAtt}</b>
+              <span className="block text-stone-400">{p.notes.join(' · ')}</span>
+            </button>
+          );
+        })}
         <button onClick={() => setUnitMode('menu')} className={`${btn} ${inline ? '' : 'w-full'} border border-stone-500 font-normal`}>
           ← 돌아가기
         </button>
@@ -71,12 +93,12 @@ export function UnitActionButtons({
     <div className={inline ? 'flex flex-wrap gap-1.5' : 'grid grid-cols-2 gap-1.5'}>
       {t.attack > 0 && (
         <button
-          disabled={disabled || enemies.length === 0}
+          disabled={disabled || targetCount === 0}
           onClick={() => setUnitMode('attack')}
-          title={enemies.length ? '사거리 안의 적을 공격합니다 (A)' : '사거리 안에 적이 없어요'}
+          title={targetCount ? '사거리 안의 적 유닛·도시를 공격합니다 (A)' : '사거리 안에 적이 없어요'}
           className={`${btn} bg-red-700 hover:bg-red-600`}
         >
-          ⚔️ 공격 {enemies.length > 0 && `(${enemies.length})`}
+          ⚔️ 공격 {targetCount > 0 && `(${targetCount})`}
         </button>
       )}
       {unit.kind === 'settler' && (

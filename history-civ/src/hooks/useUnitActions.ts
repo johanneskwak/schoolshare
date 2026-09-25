@@ -18,6 +18,8 @@ export interface UnitActions {
   upgrade: (unit: Unit) => Promise<void>;
   /** 불가사의 즉시 건설 (망치) */
   buildWonder: (x: number, y: number, wonderId: string) => Promise<void>;
+  /** 진행 중인 불가사의 공사 취소 (투입한 망치는 돌려받지 못함) */
+  cancelWonder: (x: number, y: number) => Promise<void>;
   /** 도시 건물 즉시 건설 (골드) — 도서관·위인 건물 */
   buildBuilding: (x: number, y: number, building: BuildingId) => Promise<void>;
 }
@@ -116,7 +118,12 @@ export function useUnitActions(roomId: string, refetch: () => Promise<void>): Un
       buildWonder: (x, y, wonderId) =>
         run(async () => {
           await api.buildWonder(roomId, x, y, wonderId);
-          showFx([{ x, y, text: '불가사의 완공!', kind: 'info' }]);
+          showFx([{ x, y, text: '🏗️ 불가사의 공사 시작!', kind: 'info' }]);
+          await refetch();
+        }),
+      cancelWonder: (x, y) =>
+        run(async () => {
+          await api.cancelWonder(roomId, x, y);
           await refetch();
         }),
       buildBuilding: (x, y, building) =>
