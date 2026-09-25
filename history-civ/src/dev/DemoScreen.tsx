@@ -136,6 +136,7 @@ function useLocalActions(): UnitActions {
     },
     buildWonder: async () => undefined,
     buildBuilding: async () => undefined,
+    cancelWonder: async () => undefined,
     upgrade: async (u) => mapUnit(u.id, (v) => ({ ...v, kind: UPGRADES[v.kind]!.to, acted: true, moves_left: 0 })),
   };
 }

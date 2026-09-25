@@ -142,3 +142,44 @@ export function previewCombat(att: Unit, def: Unit, defTile: Tile, attLeaders: L
   ];
   return { dmgDef, dmgAtt, defenderDies: dmgDef >= def.hp, attackerDies: dmgAtt >= att.hp, bonusNotes };
 }
+
+export interface SiegePreview {
+  dmgCity: number;
+  dmgAtt: number;
+  breaches: boolean;
+  attackerDies: boolean;
+  notes: string[];
+}
+
+/** 서버 hc__siege와 같은 공식: 빈 적 도시의 성벽(도시 HP)을 깎는다 */
+export function previewSiege(
+  att: Unit,
+  city: Tile,
+  attLeaders: LeaderId[] = [],
+  defenderPersons: ReadonlySet<string> = new Set(),
+): SiegePreview {
+  const a = UNIT_TYPES[att.kind];
+  const bonus = attLeaders.includes('napoleon') ? 2 : 0;
+  const personDef = (defenderPersons.has('lincoln_scholar') ? 2 : 0) + (defenderPersons.has('churchill') ? 3 : 0);
+  const cdef = 4 + city.city_pop + (city.is_capital ? 3 : 0) + personDef;
+  let dmgCity = Math.trunc(
+    (Math.max(8, 25 + 4 * (a.attack + bonus + (att.kind === 'artillery' ? 3 : 0) - cdef)) * (50 + Math.trunc(att.hp / 2))) / 100,
+  );
+  const churchill = defenderPersons.has('churchill');
+  if (churchill) dmgCity = Math.trunc((dmgCity * 2) / 3);
+  const dmgAtt = a.range > 1 ? 0 : Math.trunc((Math.max(5, 10 + 3 * cdef - 2 * a.attack) * 8) / 10);
+  const hp = city.city_hp ?? 100;
+  return {
+    dmgCity,
+    dmgAtt,
+    breaches: dmgCity >= hp,
+    attackerDies: dmgAtt >= att.hp,
+    notes: [
+      `도시 방어 ${cdef}`,
+      ...(att.kind === 'artillery' ? ['포병 공성 +3'] : []),
+      ...(bonus ? ['나폴레옹 +2'] : []),
+      ...(churchill ? ['처칠 결사항전: 피해 2/3'] : []),
+      ...(a.range > 1 ? ['원거리: 반격 없음'] : []),
+    ],
+  };
+}

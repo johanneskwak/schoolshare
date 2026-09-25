@@ -11,7 +11,7 @@ import {
 import { useGameStore } from '../store/gameStore';
 import { leadersOf, unitCost } from '../lib/leaders';
 import { TECHS, type Action, type GameSnapshot, type RoomPlayer } from '../types/game';
-import { WONDER_DEFENSE_TURNS, wonderOptions } from '../lib/civ';
+import { cycleCity, myCitiesOrdered, turnsLeft, WONDER_BUILD_TURNS, WONDER_DEFENSE_TURNS, wonderOptions, wonderRate } from '../lib/civ';
 import { BUILDINGS, buildingUnlocked, PERSONS } from '../lib/chronicle';
 import type { BuildingId } from '../types/game';
 import { InfoTooltip } from './InfoTooltip';
@@ -52,6 +52,8 @@ export function CommandPanel({
   const selection = useGameStore((s) => s.selection);
   const pending = useGameStore((s) => s.pending);
   const queueAction = useGameStore((s) => s.queueAction);
+  const select = useGameStore((s) => s.select);
+  const myCityCount = useMemo(() => myCitiesOrdered(snapshot.tiles, me.user_id).length, [snapshot.tiles, me.user_id]);
   const removeActionAt = useGameStore((s) => s.removeActionAt);
   const tileIndex = useMemo(() => indexTiles(snapshot.tiles), [snapshot.tiles]);
   const myUnits = useMemo(() => snapshot.units.filter((u) => u.owner_id === me.user_id), [snapshot.units, me.user_id]);
@@ -75,11 +77,26 @@ export function CommandPanel({
       const owner = snapshot.players.find((p) => p.user_id === tile.owner_id);
       const mine = tile.owner_id === me.user_id;
       const builds = mine ? buildableImprovements(tile, me, tileIndex) : [];
+      const cityArrow = (dir: 1 | -1) => (
+        <button
+          onClick={() => {
+            const c = cycleCity(snapshot.tiles, me.user_id, tile, dir);
+            if (c) select({ kind: 'tile', x: c.x, y: c.y });
+          }}
+          title={dir < 0 ? '이전 도시 ([ 키)' : '다음 도시 (] 키)'}
+          aria-label={dir < 0 ? '이전 도시' : '다음 도시'}
+          className="mx-1 h-6 w-6 rounded border border-amber-700 bg-stone-900 align-middle text-amber-300 hover:bg-amber-900"
+        >
+          {dir < 0 ? '‹' : '›'}
+        </button>
+      );
       const produceOrder = pending.find((a) => a.type === 'produce' && a.x === tile.x && a.y === tile.y);
       body = (
         <div className="space-y-2">
           <div className="font-bold">
+            {mine && tile.is_city && myCityCount > 1 && cityArrow(-1)}
             {tile.is_city ? `${tile.is_capital ? '★ ' : ''}${tile.city_name} (인구 ${tile.city_pop} · 🏰 ${tile.city_hp ?? 100}/100)` : TERRAIN[tile.terrain].name}
+            {mine && tile.is_city && myCityCount > 1 && cityArrow(1)}
             <span className="ml-2 text-xs font-normal text-stone-400">
               ({tile.x},{tile.y}) {owner ? `· ${owner.nickname}` : '· 무주지'}
             </span>
@@ -173,13 +190,46 @@ export function CommandPanel({
                 </div>
               );
             }
+            const projects = snapshot.wonder_projects ?? [];
+            const project = projects.find((p) => p.x === tile.x && p.y === tile.y);
+            if (project) {
+              const left = turnsLeft(project);
+              const pct = Math.min(100, (project.progress / project.cost) * 100);
+              return (
+                <div className="space-y-1 rounded border border-amber-600/60 bg-amber-950/30 p-2 text-xs">
+                  <div className="font-bold text-amber-300">
+                    🏗️ {project.icon} {project.name_ko} 건설 중 — 남은 턴: {left}턴
+                  </div>
+                  <div className="h-2 overflow-hidden rounded bg-stone-800">
+                    <div className="h-full bg-amber-500 transition-[width]" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="text-stone-300">
+                    🔨 {project.progress}/{project.cost} · 매 턴 +{project.rate} (문명 생산 ÷ 도시 수)
+                  </div>
+                  <div className="text-stone-400">완공 후 이 도시를 {WONDER_DEFENSE_TURNS}턴 지키면 불가사의 승리. 공사 중 도시를 빼앗기면 공사가 사라져요.</div>
+                  {mine && (
+                    <button
+                      disabled={!canAct || actions.busy}
+                      onClick={() => {
+                        if (window.confirm('공사를 취소할까요? 투입한 망치는 돌려받지 못해요.')) void actions.cancelWonder(tile.x, tile.y);
+                      }}
+                      className="rounded border border-stone-600 px-2 py-0.5 text-stone-300 hover:bg-stone-800 disabled:opacity-40"
+                    >
+                      공사 취소
+                    </button>
+                  )}
+                </div>
+              );
+            }
             if (!mine) return null;
+            const cityCount = myCityCount || 1;
+            const hasEinstein = snapshot.scholars.some((p) => p.player_id === me.user_id && p.id === 'einstein');
             return (
               <div className="space-y-1">
                 <div className="text-sm font-bold">
-                  <InfoTooltip concept="wonder_victory">🏛️ 불가사의 (즉시 완공)</InfoTooltip>
+                  <InfoTooltip concept="wonder_victory">🏛️ 불가사의 (약 {WONDER_BUILD_TURNS}턴 공사)</InfoTooltip>
                 </div>
-                {wonderOptions(me, tile, snapshot.wonders).map((o) => (
+                {wonderOptions(me, tile, snapshot.wonders, projects).map((o) => (
                   <button
                     key={o.id}
                     disabled={!canAct || !o.ok || actions.busy}
@@ -190,12 +240,13 @@ export function CommandPanel({
                     <span className="font-bold">
                       {o.def.icon} {o.def.name}
                     </span>{' '}
-                    🔨{o.def.hammer}
+                    🔨{o.def.hammer} · 공사 시작 (지금 속도면 약{' '}
+                    {turnsLeft({ progress: 0, cost: o.def.hammer, rate: wonderRate(me, cityCount, o.id, hasEinstein) })}턴)
                     {o.def.tech && ` · ${TECHS[o.def.tech].name}`}
                     {!o.ok && <span className="block text-stone-400">({o.reason})</span>}
                   </button>
                 ))}
-                <p className="text-[11px] text-stone-500">완공 후 이 도시를 {WONDER_DEFENSE_TURNS}턴 동안 지키면 불가사의 승리!</p>
+                <p className="text-[11px] text-stone-500">매 턴 이 도시의 생산이 들어가 완공되면, 그 뒤 {WONDER_DEFENSE_TURNS}턴 동안 지켜야 불가사의 승리!</p>
               </div>
             );
           })()}

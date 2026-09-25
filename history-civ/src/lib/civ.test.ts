@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { nextCityName, wonderOptions } from './civ';
+import { cycleCity, nextCityName, turnsLeft, wonderOptions, wonderRate, WONDERS } from './civ';
 import { unitCost } from './leaders';
 import type { RoomPlayer, Tile, WonderState } from '../types/game';
 
@@ -38,12 +38,41 @@ describe('불가사의', () => {
     const ids = wonderOptions(me(), nyc, []).map((o) => o.id);
     expect(ids).toEqual(['empire_state', 'manhattan', 'crystal_palace']);
   });
-  it('조건: 기술 · 중복 · 망치', () => {
-    const opts = Object.fromEntries(wonderOptions(me({ hammer: 110 }), nyc, []).map((o) => [o.id, o]));
-    expect(opts.empire_state).toMatchObject({ ok: false, reason: '망치 부족 (110/120)' });
+  it('조건: 기술 · 중복 · 공사 중 (망치는 매 턴 투입되므로 시작 조건이 아님)', () => {
+    const opts = Object.fromEntries(wonderOptions(me({ hammer: 0 }), nyc, []).map((o) => [o.id, o]));
+    expect(opts.empire_state!.ok).toBe(true);
+    const proj = [{ wonder_id: 'empire_state', player_id: 'me', x: nyc.x, y: nyc.y, progress: 30, cost: 240, rate: 16, started_turn: 1, name_ko: '', icon: '' }];
+    expect(wonderOptions(me(), nyc, [], proj).find((o) => o.id === 'crystal_palace')).toMatchObject({ ok: false, reason: '이 도시는 이미 불가사의를 짓는 중' });
     expect(opts.manhattan).toMatchObject({ ok: false, reason: '필요 기술 미연구' });
     expect(opts.crystal_palace!.ok).toBe(true);
     const built: WonderState[] = [{ wonder_id: 'crystal_palace', player_id: 'foe', x: 9, y: 9, built_turn: 3, turns_left: 7, name_ko: '수정궁', icon: '' }];
     expect(wonderOptions(me(), nyc, built).find((o) => o.id === 'crystal_palace')).toMatchObject({ ok: false, reason: '이미 다른 곳에 건설됨' });
+  });
+});
+
+describe('도시 < > 전환', () => {
+  const t = (x: number, y: number, capital = false, owner = 'me') =>
+    ({ x, y, terrain: 'plains', owner_id: owner, is_city: true, is_capital: capital, city_name: `${x},${y}`, city_pop: 1, improvement: null, city_hp: 100 }) as const;
+  const tiles = [t(5, 5), t(2, 2, true), t(8, 1), t(3, 3, false, 'enemy')];
+  it('수도부터 시작해 내 도시만 순환하고 끝에서 처음으로 돌아간다', () => {
+    expect(cycleCity(tiles, 'me', null, 1)).toMatchObject({ x: 2, y: 2 });
+    expect(cycleCity(tiles, 'me', { x: 2, y: 2 }, 1)).toMatchObject({ x: 8, y: 1 });
+    expect(cycleCity(tiles, 'me', { x: 8, y: 1 }, 1)).toMatchObject({ x: 5, y: 5 });
+    expect(cycleCity(tiles, 'me', { x: 5, y: 5 }, 1)).toMatchObject({ x: 2, y: 2 });
+    expect(cycleCity(tiles, 'me', { x: 2, y: 2 }, -1)).toMatchObject({ x: 5, y: 5 });
+    expect(cycleCity(tiles, 'nobody', null, 1)).toBeNull();
+  });
+});
+
+describe('불가사의 건설 기간', () => {
+  it('중반 도시 1곳 생산(문명 64/턴 · 도시 4곳)이면 약 15턴', () => {
+    const rate = wonderRate({ hammer_rate: 64 }, 4, 'big_ben');
+    expect(rate).toBe(16);
+    expect(turnsLeft({ progress: 0, cost: WONDERS.big_ben!.hammer, rate })).toBe(15);
+    expect(turnsLeft({ progress: 0, cost: WONDERS.manhattan!.hammer, rate: wonderRate({ hammer_rate: 80 }, 4, 'manhattan') })).toBe(15);
+  });
+  it('아인슈타인은 맨해튼 프로젝트를 2배 빠르게', () => {
+    expect(wonderRate({ hammer_rate: 80 }, 4, 'manhattan', true)).toBe(40);
+    expect(wonderRate({ hammer_rate: 0 }, 1, 'eiffel')).toBe(3);
   });
 });

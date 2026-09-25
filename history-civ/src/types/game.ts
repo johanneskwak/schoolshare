@@ -59,6 +59,8 @@ export interface RoomPlayer {
   research_progress: number;
   researched: TechId[];
   score: number;
+  /** 지난 정산의 턴당 망치 (불가사의 건설 속도 계산용) */
+  hammer_rate?: number;
   /** 외교 명성 (보스턴 차 사건 유화책 · 독립운동 후원 등) */
   prestige?: number;
   joined_at: string;
@@ -185,6 +187,21 @@ export interface PlayerCondition {
   until_turn: number;
 }
 
+/** 건설 중인 불가사의 (매 턴 도시 생산이 투입됨) */
+export interface WonderProject {
+  wonder_id: string;
+  player_id: string;
+  x: number;
+  y: number;
+  progress: number;
+  cost: number;
+  /** 이번 턴 투입될 망치 */
+  rate: number;
+  started_turn: number;
+  name_ko: string;
+  icon: string;
+}
+
 export interface GameSnapshot {
   server_now: string;
   /** 현재 연도 (1750 + 5 × (턴 − 1)) */
@@ -199,6 +216,7 @@ export interface GameSnapshot {
   my_events: PendingEvent[];
   scholars: ScholarHolder[];
   wonders: WonderState[];
+  wonder_projects?: WonderProject[];
   buildings: CityBuilding[];
   conditions: PlayerCondition[];
 }

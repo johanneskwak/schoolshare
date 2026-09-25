@@ -1,13 +1,14 @@
-import { WONDER_DEFENSE_TURNS } from '../lib/civ';
+import { turnsLeft, WONDER_DEFENSE_TURNS } from '../lib/civ';
 import { FACTIONS, type GameSnapshot } from '../types/game';
 import { InfoTooltip } from './InfoTooltip';
 
 /** 상단 HUD: 완공된 불가사의의 방어 카운트다운 (10 → 9 → …) + 새로 완공되면 전역 공지 */
 export function WonderHud({ snapshot, userId }: { snapshot: GameSnapshot; userId: string }) {
   const { wonders, players, last_log } = snapshot;
+  const projects = snapshot.wonder_projects ?? [];
   const nameOf = (id: string) => players.find((p) => p.user_id === id);
   const justBuilt = (last_log ?? []).filter((e) => e.type === 'wonder_built' || e.type === 'wonder_captured');
-  if (!wonders.length && !justBuilt.length) return null;
+  if (!wonders.length && !justBuilt.length && !projects.length) return null;
 
   return (
     <div className="space-y-1.5">
@@ -27,6 +28,20 @@ export function WonderHud({ snapshot, userId }: { snapshot: GameSnapshot; userId
         <InfoTooltip concept="wonder_victory" className="text-xs font-bold text-amber-300">
           🏛️ 불가사의 방어
         </InfoTooltip>
+        {projects.map((p) => {
+          const owner = nameOf(p.player_id);
+          return (
+            <span
+              key={`p${p.player_id}${p.wonder_id}`}
+              className="flex items-center gap-1.5 rounded-full border border-dashed border-stone-500 bg-stone-900/80 px-2.5 py-0.5 text-xs text-stone-300"
+              title={`${p.name_ko} 건설 중 ${p.progress}/${p.cost}`}
+            >
+              🏗️ {p.icon} {p.name_ko}
+              {owner && <span style={{ color: FACTIONS[owner.faction].color }}>{owner.nickname}</span>}
+              <b>완공까지 {turnsLeft(p)}턴</b>
+            </span>
+          );
+        })}
         {wonders.map((w) => {
           const p = nameOf(w.player_id);
           const mine = w.player_id === userId;
