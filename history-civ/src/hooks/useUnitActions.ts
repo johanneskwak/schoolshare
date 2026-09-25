@@ -2,7 +2,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import { api, type AttackResult } from '../lib/api';
 import { useGameStore, type CombatFx } from '../store/gameStore';
-import type { Unit } from '../types/game';
+import type { BuildingId, Unit } from '../types/game';
+import { BUILDINGS } from '../lib/chronicle';
 
 export type RestMode = 'wait' | 'fortify' | 'heal';
 
@@ -17,16 +18,22 @@ export interface UnitActions {
   upgrade: (unit: Unit) => Promise<void>;
   /** 불가사의 즉시 건설 (망치) */
   buildWonder: (x: number, y: number, wonderId: string) => Promise<void>;
+  /** 도시 건물 즉시 건설 (골드) — 도서관·위인 건물 */
+  buildBuilding: (x: number, y: number, building: BuildingId) => Promise<void>;
 }
 
 const FX_MS = 1500;
 
 /** 공격 결과 → 데미지 숫자·격파 연출 */
-export function combatFx(r: Pick<AttackResult, 'from' | 'at' | 'dmg_att' | 'dmg_def' | 'attacker_hp' | 'defender_hp'>): Omit<CombatFx, 'id'>[] {
+export function combatFx(r: Pick<AttackResult, 'from' | 'at' | 'dmg_att' | 'dmg_def' | 'attacker_hp' | 'defender_hp' | 'siege'>): Omit<CombatFx, 'id'>[] {
   const [ax, ay] = r.from, [dx, dy] = r.at;
   return [
-    { x: dx, y: dy, text: r.dmg_def > 0 ? `-${r.dmg_def}` : '0', kind: 'damage' },
-    ...(r.defender_hp <= 0 ? [{ x: dx, y: dy, text: '격파!', kind: 'kill' as const }] : []),
+    { x: dx, y: dy, text: r.dmg_def > 0 ? `${r.siege ? '🏰 ' : ''}-${r.dmg_def}` : '0', kind: 'damage' },
+    ...(r.defender_hp <= 0
+      ? [{ x: dx, y: dy, text: r.siege ? '성벽 붕괴! 입성하세요' : '격파!', kind: 'kill' as const }]
+      : r.siege
+        ? [{ x: dx, y: dy, text: `성벽 ${r.defender_hp}`, kind: 'info' as const }]
+        : []),
     { x: ax, y: ay, text: r.dmg_att > 0 ? `-${r.dmg_att}` : '반격 없음', kind: r.dmg_att > 0 ? ('damage' as const) : ('miss' as const) },
     ...(r.attacker_hp <= 0 ? [{ x: ax, y: ay, text: '전사', kind: 'kill' as const }] : []),
   ];
@@ -110,6 +117,12 @@ export function useUnitActions(roomId: string, refetch: () => Promise<void>): Un
         run(async () => {
           await api.buildWonder(roomId, x, y, wonderId);
           showFx([{ x, y, text: '불가사의 완공!', kind: 'info' }]);
+          await refetch();
+        }),
+      buildBuilding: (x, y, building) =>
+        run(async () => {
+          await api.buildBuilding(roomId, x, y, building);
+          showFx([{ x, y, text: `${BUILDINGS[building].icon} ${BUILDINGS[building].name} 완공!`, kind: 'info' }]);
           await refetch();
         }),
       upgrade: (unit) =>

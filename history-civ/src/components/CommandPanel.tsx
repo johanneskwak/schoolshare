@@ -12,6 +12,8 @@ import { useGameStore } from '../store/gameStore';
 import { leadersOf, unitCost } from '../lib/leaders';
 import { TECHS, type Action, type GameSnapshot, type RoomPlayer } from '../types/game';
 import { WONDER_DEFENSE_TURNS, wonderOptions } from '../lib/civ';
+import { BUILDINGS, buildingUnlocked, PERSONS } from '../lib/chronicle';
+import type { BuildingId } from '../types/game';
 import { InfoTooltip } from './InfoTooltip';
 import type { UnitActions } from '../hooks/useUnitActions';
 import { UnitDetailPanel } from './UnitDetailPanel';
@@ -77,7 +79,7 @@ export function CommandPanel({
       body = (
         <div className="space-y-2">
           <div className="font-bold">
-            {tile.is_city ? `${tile.is_capital ? '★ ' : ''}${tile.city_name} (인구 ${tile.city_pop})` : TERRAIN[tile.terrain].name}
+            {tile.is_city ? `${tile.is_capital ? '★ ' : ''}${tile.city_name} (인구 ${tile.city_pop} · 🏰 ${tile.city_hp ?? 100}/100)` : TERRAIN[tile.terrain].name}
             <span className="ml-2 text-xs font-normal text-stone-400">
               ({tile.x},{tile.y}) {owner ? `· ${owner.nickname}` : '· 무주지'}
             </span>
@@ -111,6 +113,51 @@ export function CommandPanel({
               </div>
             </div>
           )}
+
+          {tile.is_city && (() => {
+            const built = new Set((snapshot.buildings ?? []).filter((b) => b.x === tile.x && b.y === tile.y).map((b) => b.building_id));
+            const myPersons = new Set(snapshot.scholars.filter((p) => p.player_id === me.user_id).map((p) => p.id));
+            if (!mine) {
+              return built.size ? (
+                <div className="text-xs text-stone-300">건물: {[...built].map((b) => `${BUILDINGS[b].icon} ${BUILDINGS[b].name}`).join(' · ')}</div>
+              ) : null;
+            }
+            const ids = Object.keys(BUILDINGS) as BuildingId[];
+            const open = ids.filter((b) => built.has(b) || buildingUnlocked(b, me, myPersons));
+            const next = ids.find((b) => {
+              const f = PERSONS.find((p) => p.id === BUILDINGS[b].person)?.factions;
+              return !open.includes(b) && (!f || f.includes(me.faction));
+            });
+            return (
+              <div className="space-y-1">
+                <div className="text-sm font-bold">
+                  <InfoTooltip concept="scholars">🏛️ 도시 건물 (즉시 완공 · 💰 {me.gold})</InfoTooltip>
+                </div>
+                {open.map((b) => {
+                  const def = BUILDINGS[b];
+                  const done = built.has(b);
+                  return (
+                    <button
+                      key={b}
+                      disabled={!canAct || done || actions.busy || me.gold < def.cost}
+                      onClick={() => void actions.buildBuilding(tile.x, tile.y, b)}
+                      className={`block w-full rounded px-2 py-1 text-left text-xs disabled:opacity-60 ${done ? 'bg-emerald-950/60 text-emerald-200' : 'bg-stone-700 hover:bg-stone-600'}`}
+                    >
+                      <span className="font-bold">{def.icon} {def.name}</span> {done ? '✓ 완공' : `💰${def.cost}`}
+                      <span className="block text-stone-400">{def.desc}</span>
+                    </button>
+                  );
+                })}
+                {next && (
+                  <p className="text-[11px] text-stone-500">
+                    다음 해금: {BUILDINGS[next].icon} {BUILDINGS[next].name} —{' '}
+                    {PERSONS.find((p) => p.id === BUILDINGS[next].person)?.name ?? ''}
+                    {BUILDINGS[next].tech ? ` 또는 ${TECHS[BUILDINGS[next].tech!].name}` : ''} 필요
+                  </p>
+                )}
+              </div>
+            );
+          })()}
 
           {tile.is_city && (() => {
             const here = snapshot.wonders.find((w) => w.x === tile.x && w.y === tile.y);

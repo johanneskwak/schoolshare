@@ -3,7 +3,7 @@ import { canUpgrade, previewCombat, upgradeChain } from './units';
 import type { RoomPlayer, Tile, Unit } from '../types/game';
 
 const tile = (o: Partial<Tile> = {}): Tile => ({
-  x: 8, y: 5, terrain: 'plains', owner_id: null, is_city: false, is_capital: false, city_name: null, city_pop: 0, improvement: null, ...o,
+  x: 8, y: 5, terrain: 'plains', owner_id: null, is_city: false, is_capital: false, city_name: null, city_pop: 0, improvement: null, city_hp: 100, ...o,
 });
 const unit = (o: Partial<Unit>): Unit => ({
   id: 'u', owner_id: 'me', kind: 'line_infantry', x: 7, y: 5, hp: 100, moves_left: 1, created_turn: 1, acted: false, fortified: false, ...o,

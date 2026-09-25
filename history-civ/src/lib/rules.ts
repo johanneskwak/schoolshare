@@ -86,6 +86,14 @@ export function unitTargets(unit: Unit, tiles: TileIndex, units: Unit[]): Target
       if (other) {
         if (other.owner_id !== unit.owner_id && t.attack > 0 && (dist <= unit.moves_left || (t.range > 1 && dist <= t.range)))
           attacks.add(k);
+      } else if (tile.is_city && tile.owner_id && tile.owner_id !== unit.owner_id) {
+        // 빈 적 도시: 성벽(도시 HP)이 남아 있으면 공성, 0이면 근접 유닛이 입성해 점령 (서버 hc_unit_attack / hc_unit_move)
+        const inRange = dist <= unit.moves_left || (t.range > 1 && dist <= t.range);
+        if ((tile.city_hp ?? 100) > 0) {
+          if (t.attack > 0 && inRange) attacks.add(k);
+        } else if (t.attack > 0 && t.range <= 1 && dist <= unit.moves_left && canEnter(unit, tile)) {
+          moves.add(k);
+        }
       } else if (dist <= unit.moves_left && canEnter(unit, tile)) {
         moves.add(k);
       }
@@ -121,7 +129,6 @@ export function producibleUnits(me: RoomPlayer, myUnits: Unit[], leaders: Leader
 export function buildableImprovements(tile: Tile, me: RoomPlayer, tiles: TileIndex): Improvement[] {
   if (tile.owner_id !== me.user_id || tile.improvement || tile.terrain === 'water' || tile.terrain === 'mountain') return [];
   const steam = me.researched.includes('steam_engine');
-  const enlightened = me.researched.includes('enlightenment');
   const coastal = [-1, 0, 1].some((dx) =>
     [-1, 0, 1].some((dy) => (dx || dy) && tiles.get(key(tile.x + dx, tile.y + dy))?.terrain === 'water'),
   );
@@ -129,7 +136,7 @@ export function buildableImprovements(tile: Tile, me: RoomPlayer, tiles: TileInd
     if (i === 'port') return coastal;
     if (i === 'railway') return steam;
     if (i === 'factory') return steam && tile.is_city;
-    if (i === 'library') return enlightened && tile.is_city;
+    if (i === 'library') return false; // 도서관은 이제 도시 건물 (lib/chronicle BUILDINGS)
     return true;
   });
 }

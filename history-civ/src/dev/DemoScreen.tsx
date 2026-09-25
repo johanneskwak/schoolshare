@@ -35,7 +35,7 @@ function buildSnapshot(): GameSnapshot {
         is_capital: (x === 2 && y === 2) || (x === 13 && y === 9),
         city_name: x === 2 && y === 2 ? '파리' : x === 13 && y === 9 ? '런던' : null,
         city_pop: (x === 2 && y === 2) || (x === 13 && y === 9) ? 1 : 0,
-        improvement: x === 3 && y === 3 ? 'farm' : null,
+        improvement: x === 3 && y === 3 ? 'farm' : null, city_hp: 100,
       });
     }
   const u = (id: string, owner: string, kind: Unit['kind'], x: number, y: number, moves: number, hp = 100): Unit =>
@@ -54,7 +54,7 @@ function buildSnapshot(): GameSnapshot {
     room: {
       id: 'demo', code: 'DEMO01', host_id: ME, status: 'playing', max_players: 2, map_width: W, map_height: H,
       turn_number: 3, turn_seconds: 60, turn_deadline: new Date(now.getTime() + 45_000).toISOString(), max_turns: 60,
-      winner_id: null, victory: null, is_solo: false, action_seq: 0, created_at: '', updated_at: '',
+      winner_id: null, victory: null, is_solo: false, difficulty: 'normal', action_seq: 0, created_at: '', updated_at: '',
     },
     players: [
       { room_id: 'demo', user_id: ME, nickname: '나', seat: 0, faction: 'france', is_ready: true, has_ended_turn: false,
@@ -77,6 +77,7 @@ function buildSnapshot(): GameSnapshot {
       },
     ],
     wonders: [{ wonder_id: 'big_ben', player_id: FOE, x: 13, y: 9, built_turn: 1, turns_left: 8, name_ko: '빅벤', icon: '🕰️' }],
+    year: 1760, buildings: [{ x: 4, y: 4, building_id: 'library', built_turn: 2 }], conditions: [],
     leaders: [
       { leader_id: 'napoleon', player_id: ME, joined_turn: 2 },
       { leader_id: 'watt', player_id: FOE, joined_turn: 3 },
@@ -134,6 +135,7 @@ function useLocalActions(): UnitActions {
       useGameStore.getState().select(null);
     },
     buildWonder: async () => undefined,
+    buildBuilding: async () => undefined,
     upgrade: async (u) => mapUnit(u.id, (v) => ({ ...v, kind: UPGRADES[v.kind]!.to, acted: true, moves_left: 0 })),
   };
 }

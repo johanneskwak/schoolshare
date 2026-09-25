@@ -4,7 +4,7 @@ import { unitCost } from './leaders';
 import type { RoomPlayer, Tile, WonderState } from '../types/game';
 
 const city = (x: number, name: string, owner = 'me'): Tile => ({
-  x, y: 0, terrain: 'plains', owner_id: owner, is_city: true, is_capital: false, city_name: name, city_pop: 1, improvement: null,
+  x, y: 0, terrain: 'plains', owner_id: owner, is_city: true, is_capital: false, city_name: name, city_pop: 1, improvement: null, city_hp: 100,
 });
 const me = (o: Partial<RoomPlayer> = {}): RoomPlayer => ({
   room_id: 'r', user_id: 'me', nickname: '', seat: 0, faction: 'usa', is_ready: true, has_ended_turn: false, is_eliminated: false,

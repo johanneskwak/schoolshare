@@ -1,10 +1,13 @@
 // 서버 RPC 래퍼. 게임 상태를 바꾸는 유일한 경로.
 import { supabase } from './supabase';
-import type { Action, Faction, GameEvent, GameSnapshot, Room } from '../types/game';
+import type { Action, BuildingId, Difficulty, Faction, GameEvent, GameSnapshot, Room } from '../types/game';
 
 export interface AttackResult {
+  /** 빈 적 도시를 공격하면 공성: dmg_def = 성벽 피해, defender_hp = 남은 도시 HP */
+  siege?: boolean;
+  city_hp?: number;
   attacker_id: string;
-  defender_id: string;
+  defender_id: string | null;
   from: [number, number];
   at: [number, number];
   dmg_att: number;
@@ -53,7 +56,15 @@ const ERROR_MESSAGES: Record<string, string> = {
   NOT_ENOUGH_HAMMER: '망치가 부족해요.',
   EVENT_NOT_PENDING: '이미 결정된 사건이에요.',
   INVALID_CHOICE: '잘못된 선택이에요.',
-  INVALID_AI_COUNT:'AI는 1~3명까지 고를 수 있어요.',
+  INVALID_AI_COUNT: 'AI는 1~3명까지 고를 수 있어요.',
+  INVALID_DIFFICULTY: '난이도를 다시 골라 주세요.',
+  CITY_WALLS: '성벽(도시 HP)이 남아 있어요. 먼저 공격해 도시 HP를 0으로 만드세요.',
+  CANNOT_ENTER_CITY: '근접 전투 유닛만 적 도시에 입성할 수 있어요.',
+  NO_BUILDING: '없는 건물이에요.',
+  BUILDING_LOCKED: '아직 해금되지 않은 건물이에요. (필요한 위인·기술 확인)',
+  ALREADY_BUILT: '이 도시엔 이미 있는 건물이에요.',
+  NOT_YOUR_PERSON: '우리 문명의 위인이 아니에요.',
+  ALREADY_ANSWERED: '이미 퀴즈에 답했어요.',
 };
 
 export class GameApiError extends Error {
@@ -78,8 +89,14 @@ export const api = {
     rpc<void>('hc_update_lobby_state', { p_room: roomId, p_ready: ready, p_faction: faction ?? null }),
   leaveRoom: (roomId: string) => rpc<void>('hc_leave_room', { p_room: roomId }),
   startGame: (roomId: string) => rpc<void>('hc_start_game', { p_room: roomId }),
-  createSoloGame: (faction: Faction, aiCount: number, turnSeconds: number) =>
-    rpc<string>('hc_create_solo_game', { p_faction: faction, p_ai_count: aiCount, p_turn_seconds: turnSeconds }),
+  /** turnSeconds 0 = 시간 무제한 */
+  createSoloGame: (faction: Faction, aiCount: number, turnSeconds: number, difficulty: Difficulty = 'normal') =>
+    rpc<string>('hc_create_solo_game', {
+      p_faction: faction,
+      p_ai_count: aiCount,
+      p_turn_seconds: turnSeconds,
+      p_difficulty: difficulty,
+    }),
 
   getGameState: (roomId: string) => rpc<GameSnapshot>('hc_get_game_state', { p_room: roomId }),
   submitActions: (roomId: string, actions: Action[]) =>
@@ -98,6 +115,10 @@ export const api = {
   unitUpgrade: (roomId: string, unitId: string) => rpc<unknown>('hc_unit_upgrade', { p_room: roomId, p_unit: unitId }),
   buildWonder: (roomId: string, x: number, y: number, wonderId: string) =>
     rpc<GameEvent[]>('hc_build_wonder', { p_room: roomId, p_x: x, p_y: y, p_wonder: wonderId }),
+  buildBuilding: (roomId: string, x: number, y: number, building: BuildingId) =>
+    rpc<GameEvent[]>('hc_build_building', { p_room: roomId, p_x: x, p_y: y, p_building: building }),
+  answerPersonQuiz: (roomId: string, personId: string, choice: number) =>
+    rpc<{ correct: boolean; answer: number }>('hc_answer_person_quiz', { p_room: roomId, p_person: personId, p_choice: choice }),
   ackScholar: (roomId: string, scholarId: string) => rpc<void>('hc_ack_scholar', { p_room: roomId, p_scholar: scholarId }),
   chooseEvent: (roomId: string, eventId: number, choice: 'a' | 'b') =>
     rpc<unknown>('hc_choose_event', { p_room: roomId, p_event: eventId, p_choice: choice }),

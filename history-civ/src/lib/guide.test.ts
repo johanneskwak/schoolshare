@@ -13,11 +13,11 @@ function snap(units: Unit[], extra: Partial<GameSnapshot> = {}, cityAt = { x: 2,
       tiles.push({
         x, y, terrain: 'plains', owner_id: Math.max(Math.abs(x - cityAt.x), Math.abs(y - cityAt.y)) <= 1 ? ME : null,
         is_city: x === cityAt.x && y === cityAt.y, is_capital: x === cityAt.x && y === cityAt.y,
-        city_name: x === cityAt.x && y === cityAt.y ? '파리' : null, city_pop: 1, improvement: null,
+        city_name: x === cityAt.x && y === cityAt.y ? '파리' : null, city_pop: 1, improvement: null, city_hp: 100,
       });
   return {
     server_now: '', room: {} as GameSnapshot['room'], players: [me()], tiles, units,
-    my_actions: [], last_log: null, leaders: [], my_events: [], scholars: [], wonders: [], ...extra,
+    my_actions: [], last_log: null, leaders: [], my_events: [], scholars: [], wonders: [], year: 1760, buildings: [], conditions: [], ...extra,
   };
 }
 function me(o: Partial<RoomPlayer> = {}): RoomPlayer {
