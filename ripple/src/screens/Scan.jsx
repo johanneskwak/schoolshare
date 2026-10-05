@@ -62,7 +62,7 @@ export default function Scan({ apiKey, onSave, onOpenKey }) {
         <button className="btn-primary w-full" disabled={!img || busy} onClick={() => run(false)}>
           {busy ? <><Loader2 size={16} className="animate-spin" /> 분석 중…</> : <><Sparkles size={16} /> 분석하기</>}
         </button>
-        {!apiKey && <p className="text-xs text-mute">API 키가 없어 <b>Mock 모드</b>로 동작해요. <button className="text-coral underline" onClick={onOpenKey}>키 입력</button></p>}
+        {!apiKey && <p className="text-xs text-mute">내 키를 넣지 않으면 서버 기본 키로 분석하고, 서버 키가 없으면 <b>Mock 모드</b>로 동작해요. <button className="text-coral underline" onClick={onOpenKey}>내 키 입력</button></p>}
       </div>
 
       {error && (

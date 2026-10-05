@@ -5,8 +5,10 @@ export const MODELS = ['gemini-flash-latest', 'gemini-3.5-flash', 'gemini-2.5-fl
 const ENDPOINT = (model) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
+export const PROXY_URL = '/api/analyze';
+
 export class AnalyzeError extends Error {
-  // code: NO_KEY | QUOTA | UNREADABLE | NETWORK | PARSE | AUTH
+  // code: NOPROXY | QUOTA | UNREADABLE | NETWORK | PARSE | AUTH | MODEL | REQUEST | SERVER
   constructor(code, message) {
     super(message);
     this.code = code;
@@ -112,14 +114,17 @@ export function validateAnalysis(obj) {
 export async function analyzeProblem(opts) {
   const { base64, mime = 'image/jpeg', apiKey, fetchImpl = globalThis.fetch, allowMockFallback = false, seed = 0, retryDelayMs } = opts;
 
-  if (!apiKey) {
-    return { data: validateAnalysis(getMockAnalysis(seed)), source: 'mock', warning: 'API 키가 없어 테스트용 Mock 데이터를 사용했습니다.' };
-  }
+  // 사용자가 자기 키를 넣었으면 브라우저에서 Google로 직접 호출한다.
+  // 키가 없으면 서버 프록시(/api/analyze)를 쓰고, 프록시가 없거나 서버 키가 설정되지 않았으면 Mock으로 동작한다.
+  const viaProxy = !apiKey;
 
   try {
-    const data = await callGemini({ base64, mime, apiKey, fetchImpl, retryDelayMs });
+    const data = await callGemini({ base64, mime, apiKey, fetchImpl, retryDelayMs, viaProxy });
     return { data, source: 'gemini' };
   } catch (err) {
+    if (err instanceof AnalyzeError && err.code === 'NOPROXY') {
+      return { data: validateAnalysis(getMockAnalysis(seed)), source: 'mock', warning: 'API 키가 없어 테스트용 Mock 데이터를 사용했습니다.' };
+    }
     // 사진을 못 읽은 경우는 Mock으로 덮지 않고 재촬영을 안내한다.
     if (allowMockFallback && err instanceof AnalyzeError && err.code !== 'UNREADABLE') {
       return { data: validateAnalysis(getMockAnalysis(seed)), source: 'mock', warning: `${err.message} Mock 데이터로 대체했습니다.` };
@@ -149,20 +154,28 @@ async function callGemini({ retryDelayMs = 1500, ...args }) {
   throw new AnalyzeError('MODEL', `사용 가능한 모델이 없습니다. 시도: ${MODELS.join(', ')} · ${last?.message ?? ''}`);
 }
 
-async function callModel({ base64, mime, apiKey, fetchImpl, model }) {
+async function callModel({ base64, mime, apiKey, fetchImpl, model, viaProxy }) {
   let res;
   try {
-    res = await fetchImpl(ENDPOINT(model), {
+    res = await fetchImpl(viaProxy ? `${PROXY_URL}?model=${encodeURIComponent(model)}` : ENDPOINT(model), {
       method: 'POST',
-      // 키는 URL이 아니라 헤더로 보낸다 (주소창·로그에 남지 않도록).
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      // 직접 호출: 키는 URL이 아니라 헤더로 보낸다 (주소창·로그에 남지 않도록).
+      // 프록시 호출: 키가 없다. 서버가 환경변수의 키를 붙인다.
+      headers: viaProxy ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
       body: JSON.stringify({
         contents: [{ parts: [{ text: PROMPT }, { inline_data: { mime_type: mime, data: base64 } }] }],
         generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA, temperature: 0.4 },
       }),
     });
   } catch {
+    if (viaProxy) throw new AnalyzeError('NOPROXY', '서버 프록시에 연결하지 못했습니다.');
     throw new AnalyzeError('NETWORK', '네트워크 오류로 요청하지 못했습니다.');
+  }
+
+  // 프록시 응답에는 항상 x-ripple-proxy 헤더가 있다. 없으면 프록시가 배포되지 않은 환경(예: 로컬 개발 서버).
+  // 501은 프록시는 있으나 서버에 GEMINI_API_KEY가 설정되지 않은 경우.
+  if (viaProxy && (!res.headers?.get?.('x-ripple-proxy') || res.status === 501)) {
+    throw new AnalyzeError('NOPROXY', '서버 키가 설정되지 않았습니다.');
   }
 
   if (!res.ok) {
