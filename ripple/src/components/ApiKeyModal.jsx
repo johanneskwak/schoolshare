@@ -12,7 +12,7 @@ export default function ApiKeyModal({ initialKey, onSave, onClose }) {
         </div>
         <p className="mb-3 text-sm leading-relaxed text-mute">
           키는 이 기기의 브라우저(LocalStorage)에만 저장되고, 사진 분석 요청 때 Google 서버로만 전송됩니다.
-          공용 기기에서는 사용 후 키를 지워 주세요. 비워 두면 테스트용 Mock 모드로 동작합니다.
+          공용 기기에서는 사용 후 키를 지워 주세요. 비워 두면 서버 기본 키로 분석하고, 서버 키도 없으면 테스트용 Mock 모드로 동작합니다. 내 키를 넣으면 서버 키보다 우선 사용됩니다.
         </p>
         <input
           type="password" autoComplete="off" spellCheck={false} value={key}
