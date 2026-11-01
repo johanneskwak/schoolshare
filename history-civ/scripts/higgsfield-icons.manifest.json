@@ -1,0 +1,206 @@
+[
+  {
+    "id": "washington",
+    "name": "George Washington",
+    "group": "usa",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of George Washington, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "jefferson",
+    "name": "Thomas Jefferson",
+    "group": "usa",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Thomas Jefferson, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "lincoln_scholar",
+    "name": "Abraham Lincoln",
+    "group": "usa",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Abraham Lincoln, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "fdr",
+    "name": "Franklin D. Roosevelt",
+    "group": "usa",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Franklin D. Roosevelt, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "volcker",
+    "name": "Paul Volcker",
+    "group": "usa",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Paul Volcker, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "greenspan",
+    "name": "Alan Greenspan",
+    "group": "usa",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Alan Greenspan, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "bernanke",
+    "name": "Ben Bernanke",
+    "group": "usa",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Ben Bernanke, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "goethe",
+    "name": "Johann Wolfgang von Goethe",
+    "group": "empire",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Johann Wolfgang von Goethe, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "bismarck",
+    "name": "Otto von Bismarck",
+    "group": "empire",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Otto von Bismarck, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "einstein",
+    "name": "Albert Einstein",
+    "group": "empire",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Albert Einstein, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "marx",
+    "name": "Karl Marx",
+    "group": "empire",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Karl Marx, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "hayek",
+    "name": "Friedrich Hayek",
+    "group": "empire",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Friedrich Hayek, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "kant",
+    "name": "Immanuel Kant",
+    "group": "empire",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Immanuel Kant, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "beethoven",
+    "name": "Ludwig van Beethoven",
+    "group": "empire",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Ludwig van Beethoven, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "bill_of_rights",
+    "name": "William III and Mary II signing the Bill of Rights",
+    "group": "britain",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of William III and Mary II signing the Bill of Rights, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "watt",
+    "name": "James Watt",
+    "group": "britain",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of James Watt, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "adam_smith",
+    "name": "Adam Smith",
+    "group": "britain",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Adam Smith, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "dickens",
+    "name": "Charles Dickens",
+    "group": "britain",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Charles Dickens, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "darwin",
+    "name": "Charles Darwin",
+    "group": "britain",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Charles Darwin, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "keynes",
+    "name": "John Maynard Keynes",
+    "group": "britain",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of John Maynard Keynes, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "churchill",
+    "name": "Winston Churchill",
+    "group": "britain",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Winston Churchill, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "chaplin",
+    "name": "Charlie Chaplin",
+    "group": "britain",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Charlie Chaplin, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "beatles",
+    "name": "The Beatles",
+    "group": "britain",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of The Beatles, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "voltaire",
+    "name": "Voltaire",
+    "group": "france",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Voltaire, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "rousseau",
+    "name": "Jean-Jacques Rousseau",
+    "group": "france",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Jean-Jacques Rousseau, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "napoleon",
+    "name": "Napoleon Bonaparte",
+    "group": "france",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Napoleon Bonaparte, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "hugo",
+    "name": "Victor Hugo",
+    "group": "france",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Victor Hugo, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "pasteur",
+    "name": "Louis Pasteur",
+    "group": "france",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Louis Pasteur, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "curie",
+    "name": "Marie Curie",
+    "group": "france",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Marie Curie, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "picasso",
+    "name": "Pablo Picasso",
+    "group": "france",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Pablo Picasso, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "turing",
+    "name": "Alan Turing",
+    "group": "usa",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Alan Turing, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "garibaldi",
+    "name": "Giuseppe Garibaldi",
+    "group": "patron",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Giuseppe Garibaldi, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "hidalgo",
+    "name": "Miguel Hidalgo",
+    "group": "patron",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Miguel Hidalgo, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  },
+  {
+    "id": "bolivar",
+    "name": "Simón Bolívar",
+    "group": "patron",
+    "prompt": "19th-century vintage copperplate engraving portrait icon of Simón Bolívar, circular antique brass filigree frame, cross-hatching detail, retro civilization game asset, UI icon, dark muted background"
+  }
+]

@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body { @apply bg-paper text-ink font-sans antialiased; }
+  button { @apply transition-colors duration-150; }
+  :focus-visible { @apply outline-2 outline-offset-2 outline-coral; }
+}
+@layer components {
+  .card { @apply rounded-2xl border border-line bg-card p-4; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium disabled:opacity-50; }
+  .btn-primary { @apply btn bg-coral text-white hover:bg-coral-deep disabled:cursor-not-allowed disabled:bg-sand disabled:text-mute disabled:opacity-100 disabled:hover:bg-sand; }
+  .btn-ghost { @apply btn border border-line bg-card text-ink hover:bg-sand; }
+  .input { @apply w-full rounded-2xl border border-line bg-paper px-4 py-3 text-sm placeholder:text-mute focus:border-coral focus:outline-none; }
+}
