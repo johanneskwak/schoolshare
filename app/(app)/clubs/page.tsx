@@ -31,6 +31,16 @@ export default async function ClubsPage({
   return (
     <>
       <header className="header">소모임</header>
+      <div className="container" style={{ paddingBottom: 0 }}>
+        <div style={{ display: "flex", gap: 8, padding: "12px 0" }}>
+          <Link href="/clubs" style={{ flex: 1 }}>
+            <button className="btn">모집글</button>
+          </Link>
+          <Link href="/clubs/meetups" style={{ flex: 1 }}>
+            <button className="btn btn-secondary">번개모임</button>
+          </Link>
+        </div>
+      </div>
       <Suspense>
         <CategoryFilter basePath="/clubs" />
       </Suspense>

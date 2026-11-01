@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f7f4eb"><meta name="description" content="플레이하는 사회 — 서로 다른 출발선에서 만나 함께 만드는 인생 보드게임. 혼자, 한 기기, 온라인 교실에서 플레이하세요."><title>인생 한 바퀴 · 플레이하는 사회</title><style>@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap');
+:root{--ink:#273e39;--muted:#66736b;--paper:#f7f4eb;--green:#245d50;--line:#dddeda;--orange:#d87958;--white:#fffefa;--shadow:0 9px 0 #d6d7cc,0 18px 36px #334d3310}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans KR',system-ui,sans-serif;font-size:14px;line-height:1.6}button,input,select{font:inherit}button{cursor:pointer;color:inherit}button:disabled{cursor:not-allowed;opacity:.42}button,input,select{border-radius:10px}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #d7914d;outline-offset:3px}h1,h2,h3,p{margin:0}h1,h2,h3{line-height:1.3}button{border:1px solid var(--line);background:var(--white);padding:10px 15px}button:hover:not(:disabled){border-color:var(--green);transform:translateY(-1px)}.primary{background:var(--green);color:white;border-color:var(--green);box-shadow:0 3px 0 #153b32;font-weight:700}.secondary{background:#e8eddf;border-color:#ced9c6}.small{font-size:12px}.muted{color:var(--muted)}.eyebrow{font-size:10px;letter-spacing:2px;font-weight:800;text-transform:uppercase;color:var(--green)}.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:30px;background:#e6ebdd;font-size:11px;font-weight:600}.dot{width:7px;height:7px;border-radius:50%;background:#5c9374;display:inline-block}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.spread{justify-content:space-between}.wide{width:100%}.stack{display:grid;gap:12px}.hidden{display:none!important}.shell{max-width:1480px;margin:auto;padding:0 32px 40px}.topbar{height:86px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:12px}.brand{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800}.brandmark{background:var(--green);color:#fcf8ed;width:34px;height:34px;display:grid;place-items:center;font-size:23px;border-radius:10px;transform:rotate(-7deg)}.brand small{font-size:10px;letter-spacing:1.5px;color:var(--muted);font-weight:500;display:block}.nav{display:flex;gap:8px;align-items:center}.nav button{font-size:12px;background:transparent}.hero{display:grid;grid-template-columns:.83fr 1.17fr;gap:55px;padding:54px 0 40px;align-items:center}.hero h1{font-size:clamp(36px,4.4vw,64px);font-weight:900;letter-spacing:-3px;line-height:1.24;margin:19px 0}.hero h1 em{font-style:normal;color:var(--orange)}.hero p{color:var(--muted);font-size:15px;line-height:1.95;max-width:410px}.hero .note{margin-top:20px;font-size:12px}.hero-board{transform:rotate(2deg);padding:12px 0}.hero-board .board{font-size:10px}.hero-board .cell{min-height:52px}.hero-board .cell .tile-icon{font-size:22px}.hero-board .cell .label{font-size:9px}.hero-board .center-title{font-size:33px}.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}.mode-card{text-align:left;padding:24px;background:var(--white);border:1px solid var(--line);border-radius:18px;display:flex;gap:17px;align-items:flex-start}.mode-icon{font-size:26px;width:53px;height:53px;display:grid;place-items:center;background:#edf0e6;border-radius:15px;flex-shrink:0}.mode-card h3{font-size:17px;margin-bottom:7px}.mode-card p{font-size:12px;color:var(--muted);line-height:1.8}.mode-card b{display:block;margin-top:15px;font-size:12px;color:var(--green)}.footer{border-top:1px solid var(--line);padding-top:16px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:15px}.game-head{padding:24px 0 18px}.game-head h1{font-size:26px;letter-spacing:-1px}.round-meta{display:flex;align-items:center;gap:15px}.round-num{font-size:28px;font-weight:800;line-height:1}.round-num span{font-size:13px;color:var(--muted);font-weight:400}.players{display:grid;grid-template-columns:repeat(var(--count,4),1fr);gap:10px;margin-bottom:22px}.player{background:var(--white);border:1px solid var(--line);border-radius:13px;padding:12px 14px;position:relative;min-width:0;text-align:left;box-shadow:0 3px 0 #e5e3d9}.player.active{border:2px solid var(--pc);padding:11px 13px;background:color-mix(in srgb,var(--pc) 6%,white)}.player .avatar{width:32px;height:32px;background:color-mix(in srgb,var(--pc) 20%,white);display:grid;place-items:center;border-radius:50%;font-size:20px}.player-name{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px}.money{font-size:20px;font-weight:800;letter-spacing:-.6px}.money small{font-size:10px;font-weight:400;letter-spacing:0}.player .mini-stats{font-size:10px;margin-top:6px;display:flex;justify-content:space-between;gap:5px;color:var(--muted)}.game-grid{display:grid;grid-template-columns:minmax(0,1fr) 342px;gap:24px;align-items:start}.board-wrap{min-width:0}.board{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));grid-template-rows:repeat(7,minmax(68px,1fr));gap:5px;padding:12px;background:#e5e6da;border:1px solid #cbcebe;border-radius:22px;box-shadow:var(--shadow);position:relative;isolation:isolate}.cell{background:var(--tile);border:1px solid #ffffffaa;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;min-width:0;padding:8px 2px;transition:box-shadow .2s;user-select:none;cursor:pointer;box-shadow:0 2px 0 #5e62461a}.cell:hover{filter:brightness(1.04)}.cell.current{box-shadow:inset 0 0 0 2px var(--green),0 2px 0 #5e62461a}.cell .tile-no{position:absolute;top:3px;left:6px;font-size:8px;color:#6c766a}.tile-icon{font-size:25px;line-height:1.2}.cell .label{font-size:10px;font-weight:700;margin-top:5px;white-space:nowrap}.cell .pawns{position:absolute;bottom:-6px;display:flex;z-index:3;gap:0}.pawn{width:19px;height:25px;background:var(--pc);border:2px solid white;border-radius:10px 10px 7px 7px;color:white;box-shadow:0 2px 3px #0004;display:grid;place-items:center;font-size:9px;font-weight:900;position:relative}.pawn::before{content:'';position:absolute;width:9px;height:9px;background:var(--pc);border:2px solid white;top:-9px;left:3px;border-radius:50%}.pawn.walking{animation:hop .2s ease infinite}.board-center{grid-column:2/9;grid-row:2/7;border-radius:16px;background:#f6f4e9;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:15px;text-align:center;background-image:radial-gradient(#b4c1a43b .8px,transparent .8px);background-size:12px 12px}.center-title{font-family:'Gowun Dodum',sans-serif;font-size:42px;letter-spacing:-2px;margin:5px 0;font-weight:800}.center-sub{font-size:11px;color:var(--muted)}.town{width:min(320px,80%);height:145px;margin:5px 0 4px}.center-bottom{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap;justify-content:center}.center-bottom .pill{background:#e8e9dc;font-size:10px}.board-caption{display:flex;justify-content:space-between;margin:22px 2px 14px;font-size:11px;color:var(--muted);gap:10px}.legend{display:flex;gap:9px;flex-wrap:wrap}.legend span{display:flex;align-items:center;gap:4px}.legend i{width:8px;height:8px;border-radius:2px}.panel{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:21px;box-shadow:0 5px 0 #e9e6dc}.panel h2{font-size:21px;letter-spacing:-.5px}.panel .desc{font-size:12px;color:var(--muted);margin:10px 0 17px;line-height:1.85}.turn-tag{display:flex;align-items:center;gap:8px;margin-bottom:17px;font-size:12px;font-weight:700}.turn-tag .avatar{font-size:25px}.dice-area{text-align:center;padding:18px 0}.dice{width:78px;height:78px;border-radius:18px;background:white;border:1px solid #d8dcce;box-shadow:0 7px 0 #d1d5c6,0 10px 20px #48584318;margin:0 auto 17px;font-size:60px;line-height:76px;color:var(--green);transform:rotate(-6deg)}.dice.rolling{animation:roll .15s infinite}.roll-button{padding:14px;font-size:15px}.choice{width:100%;text-align:left;padding:12px 13px;margin-bottom:8px;background:#fafaf5;border:1px solid #dfE3d9}.choice b{font-size:13px;display:block;margin-bottom:4px}.choice span{font-size:11px;display:block;color:var(--muted);line-height:1.7}.choice:hover:not(:disabled){background:#edf2e7}.event-icon{font-size:28px;background:#f3e5d5;display:inline-grid;place-items:center;width:51px;height:57px;border-radius:8px;box-shadow:3px 3px 0 #e7d5bf;transform:rotate(-5deg);margin-bottom:17px}.ledger{padding:12px;background:#f2f3e9;border-radius:10px;font-size:11px;margin:12px 0}.ledger .row{margin:3px 0}.hint{border-left:3px solid #d3b76d;background:#f5f0df;padding:10px 12px;font-size:11px;line-height:1.8;color:#74633b;margin-top:15px}.journal{margin-top:20px;background:var(--white);border:1px solid var(--line);border-radius:16px;padding:17px 20px}.journal h3{font-size:13px;margin-bottom:10px}.log-list{max-height:128px;overflow:auto;font-size:11px;color:var(--muted)}.log-item{padding:7px 0;border-bottom:1px dashed #e3e5dd;display:flex;gap:10px}.log-item span{color:var(--orange);white-space:nowrap;font-size:10px}.network-status{font-size:11px;color:var(--muted)}.timeline{display:flex;gap:4px;align-items:center;margin-top:15px}.timeline i{height:5px;flex:1;border-radius:3px;background:#dedfd3}.timeline i.on{background:var(--green)}.setup{max-width:640px;margin:40px auto}.setup h1{font-size:30px;margin-bottom:10px}.setup label{display:block;font-size:12px;font-weight:700;margin:16px 0 7px}.setup input,.setup select{width:100%;padding:12px;border:1px solid var(--line);background:white;color:var(--ink)}.setup .fields{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.setup .names{display:grid;grid-template-columns:1fr 1fr;gap:10px}.setup .names input{margin-top:7px}.setup button.primary{margin-top:22px}.check{display:flex!important;align-items:center;gap:10px;font-weight:400!important}.check input{width:18px;height:18px}.room-code{font-size:44px;font-weight:900;letter-spacing:8px;padding:18px 0;color:var(--green)}.room-member{display:flex;align-items:center;gap:12px;padding:13px;border-bottom:1px solid var(--line)}.empty-seat{color:#9da499}.results{max-width:1100px;margin:30px auto}.results h1{font-size:38px;margin-bottom:15px}.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:15px;margin:24px 0}.result-card{padding:22px;border-radius:16px;background:var(--white);border-top:5px solid var(--pc);box-shadow:0 3px 0 #deded2}.result-card h3{font-size:18px}.result-card .money{font-size:29px;margin:12px 0}.result-card .goal{font-size:12px;background:#edf0e4;padding:12px;border-radius:8px;margin-top:13px}.reflection{padding:25px;background:#e6edde;border-radius:16px}.reflection ol{font-size:13px;line-height:2.2;padding-left:20px}.bars{margin:20px 0}.bar-row{display:grid;grid-template-columns:90px 1fr 80px;gap:12px;align-items:center;font-size:12px;margin:13px 0}.bar-pair{display:grid;gap:4px}.bar-pair i{display:block;height:9px;background:var(--pc);border-radius:4px;min-width:2px}.bar-pair i:first-child{opacity:.3}.error{background:#f8e3dc;color:#924a34;border-radius:8px;padding:10px;margin:10px 0;font-size:12px}.info{background:#eef1e5;padding:13px;border-radius:10px;font-size:12px;color:var(--muted);line-height:1.9}dialog{border:1px solid var(--line);border-radius:20px;padding:26px;width:min(530px,92vw);color:var(--ink);background:var(--white);box-shadow:0 25px 100px #0003}dialog::backdrop{background:#263e395e;backdrop-filter:blur(3px)}dialog h2{font-size:23px;margin-bottom:14px}dialog p{font-size:13px;line-height:1.9;margin:10px 0}dialog .close{float:right;padding:4px 11px;margin:-10px -10px 10px 10px}.rules-list{padding-left:20px;font-size:13px;line-height:2}.badge{display:inline-block;background:#e5ebdf;border-radius:6px;padding:4px 8px;margin:3px;font-size:11px}#toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:var(--ink);color:white;border-radius:12px;padding:12px 20px;z-index:20;max-width:90vw;display:none;font-size:13px}.fade-in{animation:fade .3s ease}.success-mark{font-size:35px;margin-bottom:12px}.policy-chip{font-size:10px;color:var(--green);padding:3px 6px;background:#e5ecda;border-radius:4px}.offline-banner{background:#f8e7c9;border-radius:8px;padding:8px;font-size:11px;margin:10px 0}@keyframes hop{50%{transform:translateY(-7px)}}@keyframes roll{0%{transform:rotate(-15deg)}50%{transform:rotate(15deg) translateY(-6px)}100%{transform:rotate(-15deg)}}@keyframes fade{from{opacity:.5;transform:translateY(6px)}to{opacity:1;transform:none}}@media(min-width:1600px){.board{grid-template-rows:repeat(7,minmax(77px,1fr))}}@media(max-width:1100px){.shell{padding:0 20px 30px}.game-grid{grid-template-columns:minmax(0,1fr) 300px;gap:17px}.board{grid-template-rows:repeat(7,minmax(59px,1fr));gap:4px;padding:9px}.cell .label{font-size:8px}.tile-icon{font-size:21px}.center-title{font-size:32px}.town{height:113px}.hero{gap:25px}.hero-board .cell{min-height:45px}.hero-board .board{grid-template-rows:repeat(7,minmax(45px,1fr))}.hero-board .town{height:90px}.player{padding:10px}.player.active{padding:9px}.player .mini-stats{flex-wrap:wrap}.mode-card{padding:19px;gap:12px}.mode-icon{width:40px;height:40px}}@media(max-width:820px){.hero{grid-template-columns:1fr;text-align:center;padding:30px 0}.hero p{margin:auto}.hero-board{max-width:620px;margin:auto;width:100%;transform:rotate(1deg)}.hero h1{font-size:46px}.mode-grid{grid-template-columns:1fr}.mode-card{padding:20px}.mode-card b{margin-top:8px}.hero .row{justify-content:center}.game-grid{grid-template-columns:1fr}.control{order:-1}.control .panel{padding:17px}.dice-area{padding:4px 0;display:flex;align-items:center;gap:18px}.dice{margin:0 0 9px 8px;width:55px;height:55px;font-size:45px;line-height:53px;flex-shrink:0}.roll-button{flex:1}.control .panel .desc{margin:6px 0 10px}.turn-tag{margin-bottom:7px}.board{grid-template-rows:repeat(7,minmax(57px,1fr))}.players{overflow-x:auto;grid-template-columns:repeat(var(--count),minmax(140px,1fr));padding-bottom:5px}.panel .options{display:grid;grid-template-columns:1fr 1fr;gap:8px}.choice{margin:0}.event-icon{display:none}.town{height:125px}.nav .desktop{display:none}.topbar{height:72px}.game-head{padding-top:18px}.game-head h1{font-size:23px}.footer{flex-direction:column;gap:3px}}@media(max-width:480px){.shell{padding:0 12px 25px}.brand{font-size:13px}.brand small{font-size:8px}.nav button{padding:7px 10px;font-size:11px}.nav{gap:5px}.hero h1{font-size:40px}.hero-board .cell{min-height:39px}.hero-board .board{grid-template-rows:repeat(7,minmax(39px,1fr))}.hero-board .label{font-size:7px!important}.hero-board .tile-icon{font-size:17px!important}.hero-board .center-title{font-size:26px}.board{padding:6px;gap:3px;border-radius:15px;grid-template-rows:repeat(7,minmax(45px,1fr))}.cell{border-radius:5px;padding:6px 0}.cell .label{font-size:7px;letter-spacing:-.3px}.cell .tile-icon{font-size:19px}.cell .tile-no{font-size:6px;left:3px;top:1px}.board-center{padding:5px;border-radius:9px}.center-title{font-size:27px}.center-sub{font-size:9px}.board-center .eyebrow{font-size:8px}.town{height:90px;width:85%}.center-bottom{margin-top:4px;gap:3px}.center-bottom .pill{padding:3px 6px;font-size:8px}.board-caption{font-size:9px}.legend{gap:6px}.pawn{width:14px;height:19px;font-size:7px;border-width:1px}.pawn::before{width:7px;height:7px;border-width:1px;top:-6px;left:2px}.round-num{font-size:22px}.round-meta{gap:8px}.game-head .pill{font-size:10px}.panel .options{grid-template-columns:1fr}.setup .fields{grid-template-columns:1fr}.results h1{font-size:29px}.bar-row{grid-template-columns:70px 1fr 65px}.hint{font-size:10px}.hero-board .town{height:77px}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}@media print{.nav,.primary,.secondary,.board-wrap,.control,.topbar,.players,.game-head,.footer{display:none!important}.results{margin:0}.result-card{break-inside:avoid}.shell{padding:0}body{background:white}.reflection{break-inside:avoid}}
+
+/* ── 추가 요소 ───────────────────────────────────────────── */
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.chips span{font-size:10px;font-weight:700;border-radius:999px;padding:2px 7px;line-height:1.6}
+.chip-token{background:#f3e6c9;color:#7a5c1e}
+.chip-info{background:#dde9e3;color:#2f5d4f}
+.chip-loan{background:#eadfe9;color:#6c4468}
+.chip-debt{background:#f3dcd6;color:#8c4630}
+
+.helper-box{margin-top:14px;padding:12px;border:1px dashed #cfc7ae;border-radius:12px;background:#fffdf4}
+button.helper{display:block;width:100%;text-align:left;margin-top:6px;font-size:13px;font-weight:600;background:#f1ece0;border:1px solid #ddd5bf;border-radius:10px;padding:9px 11px;cursor:pointer}
+button.helper:hover:not(:disabled){background:#e8e1d0}
+button.helper:disabled{opacity:.5;cursor:default}
+
+.choice .why{display:block;margin-top:5px;font-size:11px;color:#8a6b4a;line-height:1.5}
+.choice.unknown{border-style:dashed;background:#f2efe4;color:#8a8574;cursor:default}
+.choice.unknown b{color:#8a8574}
+.choice.info-choice{border-color:#a9c8b8;background:#f2f8f4}
+.choice.info-choice b::after{content:'정보';font-size:9px;font-weight:800;background:#cfe3d8;color:#2f5d4f;border-radius:999px;padding:2px 6px;margin-left:6px;vertical-align:2px}
+
+.peek{margin:12px 0 4px}
+.peek-row{display:flex;gap:5px;margin-top:6px}
+.peek-cell{flex:1;background:var(--tile);border:1px solid #ffffffaa;border-radius:8px;padding:5px 2px;text-align:center;font-size:11px;line-height:1.5}
+.peek-cell b{display:block;font-size:9px;color:#7d7867}
+.peek-cell i{display:block;font-style:normal;font-size:14px}
+.peek-cell em{display:block;font-style:normal;font-size:9px;font-weight:600}
+
+.crisis-table{margin:12px 0 8px;display:flex;flex-direction:column;gap:6px}
+.crisis-row{display:grid;grid-template-columns:70px 1fr 62px;align-items:center;gap:8px;font-size:12px}
+.crisis-row b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crisis-row i{height:10px;border-radius:999px;background:var(--pc);display:block;min-width:4px}
+.crisis-row span{text-align:right;font-weight:700;color:#8c4630}
+.crisis-note{background:#f7e7df;border:1px solid #e8cdc0;border-radius:10px;padding:9px 11px;font-size:12px;margin:8px 0 12px}
+
+.promise-list{display:flex;flex-direction:column;gap:7px;margin-top:8px}
+.promise-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fffdf4;border:1px solid #e6e0cd;border-radius:10px;padding:9px 11px}
+.promise-item.kept{background:#f1f7f1;border-color:#cfe0cf}
+.promise-item b{font-size:12px}
+
+.awards{margin-top:11px;display:flex;flex-direction:column;gap:5px}
+.award{background:#f7f1e0;border:1px solid #e8dfc5;border-left:3px solid var(--pc);border-radius:8px;padding:6px 9px}
+.award b{display:block;font-size:12px}
+.award span{font-size:11px;color:#7d7867}
+
+svg.chart{width:100%;height:auto;margin-top:10px}
+
+@media print{.helper-box,.promise-item button{display:none!important}}
+
+/* v3: clearer controls and compact-screen ergonomics */
+button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focus-visible{outline:3px solid #bd673d;outline-offset:3px}
+button:disabled{cursor:not-allowed} .helper-box{border-left:3px solid #5c8973} .crisis-row{min-height:42px}.crisis-row span{font-size:11px}.choice{transition:transform .16s,border-color .16s}.choice:not(:disabled):hover{transform:translateY(-2px);border-color:#5c8973}
+@media(max-width:600px){.nav{gap:5px}.nav button{padding:8px;font-size:11px}.control .row button{min-height:40px}.crisis-row{grid-template-columns:65px 1fr 90px}.result-card{padding:16px}dialog{max-height:86dvh;overflow:auto}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ── 자본 능력치(HP/MP 스타일) ───────────────────────────────── */
+.capital-stats{display:flex;flex-direction:column;gap:3px;margin-top:8px}
+.capital-stat{display:grid;grid-template-columns:15px 30px 1fr 20px;align-items:center;gap:5px;font-size:9px}
+.capital-stat .cap-label{color:var(--muted);font-weight:700;white-space:nowrap}
+.capital-stat .cap-track{height:6px;background:#e7e8dc;border-radius:4px;overflow:hidden}
+.capital-stat .cap-fill{height:100%;border-radius:4px;transition:width .3s}
+.capital-stat .cap-val{text-align:right;font-weight:700;color:var(--ink)}
+.capital-total{margin-top:9px;padding:7px 9px;background:#f2f0e4;border-radius:9px;display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700}
+.capital-total b{font-size:16px;color:var(--ink)}
+.capital-ledger{display:flex;flex-direction:column;gap:7px;margin:10px 0}
+.capital-ledger-row{display:grid;grid-template-columns:80px 1fr 60px;align-items:center;gap:10px;font-size:12px}
+.capital-ledger-row .cap-track{height:9px;background:#eceee1;border-radius:5px;overflow:hidden}
+.capital-ledger-row .cap-fill{height:100%;border-radius:5px}
+.winner-banner{background:linear-gradient(135deg,#f6ecd0,#f2f8f0);border:1px solid #e3d9ab;border-radius:18px;padding:26px;text-align:center;margin:22px 0}
+.winner-banner .crown{font-size:40px}
+.winner-banner h2{font-size:24px;margin:8px 0 4px}
+.winner-banner .score{font-size:34px;font-weight:900;color:var(--green);margin:6px 0}
+.leaderboard{display:flex;flex-direction:column;gap:8px;margin:18px 0}
+.leader-row{display:grid;grid-template-columns:34px 1fr 300px 80px;align-items:center;gap:10px;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:10px 13px}
+.leader-row.first{border-color:#d7b95e;background:#fdf9ea}
+.leader-rank{font-size:16px;font-weight:900;text-align:center}
+.leader-name{font-size:13px;font-weight:800}
+.leader-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:#eceee1}
+.leader-bar span{height:100%}
+.leader-score{text-align:right;font-weight:800;font-size:13px}
+@media(max-width:700px){.leader-row{grid-template-columns:26px 1fr 60px;grid-template-areas:"rank name score" "bar bar bar"}.leader-rank{grid-area:rank}.leader-name{grid-area:name}.leader-score{grid-area:score}.leader-bar{grid-area:bar}}
+</style></head><body><div id="app"></div><div id="toast" role="status" aria-live="polite"></div><dialog id="modal"></dialog><script type="module">
+const COLORS=['#dc795a','#579287','#d4aa4a','#7894bf','#aa7ca2','#8d9f5c'];
+const ICONS=['🦊','🐳','🐥','🐻','🐰','🐢'];
+const TYPES={start:['출발','⚑','#e4e8d2'],learn:['배움','📚','#e5ecdf'],chance:['인생 카드','✦','#f6e3d4'],network:['만남','🤝','#e6e0ed'],market:['투자','▥','#dce9e8'],care:['돌봄','♥','#f3dfdc'],community:['우리 사회','⚖','#e7e5ce'],rest:['쉼표','☘','#e0e9d8'],career:['커리어','💼','#dee5f0']};
+const BOARD=['start','learn','chance','network','market','care','rest','community','career','chance','learn','network','market','care','community','rest','chance','career','market','network','care','learn','chance','community','rest','market','network','chance'];
+const BACKGROUNDS=[{name:'스스로 길을 찾는 집',cash:300,skill:1,trust:1,culture:0,card:'친구',desc:'시작 자금은 적지만, 서로 챙기는 친구가 있어요.'},{name:'차근차근 준비하는 집',cash:650,skill:2,trust:1,culture:1,card:'멘토',desc:'배움을 도와줄 멘토와 함께 출발해요.'},{name:'선택의 여유가 있는 집',cash:1100,skill:2,trust:2,culture:2,card:'동문',desc:'넉넉한 자금과 새로운 기회를 알려줄 선배가 있어요.'}];
+const CAPITALS={economic:{name:'경제자본',short:'경제',icon:'💰',color:'#d4aa4a'},human:{name:'인적자본',short:'인적',icon:'🛠',color:'#7894bf'},social:{name:'사회자본',short:'사회',icon:'🤝',color:'#579287'},cultural:{name:'문화자본',short:'문화',icon:'🎓',color:'#aa7ca2'}};
+function capitalScore(p){return {economic:wealth(p),human:p.skill*100,social:p.trust*100,cultural:p.culture*100};}
+function totalCapital(p){const c=capitalScore(p);return c.economic+c.human+c.social+c.cultural;}
+const POLICIES={
+ care:{name:'공공 돌봄',icon:'♥',desc:'돌봄 비용 100 → 30, 휴식 효과 +1. 이후 소득의 10%를 공동기금에 납부.',tax:'이후 소득에서 10%를 공동기금으로 냅니다.'},
+ education:{name:'교육 사다리',icon:'📚',desc:'배움 비용 100 → 30, 전환 훈련 120 → 50. 이후 소득의 10%를 납부.',tax:'이후 소득에서 10%를 공동기금으로 냅니다.'},
+ housing:{name:'주거 지원',icon:'⌂',desc:'무주택 팀의 생활비 40 → 10. 이후 소득의 10%를 납부.',tax:'이후 소득에서 10%를 공동기금으로 냅니다.'},
+ progressive:{name:'자산별 차등 부담',icon:'⇅',desc:'라운드 시작 자산이 중앙값보다 높으면 소득의 15%, 나머지는 5%를 추가 납부. 같은 자산에는 같은 비율을 적용합니다.',tax:'라운드 시작 자산 기준으로 15% 또는 5%를 추가 납부합니다.'}
+};
+const GOALS=[{name:'나만의 기반',desc:'순자산을 출발보다 600 이상 늘리기',check:p=>wealth(p)>=p.born+600},{name:'건강한 삶',desc:'건강 5 이상 · 순자산이 출발 이상',check:p=>p.health>=5&&wealth(p)>=p.born},{name:'함께 사는 삶',desc:'도움·기부 3회 이상 실천하기',check:p=>p.help>=3},{name:'배움의 여정',desc:'역량 7 이상 · 만남 카드 2장 이상',check:p=>p.skill>=7&&p.cards.length>=2}];
+const outstanding=p=>(p.loans||[]).reduce((s,l)=>s+Math.max(0,l.due-l.paid),0);
+const receivable=p=>(p.receivables||[]).reduce((sum,l)=>sum+Math.max(0,l.due-l.paid),0);
+const wealth=p=>Math.round(p.cash+p.stocks+p.home+receivable(p)-p.debt-outstanding(p));
+const age=g=>g.round===1?8:g.round===2?15:22+(g.round-3)*5;
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const CRISES=[
+ {id:'slump',name:'경기 침체',kind:'flat',note:'일자리가 줄고 물건이 안 팔려요. 모두 같은 금액을 부담합니다.'},
+ {id:'epidemic',name:'감염병 유행',kind:'flat',hp:-1,note:'모두 같은 금액을 부담하고, 건강이 1 줄어듭니다.'},
+ {id:'inflation',name:'물가 급등',kind:'rate',note:'가진 만큼 부담합니다. 순자산의 15%가 줄어듭니다.'},
+ {id:'shock',name:'금융 불안',kind:'rate',note:'가진 만큼 부담합니다. 순자산의 15%가 줄어듭니다.'}
+];
+const AWARDS=[
+ {key:'help',name:'제일 많이 나눈 팀',line:p=>`기부·자원봉사·돌봄 도움 ${p.help}회`,score:p=>p.help},
+ {key:'shared',name:'길을 알려준 팀',line:p=>`아는 제도를 ${p.shared}번 알려줬어요`,score:p=>p.shared},
+ {key:'advised',name:'문을 열어준 팀',line:p=>`조언 토큰으로 남의 선택지를 ${p.advised}번 열었어요`,score:p=>p.advised},
+ {key:'health',name:'끝까지 건강한 팀',line:p=>`가장 낮았을 때도 건강 ${p.minHealth}`,score:p=>p.minHealth},
+ {key:'partners',name:'가장 넓게 거래한 팀',line:p=>`${p.partners.length}개 팀과 주고받았어요`,score:p=>p.partners.length},
+ {key:'declined',name:'그래도 계속 말 건 팀',line:p=>`제안이 ${p.declined}번 거절당했는데도 다시 제안했어요`,score:p=>p.declined},
+ {key:'forecast',name:'시장을 읽은 팀',line:p=>`시장 예측 ${p.forecastRight}번 적중`,score:p=>p.forecastRight},
+ {key:'guess',name:'사람을 읽은 팀',line:p=>`다른 팀의 선택을 ${p.guessRight}번 맞혔어요`,score:p=>p.guessRight}
+];
+function awards(g){
+ const out={};g.players.forEach(p=>out[p.id]=[]);
+ for(const a of AWARDS){
+  const best=Math.max(...g.players.map(a.score));if(best<=0)continue;
+  g.players.filter(p=>a.score(p)===best).forEach(p=>out[p.id].push({name:a.name,line:a.line(p)}));
+ }
+ g.players.filter(p=>!p.everDebt).forEach(p=>out[p.id].push({name:'한 번도 빚지지 않은 팀',line:'생활비와 선택을 가진 돈 안에서 해결했어요'}));
+ const kept={};(g.promises||[]).forEach(pr=>{if(pr.kept)kept[pr.from]=(kept[pr.from]||0)+1;});
+ const bestKept=Math.max(0,...Object.values(kept));
+ if(bestKept>0)Object.entries(kept).filter(([,v])=>v===bestKept).forEach(([k])=>out[k].push({name:'약속을 지킨 팀',line:`강제력 없는 약속 ${bestKept}개를 지켰어요`}));
+ return out;
+}
+function random(g){g.seed=(Math.imul(g.seed,1664525)+1013904223)>>>0;return g.seed/4294967296;}
+function log(g,text){g.log.unshift({round:g.round,text});g.log=g.log.slice(0,400);}
+function pay(p,cost){const paid=Math.min(p.cash,cost);p.cash-=paid;const short=cost-paid;if(short>0){p.debt+=short;p.everDebt=true;}}
+function gain(p,n){p.cash+=n;}
+function health(p,n){p.health=clamp(p.health+n,0,6);p.minHealth=Math.min(p.minHealth??p.health,p.health);}
+function newGame(names,{seed=Date.now()>>>0,rounds=8,equal=false,ai=[],backgrounds=null}={}){
+ let g={version:4,seed,initialSeed:seed,round:1,maxRounds:rounds,turn:0,phase:'roll',players:[],fund:0,policies:[],log:[],history:[],taxRates:[],comparison:null,die:null,event:null,offer:null,votes:{},forecasts:{},guesses:{},promises:[],crisis:null,pending:null,loanTarget:null,market:'출발선',rate:0,revision:0};
+ if(names.length<2||names.length>6)throw Error('2~6팀으로 시작하세요.');
+ names.forEach((name,i)=>{const rnd=equal?1:Math.floor(random(g)*3);const b=backgrounds?((backgrounds[i]%3)+3)%3:equal?1:rnd,bg=BACKGROUNDS[b];g.players.push({id:i,name:String(name).trim().slice(0,12)||`${i+1}팀`,ai:ai.includes(i),background:b,born:bg.cash,cash:bg.cash,debt:0,stocks:0,home:0,skill:bg.skill,trust:bg.trust,culture:bg.culture,health:5,minHealth:5,cards:[bg.card],salary:0,job:'학생',pos:0,goal:i%4,help:0,visits:[],choices:[],usedHelp:false,tokens:2,loans:[],receivables:[],insurance:0,insuredSavings:0,defaultLoss:0,promiseRound:-1,shared:0,sharedRound:-1,advised:0,declined:0,partners:[],everDebt:false,guessRight:0,forecastRight:0});});
+ g.history.push({round:0,assets:g.players.map(wealth)});snapshotTax(g);
+ log(g,'서로 다른 출발선. 주사위를 굴려 나의 인생을 시작하세요.');return g;
+}
+function actor(g){if(g.phase==='offer')return g.offer.to;if(g.phase==='crisis')return 0;if(g.phase==='vote')return g.players.find(p=>g.votes[p.id]===undefined)?.id;if(g.phase==='forecast')return g.players.find(p=>g.forecasts[p.id]===undefined)?.id;return g.turn;}
+function hasInfo(p){return p.cards.some(c=>c==='멘토'||c==='동문');}
+function partner(p,q){if(!p.partners)p.partners=[];if(!q.partners)q.partners=[];if(!p.partners.includes(q.id))p.partners.push(q.id);if(!q.partners.includes(p.id))q.partners.push(p.id);}
+function repayLoans(g,p){let budget=Math.min(50,p.cash);for(const l of(p.loans||[])){const amount=Math.min(budget,l.due-l.paid);if(amount<=0)continue;p.cash-=amount;budget-=amount;l.paid+=amount;gain(g.players[l.from],amount);syncClaim(g,p,l);log(g,`${p.name} → ${g.players[l.from].name} 차용금 ${amount} 상환 · 남은 금액 ${l.due-l.paid}.`);}}
+function syncClaim(g,p,l){const q=g.players[l.from];q.receivables??=[];let c=q.receivables.find(c=>c.id===l.id);if(!c){c={id:l.id,to:p.id};q.receivables.push(c);}c.due=l.due;c.paid=l.paid;}
+function settleFinalLoans(g){
+ for(const p of g.players)for(const l of p.loans){let due=l.due-l.paid;if(due<=0)continue;let amount=Math.min(due,Math.max(0,p.cash+p.stocks+p.home-p.debt));const recovered=amount;for(const k of ['cash','stocks','home']){const use=Math.min(p[k],amount);p[k]-=use;amount-=use;}l.paid+=recovered;gain(g.players[l.from],recovered);let loss=l.due-l.paid;if(loss){g.players[l.from].defaultLoss+=loss;l.defaulted=loss;l.due=l.paid;}syncClaim(g,p,l);log(g,`최종 차용 정산 · ${p.name} → ${g.players[l.from].name} ${recovered} 회수${loss?`, 미회수 ${loss} 상각`:''}.`);}
+ if(g.history.length)g.history[g.history.length-1].assets=g.players.map(wealth);
+}
+function fate(g,kind,round,seat){let h=g.initialSeed>>>0;for(const c of `${kind}:${round}:${seat}`)h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;h^=h>>>16;h=Math.imul(h,0x7feb352d);h^=h>>>15;h=Math.imul(h,0x846ca68b);return ((h^(h>>>16))>>>0)/4294967296;}
+function snapshotTax(g){const sorted=g.players.map(wealth).sort((a,b)=>a-b),n=sorted.length;const mid=n%2?sorted[(n-1)/2]:(sorted[n/2-1]+sorted[n/2])/2;g.taxRates=g.players.map(p=>wealth(p)>mid?.15:.05);}
+function contextOf(g){return {round:g.round,turn:g.turn,phase:g.phase,eventId:g.event?.id||`${g.round}:${g.turn}`};}
+function upgradeGame(g){
+ if(g.version===4)return g;g=structuredClone(g);const from3=g.version===3;g.version=4;g.promises??=[];g.forecasts??={};g.guesses??={};g.taxRates??=[];
+ g.players.forEach(p=>{Object.assign(p,{receivables:[],insurance:p.insurance||0,insuredSavings:p.insuredSavings||0,defaultLoss:p.defaultLoss||0,promiseRound:p.promiseRound??-1,minHealth:p.minHealth??p.health,tokens:p.tokens??2,loans:p.loans||[],shared:p.shared||0,sharedRound:p.sharedRound??-1,advised:p.advised||0,declined:p.declined||0,partners:p.partners||[],everDebt:p.everDebt||p.debt>0,guessRight:p.guessRight||0,forecastRight:p.forecastRight||0,culture:p.culture??(BACKGROUNDS[p.background]?.culture||0)});});
+ if(!from3)g.players.forEach(p=>p.loans.forEach((l,i)=>{l.id??=`legacy-${p.id}-${i}`;p.everDebt=true;syncClaim(g,p,l);}));
+ if(!g.history.some(h=>h.round===0))g.history.unshift({round:0,assets:g.players.map(p=>p.born)});snapshotTax(g);if(g.event)g.event.id=`${g.round}:${g.turn}`;return g;
+}
+function options(g){
+ const p=g.players[g.turn],e=g.event;if(!e)return[];
+ const unl=e.unlocked||[],shr=e.shared||[],others=g.players.filter(q=>q.id!==p.id);
+ const o=(id,title,desc,cash=false,req=false,info=false)=>{const r=!!req&&!unl.includes(id);return{id,title,desc,cash:!!cash,req:r,info:!!info,known:!info||hasInfo(p)||shr.includes(id),disabled:!!cash||r,advisable:r&&!cash};};
+ const ed=g.policies.includes('education'),ca=g.policies.includes('care');
+ switch(e.type){
+ case 'learn':return[
+  o('study','배움에 투자하기',`현금 −${ed?30:100} · 역량 +2`,p.cash<(ed?30:100)),
+  o('work','생활비부터 마련하기','현금 +100 · 역량 +1 · 건강 −1'),
+  o('library','도서관에서 길 찾기','역량 +1 · 멘토 카드 획득'),
+  o('ged','평생교육 과정 신청하기','현금 −20 · 역량 +2 · 있는 줄 아는 사람만 신청해요',p.cash<20,false,true)];
+ case 'career':return[
+  o('professional','전문 역량으로 도전','역량 6 필요 · 매 턴 소득 240 · 준비비 150',p.cash<150,p.skill<6),
+  o('company','추천받은 일자리','역량 3 · 신뢰 2 필요 · 매 턴 소득 190',false,p.skill<3||p.trust<2),
+  o('craft','현장 경험으로 시작','매 턴 소득 150 · 역량 +1'),
+  o('train','일하며 다시 준비','매 턴 소득 100 · 역량 +2'),
+  o('public','공공기관 채용 공고 확인','역량 3 필요 · 매 턴 소득 200 · 준비비 없음 · 공고를 본 사람만 지원해요',false,p.skill<3,true)];
+ case 'network':return[
+  o('mentor','멘토에게 질문하기','역량 +1 · 멘토 카드'),
+  o('friend','친구와 시간을 보내기','건강 +1 · 신뢰 +1 · 친구 카드'),
+  o('alumni','새 모임에 참여하기','현금 −80 · 신뢰 +2 · 동문 카드',p.cash<80),
+  o('program','청년 지원 프로그램 신청','현금 +120 · 신뢰 +1 · 공고를 아는 사람만 신청해요',false,false,true)];
+ case 'care':return[
+  o('pay','돌봄 서비스를 이용하기',`현금 −${careCost(g,p)} · 건강 유지`,p.cash<careCost(g,p)),
+  o('self','직접 돌보기','현금 지출 없음 · 건강 −2 · 신뢰 +1'),
+  o('fund','공동기금 지원받기','기금 −80 · 현금 부담 없음',g.fund<80),
+  o('ask','다른 팀에게 부탁','상대가 수락하면 상대 현금 −60 · 두 사람 신뢰 +1',p.usedHelp||others.every(q=>q.cash<60)),
+  o('voucher','돌봄 바우처 신청하기','비용 없음 · 건강 유지 · 역량 +1 · 제도를 아는 사람만 신청해요',false,false,true)];
+ case 'market':{
+  const canLoan=!p.usedHelp&&outstanding(p)===0&&others.some(q=>q.cash>=200);
+  const list=[
+   o('invest','주식 꾸러미 매수','현금 −200 → 투자자산 +200 · 매 라운드 공동 시장 변동',p.cash<200),
+   o('home','내 집 마련','현금 −900 → 주택 +900 · 이후 생활비 면제',p.cash<900||p.home>0),
+   o('sell','투자금 회수','투자자산을 모두 현금으로 바꾸기',p.stocks<=0),
+   o('insure','다음 위기에 대비하기','보험료 −50 · 다음 공동 위기 손실 최대 150 보장 · 1회성',p.cash<50||p.insurance>0),
+   o('save','예금으로 기다리기','현금 +20 · 투자 위험을 지지 않아요'),
+   o('saving','청년 자산형성 적금 신청','현금 −100 → 투자자산 +160 · 조건을 아는 사람만 신청해요',p.cash<100,false,true)];
+  if(p.debt>0)list.push(o('repay','빚 갚기',`현금으로 대출 상환 · 한 번에 최대 300 · 현재 잔액 ${p.debt}`,p.cash<1));
+  if(canLoan)list.push(o('loan','다른 팀에게 급전 요청','200을 빌리고 이자를 붙여 갚기 · 상대가 수락해야 성사'));
+  return list;}
+ case 'community':return[
+  o('donate','공동기금에 출자하기','현금 −60 · 기금 +60 · 신뢰 +1 · 도움 실천 +1',p.cash<60),
+  o('business','함께 작은 사업 시작','서로 100 출자 · 각자 50 회수(−50) 또는 190 회수(+90) · 수락 필요',p.cash<100||p.usedHelp||others.every(q=>q.cash<100)),
+  o('volunteer','시간으로 함께하기','건강 −1 · 기금 +30 · 도움 실천 +1',p.health<1),
+  o('grant','주민참여예산 제안하기','비용 없음 · 기금 +80 · 신뢰 +1 · 도움 실천 +1 · 절차를 아는 사람만 써요',false,false,true)];
+ case 'rest':return[
+  o('rest','푹 쉬어가기',`건강 +${ca?3:2}`),
+  o('hobby','취미 모임에 가기','현금 −40 · 건강 +1 · 신뢰 +1',p.cash<40),
+  o('side','이번엔 부업하기','현금 +110 · 건강 −1'),
+  o('clinic','무료 건강검진 이용하기','비용 없음 · 건강 +2 · 대상이라는 걸 아는 사람만 써요',false,false,true)];
+ default:
+  if(e.variant===0)return[
+   o('repair','고장 난 생활도구 수리','현금 −70 · 역량 +1',p.cash<70),
+   o('borrow','친구에게 빌려 쓰기','친구 카드로 비용 없이 해결',false,!p.cards.includes('친구')),
+   o('delay','수리를 미루기','건강 −1 · 지출 없음'),
+   o('tool','공구 대여소 이용하기','비용 없음 · 역량 +1 · 그런 곳이 있다는 걸 알아야 해요',false,false,true)];
+  if(e.variant===1)return[
+   o('scholar','새로운 기회에 지원하기','멘토·동문 카드 또는 역량 4 필요 · 현금 +180',false,!p.cards.some(c=>c==='멘토'||c==='동문')&&p.skill<4),
+   o('search','정보를 더 찾아보기','역량 +1 · 멘토 카드'),
+   o('counsel','지원 제도 상담 창구 가기','현금 +100 · 역량 +1 · 창구가 있다는 걸 알아야 해요',false,false,true)];
+  return[
+   o('train2','전환 교육에 참여하기',`현금 −${ed?50:120} · 역량 +2 · 소득 +30`,p.cash<(ed?50:120)),
+   o('overtime','추가 일을 맡기','현금 +140 · 건강 −1'),
+   o('recover','나를 먼저 돌보기','건강 +1'),
+   o('retrain','국비 지원 훈련 신청','비용 없음 · 역량 +2 · 소득 +20 · 공고를 본 사람만 신청해요',false,false,true)];
+ }
+}
+function careCost(g,p){return g.policies.includes('care')?30:p.cards.includes('친구')?60:100;}
+const TITLES={learn:['배움의 갈림길','배우고 싶은 것이 생겼어요. 지금의 여유와 미래의 기회 사이에서 선택하세요.'],career:['나의 첫 명함, 다음 가능성','지금까지 쌓은 역량과 관계가 선택할 수 있는 일자리에 영향을 줍니다.'],network:['우연한 만남이 여는 문','돈으로만 얻을 수 없는 기회. 어떤 관계를 쌓고 싶나요?'],care:['누군가를 돌봐야 할 때','같은 사건도 이용할 수 있는 도움에 따라 부담이 달라져요.'],market:['오늘의 돈, 내일의 선택','자산을 불릴 수도, 잃을 수도 있어요. 시장 변화는 모두에게 함께 적용됩니다.'],community:['우리라서 가능한 일','내 자원을 함께 쓰면, 다음 위기에서 누군가의 선택지가 생깁니다.'],rest:['잠깐, 쉬어가도 괜찮아','건강이 0이면 다음 소득이 절반이 됩니다. 내 삶의 속도를 정해보세요.']};
+function eventText(e){return TITLES[e.type]||[['뜻밖의 수리비','생활에 필요한 도구가 고장 났어요. 돈, 관계, 시간을 어떻게 쓸까요?'],['나에게도 이런 기회가?','장학·프로젝트 지원 공고를 발견했어요. 정보를 알아보는 경험도 자산이 됩니다.'],['세상이 바뀌고 있어요','새로운 기술이 등장했어요. 배우거나, 더 일하거나, 숨을 고를 수 있어요.']][e.variant];}
+function endTurn(g){g.phase='result';g.offer=null;g.pending=null;g.loanTarget=null;}
+function finishRound(g){g.phase='forecast';g.forecasts={};}
+function applyCrisis(g){
+ const c=CRISES[Math.floor(fate(g,'crisis',g.round,0)*CRISES.length)],amount=60+25*g.round;
+ g.crisis={id:c.id,name:c.name,kind:c.kind,note:c.note,amount,round:g.round,hits:[]};
+ for(const p of g.players){
+  const before=wealth(p),gross=c.kind==='flat'?amount:Math.max(0,Math.round(before*.15));
+  const policyRelief=c.id==='epidemic'&&g.policies.includes('care')?Math.min(gross,60):0;
+  const covered=Math.min(p.insurance||0,Math.max(0,gross-policyRelief)),loss=gross-policyRelief-covered;
+  if(p.insurance){p.insurance=0;p.insuredSavings+=covered;}pay(p,loss);
+  if(c.hp&&!g.policies.includes('care'))health(p,c.hp);
+  g.crisis.hits.push({id:p.id,name:p.name,gross,covered,policyRelief,loss,share:Math.round(loss/Math.max(1,before)*100)});
+ }
+ log(g,`공동 위기 · ${c.name} (${c.kind==='flat'?`모두 ${amount} 부담`:'순자산의 15% 부담'}) · ${g.crisis.hits.map(h=>`${h.name} −${h.loss}`).join(' · ')}`);
+}
+function advanceRound(g){
+ if(g.round>=g.maxRounds){settleFinalLoans(g);g.phase='done';return;}
+ if(g.round%4===0){g.phase='vote';g.votes={};return;}
+ nextRound(g);
+}
+function resolveRound(g){
+ const rate=[-.18,-.08,.05,.12,.22][Math.floor(fate(g,'market',g.round,0)*5)];g.rate=rate;g.market=`이번 시장 ${rate>=0?'+':''}${Math.round(rate*100)}%`;
+ const up=rate>=0,hits=[];
+ for(const p of g.players){const f=g.forecasts[p.id];if(f&&(f==='up')===up){gain(p,25);p.forecastRight++;hits.push(p.name);}}
+ for(const p of g.players){p.stocks=Math.round(p.stocks*(1+rate));if(p.home)p.home=Math.round(p.home*(1+rate/3));if(p.debt){p.debt+=Math.ceil(p.debt*.03);}}
+ log(g,`${g.market} · 주식에 공통 적용, 주택에는 변동폭의 1/3 적용. 대출 이자 3%.`);
+ log(g,hits.length?`시장 예측 적중 · ${hits.join(', ')} (각 +25)`:'이번 시장을 맞힌 팀은 없었어요.');
+ const crisisTime=g.round%3===0&&g.round<g.maxRounds;
+ if(crisisTime)applyCrisis(g);else g.crisis=null;
+ g.history.push({round:g.round,assets:g.players.map(wealth)});
+ if(crisisTime){g.phase='crisis';return;}
+ advanceRound(g);
+}
+function nextRound(g){g.round++;g.turn=0;g.phase='roll';g.event=null;g.die=null;snapshotTax(g);}
+function handleFree(g,a){
+ const me=g.players[a.actor];if(!me)throw Error('플레이어를 확인해주세요.');
+ if(a.type==='promise'){
+  const to=g.players[a.value&&a.value.to],text=String((a.value&&a.value.text)||'').trim().slice(0,60);
+  if(!to||to.id===me.id||!text)throw Error('약속할 상대와 내용을 확인해주세요.');
+  if(me.promiseRound===g.round)throw Error('약속은 라운드마다 한 번만 남길 수 있어요.');
+  if(g.promises.filter(x=>x.from===me.id&&!x.kept).length>=3)throw Error('아직 지키지 못한 약속이 3개 있어요.');
+  me.promiseRound=g.round;g.promises.push({id:g.promises.length,from:me.id,to:to.id,text,round:g.round,kept:false});
+  log(g,`약속 기록 · ${me.name} → ${to.name}: ${text}`);return;
+ }
+ if(a.type==='keep'){
+  const pr=g.promises[a.value];if(!pr||pr.kept)throw Error('확인할 약속이 없습니다.');
+  if(pr.to!==me.id)throw Error('약속을 받은 팀만 확인할 수 있어요.');
+  pr.kept=true;pr.keptRound=g.round;g.players[pr.from].trust++;
+  log(g,`약속 이행 · ${g.players[pr.from].name}이 ${me.name}에게 한 약속을 지켰어요. 신뢰 +1.`);return;
+ }
+ if(g.phase!=='choice')throw Error('지금은 다른 팀을 도울 수 없어요.');
+ if(me.id===g.turn)throw Error('내 차례에는 쓸 수 없어요.');
+ const op=options(g).find(o=>o.id===a.value);
+ if(a.type==='advise'){
+  if(!op||!op.advisable)throw Error('조언으로 열 수 있는 선택지가 아닙니다.');
+  if(me.tokens<1)throw Error('남은 조언 토큰이 없어요.');
+  me.tokens--;me.advised++;me.trust++;
+  if(!g.event.unlocked)g.event.unlocked=[];g.event.unlocked.push(a.value);
+  if(me.ai)g.event.aiAssisted=true;
+  log(g,`${me.name}이 조언 토큰을 썼어요. ${g.players[g.turn].name}의 "${op.title}"이 열렸습니다. 신뢰 +1.`);return;
+ }
+ if(a.type==='share'){
+  if(!op||!op.info||op.known)throw Error('알려줄 정보가 아닙니다.');
+  if(!hasInfo(me))throw Error('멘토·동문 카드가 있어야 알려줄 수 있어요.');
+  if(me.sharedRound===g.round)throw Error('이번 라운드에는 이미 정보를 나눴어요.');
+  me.sharedRound=g.round;me.shared++;me.trust++;
+  if(!g.event.shared)g.event.shared=[];g.event.shared.push(a.value);
+  if(me.ai)g.event.aiAssisted=true;
+  log(g,`${me.name}이 ${g.players[g.turn].name}에게 "${op.title}"을 알려줬어요. 신뢰 +1.`);return;
+ }
+ if(a.type==='guess'){
+  if(g.guesses[me.id]!==undefined)throw Error('이미 예측했어요.');
+  if(!op||!op.known)throw Error('알고 있는 선택지만 예측할 수 있어요.');
+  g.guesses[me.id]=a.value;return;
+ }
+ throw Error('알 수 없는 행동입니다.');
+}
+function transition(source,a){
+ const g=structuredClone(source),p=g.players[g.turn];if(!a||g.phase==='done')throw Error('이미 마친 게임입니다.');
+ if(!Number.isInteger(a.actor)||!g.players[a.actor])throw Error('플레이어를 확인해주세요.');
+ const scoped=['advise','share','guess'].includes(a.type);
+ if(scoped&&(a.round!==g.round||a.turn!==g.turn||a.eventId!==(g.event?.id||`${g.round}:${g.turn}`)))throw Error('이미 지나간 차례에 대한 행동입니다.');
+ const free=['promise','keep','advise','share','guess'].includes(a.type);
+ const loose=(a.type==='vote'&&g.phase==='vote')||(a.type==='forecast'&&g.phase==='forecast');
+ if(a.expected!==undefined&&a.expected!==g.revision&&!free&&!(loose&&a.round===g.round))throw Error('화면이 갱신되었습니다. 다시 선택해주세요.');
+ if(free){handleFree(g,a);g.revision++;return g;}
+ if(g.phase==='vote'){
+  if(a.type!=='vote'||!g.players[a.actor]||g.votes[a.actor]!==undefined||!['care','education','housing','progressive','none'].includes(a.value))throw Error('투표를 확인해주세요.');
+  if(g.policies.includes(a.value))throw Error('이미 시행 중인 정책입니다.');g.votes[a.actor]=a.value;
+  if(Object.keys(g.votes).length===g.players.length){
+   const tally={};Object.values(g.votes).forEach(v=>tally[v]=(tally[v]||0)+1);
+   const entries=Object.entries(tally).sort((x,y)=>y[1]-x[1]);
+   const winner=entries[0][1]===(entries[1]&&entries[1][1])?'none':entries[0][0];
+   if(winner!=='none')g.policies.push(winner);
+   log(g,winner==='none'?'사회회의: 현행 유지 (동률이면 현행 유지).':`사회회의: ${POLICIES[winner].name} 채택. ${POLICIES[winner].tax}`);
+   nextRound(g);
+  }
+ }else if(g.phase==='forecast'){
+  if(a.type!=='forecast'||!g.players[a.actor]||g.forecasts[a.actor]!==undefined||!['up','down'].includes(a.value))throw Error('예측을 확인해주세요.');
+  g.forecasts[a.actor]=a.value;
+  if(Object.keys(g.forecasts).length===g.players.length)resolveRound(g);
+ }else if(g.phase==='crisis'){
+  if(a.type!=='ack'||a.actor!==0)throw Error('위기 카드를 확인해주세요.');
+  advanceRound(g);
+ }else{
+ if(a.actor!==actor(g))throw Error('지금 행동할 플레이어가 아닙니다.');
+ if(a.type==='roll'&&g.phase==='roll'){
+  g.die=1+Math.floor(fate(g,'dice',g.round,g.turn)*6);const from=p.pos;p.pos=(p.pos+g.die)%BOARD.length;p.visits.push(p.pos);p.usedHelp=false;g.guesses={};
+  let type=BOARD[p.pos];if(type==='start')type='chance';if(g.round===1||g.round===2)type='learn';if(g.round===3)type='career';
+  let income=g.round<3?60:p.salary;if(p.health===0)income=Math.floor(income/2);
+  const tax=Math.round(income*.1*g.policies.filter(k=>k!=='progressive').length)+progressiveTax(g,p,income);
+  p.cash+=income-tax;g.fund+=tax;
+  const living=g.round<3||p.home?0:g.policies.includes('housing')?10:40;pay(p,living);
+  repayLoans(g,p);
+  g.event={type,variant:Math.floor(fate(g,'event',g.round,g.turn)*3),id:`${g.round}:${g.turn}`,from,income,tax,living,unlocked:[],shared:[]};g.phase='choice';
+  log(g,`${p.name} · 주사위 ${g.die} → ${TYPES[type][0]}. 소득 +${income}, 세금 −${tax}, 생활비 −${living}.`);
+ }else if(a.type==='choose'&&g.phase==='choice'){
+  const op=options(g).find(o=>o.id===a.value);if(!op||op.disabled||!op.known)throw Error('선택 조건이 충족되지 않았습니다.');const t=g.event.type;
+
+  if(Object.keys(g.guesses).length){
+   const right=Object.keys(g.guesses).filter(k=>g.guesses[k]===a.value).map(k=>{g.players[k].guessRight++;return g.players[k].name;});
+   log(g,right.length?`선택 예측 적중 · ${right.join(', ')}`:'이번 선택을 맞힌 팀은 없었어요.');
+  }
+  g.guesses={};
+  if(['ask','business','loan'].includes(a.value)){g.phase='target';g.pending=a.value;g.revision++;return g;}
+  p.choices.push({round:g.round,title:op.title});log(g,`${p.name}: ${op.title}`);
+  if(op.info){p.culture++;log(g,`${p.name}의 문화자본 +1 · "${op.title}"은 제도를 아는 팀만 쓸 수 있는 선택지였어요.`);}
+  if(t==='learn'){
+   if(a.value==='study'){pay(p,g.policies.includes('education')?30:100);p.skill+=2;}
+   if(a.value==='work'){gain(p,100);p.skill++;health(p,-1);}
+   if(a.value==='library'){p.skill++;addCard(p,'멘토');}
+   if(a.value==='ged'){pay(p,20);p.skill+=2;}
+  }else if(t==='career'){
+   const jobs={professional:['전문 직업인',240],company:['기업 구성원',190],craft:['현장 전문가',150],train:['일하는 학습자',100],public:['공공기관 구성원',200]};
+   p.job=jobs[a.value][0];p.salary=jobs[a.value][1];
+   if(a.value==='professional')pay(p,150);
+   if(a.value==='craft')p.skill++;
+   if(a.value==='train')p.skill+=2;
+  }else if(t==='network'){
+   if(a.value==='mentor'){p.skill++;addCard(p,'멘토');}
+   if(a.value==='friend'){health(p,1);p.trust++;addCard(p,'친구');}
+   if(a.value==='alumni'){pay(p,80);p.trust+=2;addCard(p,'동문');}
+   if(a.value==='program'){gain(p,120);p.trust++;}
+  }else if(t==='care'){
+   if(a.value==='pay')pay(p,careCost(g,p));
+   if(a.value==='self'){health(p,-2);p.trust++;}
+   if(a.value==='fund')g.fund-=80;
+   if(a.value==='voucher')p.skill++;
+  }else if(t==='market'){
+   if(a.value==='invest'){pay(p,200);p.stocks+=200;}
+   if(a.value==='home'){pay(p,900);p.home=900;}
+   if(a.value==='sell'){gain(p,p.stocks);p.stocks=0;}
+   if(a.value==='insure'){pay(p,50);p.insurance=150;}
+   if(a.value==='save')gain(p,20);
+   if(a.value==='saving'){pay(p,100);p.stocks+=160;}
+   if(a.value==='repay'){const amt=Math.min(p.cash,300,p.debt);p.cash-=amt;p.debt-=amt;log(g,`${p.name}이 대출 ${amt}을 갚았어요. 남은 잔액 ${p.debt}.`);}
+  }else if(t==='community'){
+   if(a.value==='donate'){pay(p,60);g.fund+=60;p.trust++;p.help++;}
+   if(a.value==='volunteer'){health(p,-1);g.fund+=30;p.help++;}
+   if(a.value==='grant'){g.fund+=80;p.trust++;p.help++;}
+  }else if(t==='rest'){
+   if(a.value==='rest')health(p,g.policies.includes('care')?3:2);
+   if(a.value==='hobby'){pay(p,40);health(p,1);p.trust++;}
+   if(a.value==='side'){gain(p,110);health(p,-1);}
+   if(a.value==='clinic')health(p,2);
+  }else{
+   if(a.value==='repair'){pay(p,70);p.skill++;}
+   if(a.value==='delay')health(p,-1);
+   if(a.value==='tool')p.skill++;
+   if(a.value==='scholar')gain(p,180);
+   if(a.value==='search'){p.skill++;addCard(p,'멘토');}
+   if(a.value==='counsel'){gain(p,100);p.skill++;}
+   if(a.value==='train2'){pay(p,g.policies.includes('education')?50:120);p.skill+=2;p.salary+=30;}
+   if(a.value==='overtime'){gain(p,140);health(p,-1);}
+   if(a.value==='recover')health(p,1);
+   if(a.value==='retrain'){p.skill+=2;p.salary+=20;}
+  }
+  endTurn(g);
+ }else if(a.type==='target'&&g.phase==='target'){
+  if(a.value==='cancel'){g.phase='choice';g.pending=null;}
+  else{
+   const q=g.players[a.value],cost=g.pending==='ask'?60:g.pending==='business'?100:200;
+   if(!q||q.id===p.id||q.cash<cost)throw Error('선택할 수 없는 상대입니다.');
+   if(g.pending==='loan'){g.loanTarget=q.id;g.phase='rate';}
+   else{g.offer={from:p.id,to:q.id,kind:g.pending};g.phase='offer';log(g,`${p.name} → ${q.name}: ${g.pending==='ask'?'돌봄 도움 요청':'공동사업 제안'}`);}
+  }
+ }else if(a.type==='rate'&&g.phase==='rate'){
+  if(a.value==='cancel'){g.phase='choice';g.loanTarget=null;g.pending=null;}
+  else{
+   const r=+a.value;if(![10,20,30].includes(r))throw Error('이자율을 확인해주세요.');
+   const q=g.players[g.loanTarget];if(!q||q.cash<200)throw Error('상대가 빌려줄 현금이 부족합니다.');
+   g.offer={from:p.id,to:q.id,kind:'loan',rate:r};g.phase='offer';
+   log(g,`${p.name} → ${q.name}: 200을 이자 ${r}%로 빌려달라고 요청했어요.`);
+  }
+ }else if(a.type==='respond'&&g.phase==='offer'){
+  if(!['yes','no'].includes(a.value))throw Error('응답을 확인하세요.');
+  const q=g.players[g.offer.to],kind=g.offer.kind;p.usedHelp=true;
+  if(a.value==='yes'){
+   if(kind==='ask'){
+    if(q.cash<60)throw Error('현금이 부족합니다.');
+    pay(q,60);q.help++;p.trust++;q.trust++;partner(p,q);
+    log(g,`${q.name}이 ${p.name}의 돌봄을 도왔어요. 비용 60, 두 사람 신뢰 +1.`);
+   }else if(kind==='business'){
+    if(p.cash<100||q.cash<100)throw Error('현금이 부족합니다.');
+    pay(p,100);pay(q,100);const back=fate(g,'business',g.round,g.turn)<.35?50:190;gain(p,back);gain(q,back);p.trust++;q.trust++;partner(p,q);
+    log(g,`공동사업 · ${p.name}·${q.name} 각자 100 출자 → 각자 ${back} 회수 (${back>100?'이익 +90':'손실 −50'}). 신뢰 +1.`);
+   }else{
+    if(q.cash<200)throw Error('현금이 부족합니다.');
+    pay(q,200);gain(p,200);const due=Math.round(200*(1+g.offer.rate/100));
+    const loan={id:`${g.round}:${p.id}:${p.loans.length}`,from:q.id,due,paid:0,rate:g.offer.rate,round:g.round};p.loans.push(loan);p.everDebt=true;syncClaim(g,p,loan);partner(p,q);
+    log(g,`${q.name}이 ${p.name}에게 200을 빌려줬어요. 이자 ${g.offer.rate}%, 갚을 금액 ${due}. 매 턴 최대 50씩 자동 상환됩니다.`);
+   }
+   p.choices.push({round:g.round,title:kind==='ask'?'도움을 받아 돌봄 해결':kind==='business'?'공동사업 성사':`이자 ${g.offer.rate}%로 급전 마련`});
+   endTurn(g);
+  }else{p.declined++;log(g,`${q.name}은 이번 제안을 정중히 거절했어요.`);g.offer=null;g.phase='choice';g.pending=null;g.loanTarget=null;}
+ }else if(a.type==='next'&&g.phase==='result'){
+  if(g.turn<g.players.length-1){g.turn++;g.phase='roll';g.event=null;g.die=null;}else finishRound(g);
+ }
+ else throw Error('현재 단계에서 할 수 없는 행동입니다.');
+ }
+ g.revision++;return g;
+}
+function progressiveTax(g,p,income){return g.policies.includes('progressive')&&income>0?Math.round(income*(g.taxRates?.[p.id]??.05)):0;}
+function addCard(p,c){if(!p.cards.includes(c)){p.cards.push(c);if(c==='멘토'||c==='동문')p.culture++;}}
+function aiAction(g,id=actor(g)){
+ const base={actor:id,expected:g.revision,...contextOf(g)};
+ if(g.phase==='roll')return{...base,type:'roll'};
+ if(g.phase==='result')return{...base,type:'next'};
+ if(g.phase==='crisis')return{...base,type:'ack'};
+ if(g.phase==='forecast')return{...base,type:'forecast',value:(g.round+id)%2?'up':'down'};
+ if(g.phase==='vote'){
+  const me=g.players[id];
+  const order=me.health<=3?['care','education','housing','progressive']:me.skill<5?['education','care','progressive','housing']:!me.home?['housing','progressive','education','care']:['progressive','education','housing','care'];
+  return{...base,type:'vote',value:order.find(k=>!g.policies.includes(k))||'none'};
+ }
+ if(g.phase==='offer'){
+  const me=g.players[id],k=g.offer.kind;
+  const ok=k==='ask'?me.cash>=180:k==='business'?me.cash>=260:me.cash>=340&&g.offer.rate>=20;
+  return{...base,type:'respond',value:ok?'yes':'no'};
+ }
+ if(g.phase==='rate')return{...base,type:'rate',value:20};
+ if(g.phase==='target'){
+  const cost=g.pending==='ask'?60:g.pending==='business'?100:200;
+  const q=g.players.find(x=>x.id!==g.turn&&x.cash>=cost);
+  return{...base,type:'target',value:q?q.id:'cancel'};
+ }
+ const valid=options(g).filter(o=>!o.disabled&&o.known),p=g.players[g.turn];
+ let choice;
+ if(p.health<3)choice=valid.find(o=>['rest','clinic','friend','recover'].includes(o.id));
+ if(!choice&&p.debt>=400)choice=valid.find(o=>o.id==='repay');
+ if(!choice&&p.cash<60&&g.event.type==='market')choice=valid.find(o=>o.id==='loan');
+ if(!choice&&g.event.type==='career')choice=valid[0];
+ if(!choice)choice=valid.find(o=>o.info)||valid[(g.round+id)%valid.length];
+ return{...base,type:'choose',value:choice.id};
+}
+function aiAssist(g){
+ if(g.phase!=='choice'||!g.event||g.event.aiAssisted)return null;
+ const ops=options(g),helpers=g.players.filter(q=>q.ai&&q.id!==g.turn);
+ const roll=Math.floor(fate(g,'assist',g.round,g.turn)*100);
+ const unknown=ops.filter(o=>!o.known);
+ if(unknown.length&&roll<55){
+  const sharer=helpers.find(q=>hasInfo(q)&&q.sharedRound!==g.round);
+  if(sharer)return{actor:sharer.id,type:'share',value:unknown[0].id,expected:g.revision,...contextOf(g)};
+ }
+ const adv=ops.filter(o=>o.advisable);
+ if(adv.length&&roll<35){
+  const giver=helpers.find(q=>q.tokens>0);
+  if(giver)return{actor:giver.id,type:'advise',value:adv[0].id,expected:g.revision,...contextOf(g)};
+ }
+ return null;
+}
+
+
+const URL='https://wsmwfhoeoravcmmvreqq.supabase.co';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzbXdmaG9lb3JhdmNtbXZyZXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MDQwNDIsImV4cCI6MjEwMzQ4MDA0Mn0.5nrCqntzuAc8AFSUZe8CFjO3YLFPjEp7xYQr_rstTL8';
+
+
+
+
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),num=n=>Math.round(n).toLocaleString('ko-KR');
+let game=null,mode='home',session=null,room=null,busy=false,animating=false,aiTimer=null,pollTimer=null,polling=false,screen='home',lastOnline=Date.now(),lastRendered=-1,queued=false,soundOn=false,audio=null,assistRev=-1,projWin=null,aiPaused=false;
+const SAVE='newhabituslife-save-v1',SESSION='newhabituslife-room-v1';
+const town=`<svg class="town" viewBox="0 0 340 155" role="img" aria-label="학교와 집, 나무가 있는 작은 보드게임 마을"><ellipse cx="170" cy="131" rx="144" ry="17" fill="#dce3cd"/><path d="M28 132 Q80 113 128 132 T241 131 T312 130" fill="none" stroke="#faf8ec" stroke-width="17"/><g stroke="#53786a" stroke-width="2"><path d="M52 110v22M292 104v27M257 115v18"/><ellipse cx="51" cy="97" rx="16" ry="24" fill="#9fbd89" stroke="none"/><ellipse cx="293" cy="89" rx="19" ry="27" fill="#7da381" stroke="none"/><circle cx="257" cy="108" r="14" fill="#b4c895" stroke="none"/></g><g><path d="M80 84h69v45H80z" fill="#f2d3b1"/><path d="M73 85l41-36 42 36z" fill="#d58061"/><path d="M106 104h17v25h-17" fill="#708d7a"/><path d="M88 94h11v12H88zM129 94h11v12h-11z" fill="#fffbdf"/><path d="M177 65h59v63h-59z" fill="#e6e4c7"/><path d="M173 59h67v12h-67z" fill="#6d9183"/><path d="M190 110h15v18h-15z" fill="#6d9183"/><path d="M188 81h11v13h-11zM215 81h11v13h-11zM215 105h11v13h-11z" fill="#a9c4b6"/><path d="M202 58V28" fill="none" stroke="#6d9183" stroke-width="2"/><path d="M203 29h22l-6 7 6 7h-22" fill="#e1b858"/><rect x="146" y="96" width="21" height="30" rx="2" fill="#e6bb72"/><path d="M142 97l15-16 15 16z" fill="#9eb2a0"/></g><path d="M21 44c0-8 12-12 17-4 9-6 19 2 14 9H22zM265 32c0-7 10-11 15-4 8-6 18 2 14 8h-29z" fill="#fffdf2"/><g fill="#ddb46e"><circle cx="73" cy="132" r="3"/><circle cx="243" cy="137" r="3"/><circle cx="310" cy="131" r="3"/></g></svg>`;
+function toast(s){$('toast').textContent=s;$('toast').style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').style.display='none',3500);}
+function beep(freq=500){if(!soundOn)return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();audio.resume();let o=audio.createOscillator(),v=audio.createGain();o.connect(v);v.connect(audio.destination);o.frequency.value=freq;v.gain.setValueAtTime(.035,audio.currentTime);v.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.12);o.start();o.stop(audio.currentTime+.13);}catch{}}
+function modal(html){clearTimeout(aiTimer);$('modal').innerHTML=`<button class="close" data-close aria-label="닫기">×</button>${html}`;$('modal').showModal();$('modal').onclose=()=>scheduleAI();$('modal').querySelector('[data-close]').onclick=()=>$('modal').close();}
+function header(){return `<header class="topbar"><div class="brand"><span class="brandmark">⚄</span><div>플레이하는 사회<small>PLAY SOCIETY · LIFE BOARD</small></div></div><div class="nav"><span class="pill desktop">인생 보드게임</span><button data-nav="rules">게임 방법</button><button data-nav="sound" aria-pressed="${soundOn}">${soundOn?'♪ 소리 켜짐':'♪ 소리 꺼짐'}</button>${screen!=='home'?'<button data-nav="home">처음으로</button>':''}</div></header>`;}
+function footer(){return '<footer class="footer"><span>PLAY SOCIETY · 인생 한 바퀴</span><span>금액 단위: 게임머니 · 현실의 소득·투자수익·인생을 예측하는 모형이 아닙니다.</span></footer>';}
+function mount(body){$('app').innerHTML=`<div class="shell">${header()}${body}${footer()}</div>`;bindCommon();}
+function bindCommon(){document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{if(b.dataset.nav==='rules')rules();if(b.dataset.nav==='sound'){soundOn=!soundOn;b.setAttribute('aria-pressed',soundOn);b.textContent=soundOn?'♪ 소리 켜짐':'♪ 소리 꺼짐';beep();}if(b.dataset.nav==='home'){if(busy||animating){toast('말이 멈출 때까지 잠시 기다려주세요.');return;}if(session?.host&&game?.phase!=='done'){modal('<h2>진행을 잠시 멈출까요?</h2><p>이 화면을 나가면 온라인 방의 진행이 멈춥니다. 같은 브라우저에서 온라인 이어하기로 돌아올 수 있어요.</p><button id="go-home" class="primary wide">저장하고 처음으로</button>');$('go-home').onclick=()=>{$('modal').close();home();};}else home();}});document.querySelectorAll('[data-cell]').forEach(b=>{b.onclick=()=>{const t=BOARD[+b.dataset.cell];modal(`<h2>${TYPES[t][1]} ${TYPES[t][0]} 칸</h2><p>${t==='start'?'주사위만큼 이동합니다. 한 바퀴를 먼저 도는 경주가 아니라, 정해진 라운드 동안 각자의 인생을 만드는 게임이에요.':(eventText({type:t,variant:0})?.[1]||'예상하지 못한 기회를 만나세요.')}</p><p class="muted">1·2라운드는 배움, 3라운드는 진로 카드를 반드시 만납니다. 이후에는 도착한 칸의 카드를 해결해요.</p>`);};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click();}};});}
+function coord(i){if(i<9)return[1,i+1];if(i<14)return[i-7,9];if(i<23)return[7,23-i];return[29-i,1];}
+function board(g,preview=false){return `<div class="board" aria-label="28칸 인생 보드판">${BOARD.map((t,i)=>{let [r,c]=coord(i);let ps=g?.players.filter(p=>p.pos===i)||[];return `<div class="cell ${g?.players[g.turn]?.pos===i?'current':''}" style="grid-row:${r};grid-column:${c};--tile:${TYPES[t][2]}" data-cell="${i}" role="button" tabindex="0" aria-label="${i+1}번 ${TYPES[t][0]} 칸${ps.length?' · '+ps.map(p=>p.name).join(', '):''}"><span class="tile-no">${String(i+1).padStart(2,'0')}</span><span class="tile-icon" aria-hidden="true">${TYPES[t][1]}</span><span class="label">${TYPES[t][0]}</span><div class="pawns">${ps.map(p=>`<span class="pawn" style="--pc:${COLORS[p.id]}" title="${esc(p.name)}">${p.id+1}</span>`).join('')}</div></div>`;}).join('')}<div class="board-center"><div class="eyebrow">Every life has a story</div><div class="center-title">인생 한 바퀴</div><div class="center-sub">다른 출발선, 함께 만드는 우리 사회</div>${town}<div class="center-bottom">${preview?'<span class="pill">🎲 운과 선택</span><span class="pill">🤝 관계와 협력</span><span class="pill">⚖ 우리가 정하는 규칙</span>':`<span class="pill">공동기금 ${num(g.fund)}</span><span class="pill">${esc(g.market)}</span>`}</div>${!preview&&g.policies.length?`<div class="row" style="margin-top:8px">${g.policies.map(k=>`<span class="policy-chip">${POLICIES[k].icon} ${POLICIES[k].name}</span>`).join('')}</div>`:''}</div></div>`;}
+function home(){clearTimeout(aiTimer);clearInterval(pollTimer);screen='home';mode='home';busy=false;queued=false;let demo=newGame(['여우','고래','병아리','곰'],{seed:12});demo.players.forEach((p,i)=>p.pos=[2,9,17,25][i]);let saved=readLocal(SAVE),savedRoom=readLocal(SESSION);if(saved&&saved.game&&![1,2,3].includes(saved.game.version))saved=null;mount(`<section class="hero"><div><span class="pill"><span class="dot"></span> 주사위 위에서 만나는 사회</span><h1>인생은 한 바퀴.<br>선택은 <em>무한가지.</em></h1><p>누구는 조금 앞에서, 누구는 다른 길에서.<br>배우고, 일하고, 서로를 도우며<br>우리만의 인생 보드게임을 시작해요.</p><div class="row" style="margin-top:24px"><button class="primary" id="quick">혼자 바로 시작하기 ↗</button>${saved?'<button id="resume">저장한 게임 이어하기</button>':''}</div><p class="note">2–6명 · 기본 8라운드 · 예상 20–35분<br>혼자 할 때는 AI 친구들이 함께해요.</p></div><div class="hero-board">${board(demo,true)}</div></section><section class="mode-grid"><button class="mode-card" data-mode="solo"><span class="mode-icon">🎲</span><div><h3>혼자, 가볍게 한 판</h3><p>AI 친구 3명과 함께.<br>선생님 없이도 바로 시작해요.</p><b>나만의 인생 시작 →</b></div></button><button class="mode-card" data-mode="local"><span class="mode-icon">🪑</span><div><h3>한 테이블에 모여서</h3><p>한 기기로 2–6팀이 돌아가며.<br>대화하고 협상하는 교실 보드게임.</p><b>테이블 만들기 →</b></div></button><button class="mode-card" data-mode="online"><span class="mode-icon">🌐</span><div><h3>각자의 화면, 같은 보드</h3><p>방 코드로 만나 함께 플레이.<br>제안과 투표가 모두의 화면에 연결돼요.</p><b>온라인 방 만들기 / 참가 →</b></div></button></section>${savedRoom?'<div style="margin-bottom:22px"><button id="resume-room" class="secondary">온라인 방 이어하기</button></div>':''}`);
+ $('quick').onclick=()=>startLocal('solo',{names:['나','고래','병아리','곰'],rounds:8,equal:false});document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setup(b.dataset.mode));if($('resume'))$('resume').onclick=()=>{game=upgradeGame(saved.game);mode=saved.mode;session=null;screen='game';renderGame();scheduleAI();};if($('resume-room'))$('resume-room').onclick=()=>{session=savedRoom;mode='online';beginPoll();};
+}
+function readLocal(key){try{return JSON.parse(localStorage.getItem(key));}catch{return null;}}
+function persist(){if(['solo','local'].includes(mode)&&game)try{localStorage.setItem(SAVE,JSON.stringify({mode,game}));}catch{toast('브라우저 저장 공간이 부족합니다.');}}
+function setup(kind){screen='setup';mount(`<section class="setup panel"><span class="eyebrow">Set your table</span><h1 style="margin-top:10px">${kind==='online'?'같은 보드에서 만나요':kind==='solo'?'나의 첫 주사위':'오늘의 테이블 만들기'}</h1><p class="muted small">${kind==='online'?'진행자는 방을 만들고, 참가자는 6자리 코드를 입력하세요.':'별명으로 시작하세요. 캐릭터의 출발 조건은 게임 속 가상의 설정입니다.'}</p>${kind==='online'?`<label for="online-name">내 별명 / 모둠 이름</label><input id="online-name" maxlength="12" placeholder="예: 1모둠"><div class="fields"><div><label for="online-code">참가할 방 코드</label><input id="online-code" maxlength="6" placeholder="6자리 코드" autocomplete="off" style="text-transform:uppercase"></div><div style="align-self:end"><button id="join-room" class="secondary wide">코드로 참가하기</button></div></div><button id="create-room" class="primary wide">새 온라인 방 만들기</button><div class="hint">2–6팀 · 진행자도 한 팀으로 참여합니다. 진행자 화면을 켜 두어야 게임이 진행돼요. 방은 7일 동안 이어할 수 있어요.</div>`:`<div class="fields"><div><label for="count">참가 팀 수</label><select id="count">${[2,3,4,5,6].map(n=>`<option ${n===4?'selected':''}>${n}</option>`).join('')}</select></div><div><label for="rounds">게임 길이</label><select id="rounds"><option value="8">가볍게 · 8라운드</option><option value="12">깊이 있게 · 12라운드</option></select></div></div><label>플레이어 이름 ${kind==='solo'?'(첫 번째가 나, 나머지는 AI)':''}</label><div id="names" class="names"></div><label class="check"><input type="checkbox" id="equal">비교 실험: 모두 같은 출발 조건</label><button id="start" class="primary wide">출발선 뽑고 시작하기 →</button><div class="hint">모두가 같은 횟수만큼 플레이합니다. 자산뿐 아니라 건강, 배움, 도움의 기록도 마지막에 함께 돌아봐요.</div>`}<div id="setup-error" role="alert"></div></section>`);
+ if(kind==='online'){$('create-room').onclick=()=>connect('create');$('join-room').onclick=()=>connect('join');return;}
+ const names=()=>{$('names').innerHTML=Array.from({length:+$('count').value},(_,i)=>`<input aria-label="${i+1}번 플레이어 이름" maxlength="12" value="${kind==='solo'?['나','고래','병아리','곰','토끼','거북이'][i]:`${i+1}모둠`}">`).join('');};names();$('count').onchange=names;$('start').onclick=()=>startLocal(kind,{names:[...$('names').querySelectorAll('input')].map(i=>i.value),rounds:+$('rounds').value,equal:$('equal').checked});
+}
+function startLocal(kind,opts){clearInterval(pollTimer);session=null;mode=kind;screen='game';assistRev=-1;aiPaused=false;game=newGame(opts.names,{rounds:opts.rounds,equal:opts.equal,seed:opts.seed,backgrounds:opts.backgrounds,ai:kind==='solo'?opts.names.map((_,i)=>i).slice(1):[]});persist();renderGame();intro();}
+function intro(){modal(`<h2>출발선이 정해졌어요</h2><p>이 조건은 캐릭터의 가상 배경입니다. 실제 여러분의 가정과는 관계없어요.</p>${game.players.map(p=>`<div class="room-member"><span style="font-size:25px">${ICONS[p.id]}</span><div><b>${esc(p.name)}</b> · 시작 ${num(p.born)}<div class="muted small">${BACKGROUNDS[p.background].name} · ${esc(p.cards.join(' · '))}</div></div></div>`).join('')}<p class="small">먼저 도착하는 경주가 아닙니다. 모두 ${game.maxRounds}번의 선택을 하고, 각자의 삶을 돌아봐요.</p><button id="intro-close" class="primary wide">좋아, 나의 인생을 시작하자</button>`);$('intro-close').onclick=()=>{$('modal').close();scheduleAI();};}
+function capitalBars(p,max){
+ max=max||Math.max(6,p.skill,p.trust,p.culture,4+game.round);
+ const rows=[['human',p.skill],['social',p.trust],['cultural',p.culture]];
+ return `<div class="capital-stats">${rows.map(([k,v])=>{const c=CAPITALS[k];return `<div class="capital-stat" title="${c.name} ${v}"><span aria-hidden="true">${c.icon}</span><span class="cap-label">${c.short}</span><span class="cap-track"><span class="cap-fill" style="width:${clamp(v/max*100,0,100)}%;background:${c.color}"></span></span><span class="cap-val">${v}</span></div>`;}).join('')}</div>`;
+}
+function capitalPanel(p){
+ const c=capitalScore(p),total=totalCapital(p),max=Math.max(1,...game.players.map(totalCapital));
+ const rank=game.players.map(totalCapital).filter(v=>v>total).length+1;
+ const rows=[['economic',c.economic],['human',c.human],['social',c.social],['cultural',c.cultural]];
+ return `<p><b>부르디외의 자본 능력치 · 총자본 ${num(total)} (${rank}위 / ${game.players.length}팀)</b></p><p class="small muted">경제자본은 순자산, 인적·사회·문화자본은 1점당 100으로 환산해 더합니다. 서로 다른 자본이 교환·전환될 수 있다는 생각에서 나온 계산이에요.</p><div class="capital-ledger">${rows.map(([k,v])=>{const cap=CAPITALS[k];return `<div class="capital-ledger-row"><span>${cap.icon} ${cap.name}</span><span class="cap-track"><span class="cap-fill" style="width:${clamp(v/max*100,2,100)}%;background:${cap.color}"></span></span><span style="text-align:right">${num(v)}</span></div>`;}).join('')}</div>`;
+}
+function playerPanel(p){
+ const chips=[];
+ if(p.tokens>0)chips.push(`<span class="chip-token" title="조언 토큰">🔑${p.tokens}</span>`);
+ if(hasInfo(p))chips.push('<span class="chip-info" title="멘토·동문 카드 보유">정보</span>');
+ if(p.insurance)chips.push('<span class="chip-info">🛡 보장 '+num(p.insurance)+'</span>');
+ if(receivable(p)>0)chips.push('<span class="chip-loan">받을 돈 '+num(receivable(p))+'</span>');
+ if(outstanding(p)>0)chips.push(`<span class="chip-loan" title="다른 팀에게 갚을 금액">차용 ${num(outstanding(p))}</span>`);
+ if(p.debt>0)chips.push(`<span class="chip-debt" title="대출 잔액">빚 ${num(p.debt)}</span>`);
+ return `<button class="player ${game.turn===p.id?'active':''}" style="--pc:${COLORS[p.id]}" data-player="${p.id}" aria-label="${esc(p.name)} 상태 보기"><div class="row spread"><div class="row" style="gap:7px"><span class="avatar">${ICONS[p.id]}</span><span class="player-name">${esc(p.name)}${p.ai?' · AI':''}</span></div>${game.turn===p.id?'<span style="font-size:9px">MY TURN</span>':''}</div><div class="money" style="margin-top:8px">${num(p.cash)} <small>현금</small></div><div class="mini-stats"><span>♥ ${p.health}/6</span><span>총자본 ${num(totalCapital(p))}</span></div>${capitalBars(p)}${chips.length?`<div class="chips">${chips.join('')}</div>`:''}</button>`;
+}
+function canAct(id=actor(game)){if(busy||animating||queued)return false;if(mode==='online')return session?.seat===id;return !game.players[id]?.ai;}
+function hintText(){
+ if(game.phase==='vote')return '정책을 고르면 비용도 함께 부담합니다. 누가 혜택을 받고, 누가 더 부담하는지 이야기해보세요.';
+ if(game.phase==='forecast')return '예측은 각자 제출합니다. 먼저 고른 팀의 선택은 다른 팀에게 보이지 않아요.';
+ if(game.phase==='crisis')return '같은 사건이 모두에게 똑같이 무겁지는 않습니다. 막대 길이를 비교해보세요.';
+ if(game.round<3)return '첫 두 라운드는 배움, 세 번째는 진로 선택입니다. 이후에는 도착한 칸에서 새로운 인생 카드를 만나요.';
+ return '다른 팀의 차례에도 조언 토큰을 쓰거나 아는 길을 알려줄 수 있어요. 도움은 의무가 아니고, 제안은 거절할 수 있습니다.';
+}
+function promisePanel(){
+ if(!game.promises||!game.promises.length)return '';
+ const kept=game.promises.filter(x=>x.kept).length;
+ return `<section class="journal"><div class="row spread"><h3>우리가 남긴 약속</h3><span class="small muted">${kept} / ${game.promises.length} 이행</span></div><div class="promise-list">${game.promises.slice().reverse().map(pr=>{
+  const mine=mode==='online'?session.seat===pr.to:mode==='solo'?pr.to===0:true;
+  return `<div class="promise-item${pr.kept?' kept':''}"><div><b>${esc(game.players[pr.from].name)} → ${esc(game.players[pr.to].name)}</b><div class="small">R${pr.round} · ${esc(pr.text)}</div></div>${pr.kept?'<span class="badge">지킴</span>':mine&&!busy&&!queued?`<button class="small" data-keep="${pr.id}">지켰어요</button>`:'<span class="small muted">대기</span>'}</div>`;
+ }).join('')}</div></section>`;
+}
+function renderGame(){
+ screen='game';if(game.phase==='done')return results();
+ const p=game.players[game.turn];
+ mount(`<div class="game-head row spread"><div><div class="eyebrow">Life is a board game</div><h1>인생 한 바퀴</h1></div><div class="round-meta">${session?`<span class="pill">방 ${session.code}</span>`:'<span class="pill">'+(mode==='solo'?'AI와 함께':'한 테이블 플레이')+'</span>'}<div class="round-num">${game.round}<span> / ${game.maxRounds} ROUND</span></div><span class="pill">${age(game)}세</span></div></div><div class="players" style="--count:${game.players.length}">${game.players.map(playerPanel).join('')}</div><div class="game-grid"><div class="board-wrap"><div id="board-host">${board(game)}</div><div class="board-caption"><div class="legend">${['learn','network','market','care','community'].map(t=>`<span><i style="background:${TYPES[t][2]};border:1px solid #aaa7"></i>${TYPES[t][0]}</span>`).join('')}</div><span>칸을 누르면 설명을 볼 수 있어요</span></div><div class="timeline" aria-label="라운드 진행">${Array.from({length:game.maxRounds},(_,i)=>`<i class="${i<game.round?'on':''}"></i>`).join('')}</div><section class="journal"><div class="row spread"><h3>우리 테이블의 이야기</h3><span class="small muted">최근 기록</span></div><div class="log-list" aria-live="polite">${game.log.slice(0,10).map(l=>`<div class="log-item"><span>R${l.round}</span><div>${esc(l.text)}</div></div>`).join('')}</div></section>${promisePanel()}</div><aside class="control"><section class="panel fade-in"><div class="turn-tag"><span class="avatar">${ICONS[p.id]}</span><span>${esc(p.name)}의 차례</span>${p.ai?'<span class="pill">AI</span>':''}</div><div id="actions">${actionPanel()}</div></section><div class="hint">${hintText()}</div><div class="row spread" style="margin-top:13px"><button id="my-info" class="small">내 카드 · 목표</button><span class="network-status" id="net-status">${mode==='online'?'온라인 연결됨':'이 기기에 자동 저장'}</span></div><div class="row" style="margin-top:10px;gap:8px"><button class="small" id="promise-btn">약속 남기기</button>${mode==='solo'?`<button class="small" id="ai-pause" aria-pressed="${aiPaused}">${aiPaused?'▶ AI 계속하기':'Ⅱ AI 멈추고 토론'}</button>`:''}<button class="small" id="projector">진행 화면 띄우기</button></div>${session?.host?'<button class="small wide" style="margin-top:10px" id="assist">진행자: 멈춘 차례 도와주기</button>':''}</aside></div><div style="height:28px"></div>`);
+ bindGame();paintProjector();
+}
+function helperPanel(ops){
+ const turnId=game.turn;
+ const cands=(mode==='online'?[game.players[session.seat]]:game.players).filter(q=>q&&q.id!==turnId&&!q.ai);
+ const advisable=ops.filter(o=>o.advisable),unknown=ops.filter(o=>!o.known);
+ const canAdvise=cands.some(q=>q.tokens>0),canShare=cands.some(q=>hasInfo(q)&&q.sharedRound!==game.round);
+ const ready=!busy&&!queued&&!animating;
+ let html='';
+ if(advisable.length&&canAdvise)html+=`<button class="helper" id="advise-btn" ${ready?'':'disabled'}>🔑 조언 토큰으로 잠긴 선택지 열어주기</button>`;
+ if(unknown.length&&canShare)html+=`<button class="helper" id="share-btn" ${ready?'':'disabled'}>💬 내가 아는 길을 알려주기 · 비용 없음</button>`;
+ if(mode==='online'&&session.seat!==turnId&&game.guesses[session.seat]===undefined)html+=`<button class="helper" id="guess-btn" ${ready?'':'disabled'}>🎯 이 팀이 무엇을 고를지 예측하기</button>`;
+ const guessed=Object.keys(game.guesses).length;
+ return html||guessed?`<div class="helper-box"><div class="small muted" style="margin-bottom:7px">다른 팀의 차례에도 할 수 있는 일${guessed?` · ${guessed}팀이 예측 중`:''}</div>${html||'<span class="small muted">지금은 도울 수 있는 게 없어요.</span>'}</div>`:'';
+}
+function actionPanel(){
+ const p=game.players[game.turn],id=actor(game),active=game.players[id],can=canAct();
+ const open=!busy&&!queued&&!animating;
+ const wait=mode==='online'&&id!==session.seat?`<p class="muted small" style="margin-top:12px">${esc(active?.name||'다른 팀')}의 선택을 기다리고 있어요.</p>`:'';
+ if(game.phase==='crisis'){
+  const c=game.crisis;
+  return `<span class="event-icon">⚡</span><div class="eyebrow">모두에게 닥친 일</div><h2 style="margin-top:6px">${esc(c.name)}</h2><p class="desc">${esc(c.note)}</p><div class="crisis-table">${c.hits.map(h=>`<div class="crisis-row" style="--pc:${COLORS[h.id]}"><b>${esc(h.name)}</b><i style="width:${clamp(h.share,4,100)}%"></i><span>−${num(h.loss)}${h.covered?` · 보험 ${num(h.covered)}`:''}</span></div>`).join('')}</div><p class="small muted">막대는 위기 직전 순자산에 견준 부담의 크기입니다. 같은 사건인데 누구에게 더 무거웠나요?</p><button class="primary wide" data-action="ack" ${can&&open?'':'disabled'}>확인했어요</button>${wait}`;
+ }
+ if(game.phase==='forecast'){
+  const me=mode==='online'?session.seat:id,done=game.forecasts[me]!==undefined;
+  const ready=open&&!done&&(mode==='online'||can);
+  return `<span class="event-icon">📈</span><h2>이번 라운드 시장은?</h2><p class="desc">모두 같은 시장 변동을 맞습니다. 오를지 내릴지 각자 예측하고, 맞힌 팀은 현금 +25를 받아요. 주식이 없어도 참여합니다. 상승 3가지·하락 2가지 중 하나를 같은 확률로 뽑습니다.</p><p class="small" style="margin-bottom:10px">${Object.keys(game.forecasts).length} / ${game.players.length}팀 예측 완료 · ${done?'내 예측은 제출했어요':esc(game.players[me]?.name)+'의 예측'}</p><div class="row"><button class="primary" data-action="forecast" data-value="up" ${ready?'':'disabled'}>오른다</button><button data-action="forecast" data-value="down" ${ready?'':'disabled'}>내린다</button></div>${done?'<p class="small muted" style="margin-top:10px">다른 팀을 기다리고 있어요.</p>':''}`;
+ }
+ if(game.phase==='roll'){
+  const peek=hasInfo(p)&&game.round>3?`<div class="peek"><span class="small muted">멘토·동문 카드로 앞길을 미리 봅니다</span><div class="peek-row">${[1,2,3,4,5,6].map(d=>{const raw=BOARD[(p.pos+d)%BOARD.length],t=raw==='start'?'chance':raw;return `<span class="peek-cell" style="--tile:${TYPES[t][2]}"><b>${d}</b><i aria-hidden="true">${TYPES[t][1]}</i><em>${TYPES[t][0]}</em></span>`;}).join('')}</div></div>`:'';
+  return `<h2>어떤 하루가 기다릴까요?</h2><p class="desc">주사위를 굴리고, 말이 도착한 곳에서 나의 선택을 시작하세요.</p>${peek}<div class="dice-area"><div class="dice" id="dice" aria-label="주사위">⚄</div><button class="primary wide roll-button" data-action="roll" ${can&&open?'':'disabled'}>${p.ai?'AI가 생각하는 중…':'주사위 굴리기'}</button></div>${wait}`;
+ }
+ if(game.phase==='choice'){
+  const [title,desc]=eventText(game.event),ops=options(game);
+  const body=ops.map(o=>o.known
+   ?`<button class="choice${o.info?' info-choice':''}" data-action="choose" data-value="${o.id}" ${can&&open&&!o.disabled?'':'disabled'}><b>${o.title}${o.disabled?' 🔒':''}</b><span>${o.desc}</span>${o.disabled?`<span class="why">${o.advisable?'조건이 아직 안 됐어요. 다른 팀이 조언 토큰으로 열어줄 수 있습니다.':'지금은 조건이 안 됐어요.'}</span>`:''}</button>`
+   :'<div class="choice unknown"><b>들어본 적 없는 선택지</b><span>이 상황에 다른 길이 있다는 이야기를 들어본 적이 없어요. 멘토·동문 카드를 가진 팀이 알려줄 수 있습니다.</span></div>').join('');
+  return `<span class="event-icon">${TYPES[game.event.type][1]}</span><div class="eyebrow">${game.die}칸 이동 · ${TYPES[game.event.type][0]}</div><h2 style="margin-top:6px">${title}</h2><p class="desc">${desc}</p><div class="options">${body}</div>${helperPanel(ops)}${wait}`;
+ }
+ if(game.phase==='target'){
+  const cost=game.pending==='ask'?60:game.pending==='business'?100:200;
+  const lead=game.pending==='ask'?'돌봄 도움을 부탁해보세요. 상대가 수락해야 성사됩니다.':game.pending==='business'?'함께 100씩 출자할 동료를 찾아보세요. 손익도 함께 나눕니다.':'200을 빌려줄 팀을 고르세요. 다음 화면에서 이자율을 제시합니다. 마지막에는 보유 자산으로 정산하고, 못 갚으면 빌려준 팀의 손실이 됩니다.';
+  return `<h2>누구에게 제안할까요?</h2><p class="desc">${lead}</p><div class="options">${game.players.filter(q=>q.id!==p.id).map(q=>`<button class="choice" data-action="target" data-value="${q.id}" ${can&&open&&q.cash>=cost?'':'disabled'}><b>${ICONS[q.id]} ${esc(q.name)}</b><span>현재 현금 ${num(q.cash)}${q.cash<cost?` · ${num(cost)}이 필요해요`:''}</span></button>`).join('')}</div><button data-action="target" data-value="cancel" style="margin-top:10px" ${can&&open?'':'disabled'}>돌아가기</button>${wait}`;
+ }
+ if(game.phase==='rate'){
+  const q=game.players[game.loanTarget];
+  return `<span class="event-icon">🤝</span><h2>이자를 얼마나 붙일까요?</h2><p class="desc">${esc(q.name)}에게 200을 빌려달라고 요청합니다. 갚을 금액은 다음 턴부터 최대 50씩 자동으로 빠져나가요. 이자가 높으면 수락받기 쉽지만, 갚을 돈도 늘어납니다.</p><div class="options">${[10,20,30].map(r=>`<button class="choice" data-action="rate" data-value="${r}" ${can&&open?'':'disabled'}><b>이자 ${r}%</b><span>갚을 금액 ${num(200*(1+r/100))}</span></button>`).join('')}</div><button data-action="rate" data-value="cancel" style="margin-top:10px" ${can&&open?'':'disabled'}>돌아가기</button>${wait}`;
+ }
+ if(game.phase==='offer'){
+  const k=game.offer.kind;
+  const body=k==='ask'?'이 돌봄 도움을 요청했어요. 수락하면 내 현금 60을 쓰고 두 사람 신뢰가 1씩 올라요.':k==='business'?'이 공동사업을 제안했어요. 각자 100을 출자하고, 35% 확률로 50만 돌아오거나 65% 확률로 190이 돌아옵니다.':`이 200을 빌려달라고 해요. 이자 ${game.offer.rate}%로 ${num(200*(1+game.offer.rate/100))}을 나누어 갚습니다. 마지막에 현금·투자·주택으로 정산하고, 은행 빚을 제외하고도 갚지 못한 금액은 내 손실이 됩니다.`;
+  return `<span class="event-icon">🤝</span><h2>${esc(active.name)}님, 제안이 왔어요</h2><p class="desc">${esc(p.name)}${body}</p><div class="row"><button class="primary" data-action="respond" data-value="yes" ${can&&open?'':'disabled'}>${k==='loan'?'빌려줄게요':'함께할게요'}</button><button data-action="respond" data-value="no" ${can&&open?'':'disabled'}>이번엔 어려워요</button></div>${wait}`;
+ }
+ if(game.phase==='vote'){
+  const me=mode==='online'?session.seat:id,voted=game.votes[me]!==undefined;
+  const ready=!voted&&open&&(mode==='online'||can);
+  const recent=game.crisis&&game.crisis.round===game.round?`<div class="crisis-note">방금 겪은 일 · ${esc(game.crisis.name)}. ${esc(game.crisis.note)}</div>`:'';
+  return `<span class="event-icon">⚖</span><h2>우리가 만드는 다음 사회</h2>${recent}<p class="desc">정책 한 가지에 투표하세요. 최다 득표 정책을 시행하며, 동률이면 현행을 유지합니다.</p><p class="small" style="margin-bottom:10px">${Object.keys(game.votes).length} / ${game.players.length}팀 투표 · ${voted?'투표 완료':esc(game.players[me]?.name)+'의 투표'}</p><div class="options">${Object.entries(POLICIES).filter(([k])=>!game.policies.includes(k)).map(([k,v])=>`<button class="choice" data-action="vote" data-value="${k}" ${ready?'':'disabled'}><b>${v.icon} ${v.name}</b><span>${v.desc}</span></button>`).join('')}<button class="choice" data-action="vote" data-value="none" ${ready?'':'disabled'}><b>현행 유지</b><span>새로운 세금과 지원 제도를 추가하지 않아요.</span></button></div>`;
+ }
+ const owe=outstanding(p);
+ return `<div class="success-mark">✓</div><h2>내 인생에 한 줄이 더해졌어요</h2><p class="desc">${esc(game.log[0]?.text||'선택이 기록되었습니다.')}</p><div class="ledger"><div class="row spread"><span>지금 현금</span><b>${num(p.cash)}</b></div><div class="row spread"><span>순자산 (자산+받을 돈−갚을 돈)</span><b>${num(wealth(p))}</b></div><div class="row spread"><span>건강 / 역량 / 신뢰</span><b>${p.health} / ${p.skill} / ${p.trust}</b></div>${p.debt?`<div class="row spread"><span>대출 잔액</span><b>${num(p.debt)}</b></div>`:''}${owe?`<div class="row spread"><span>다른 팀에게 갚을 금액</span><b>${num(owe)}</b></div>`:''}</div><button class="primary wide" data-action="next" ${can&&open?'':'disabled'}>${game.turn===game.players.length-1?'이번 라운드 마무리 →':'다음 팀에게 →'}</button>${wait}`;
+}
+function helperCandidates(test){
+ const pool=mode==='online'?[game.players[session.seat]]:game.players;
+ return pool.filter(q=>q&&q.id!==game.turn&&!q.ai&&test(q));
+}
+function adviseModal(){
+ const ops=options(game).filter(o=>o.advisable),cands=helperCandidates(q=>q.tokens>0);
+ if(!ops.length||!cands.length)return toast('지금 조언으로 열 수 있는 선택지가 없어요.');
+ const rows=cands.flatMap(q=>ops.map(o=>`<button class="choice" data-adv="${q.id}|${o.id}"><b>${ICONS[q.id]} ${esc(q.name)} · 남은 토큰 ${q.tokens}</b><span>${esc(game.players[game.turn].name)}의 "${o.title}"을 열어주기</span></button>`));
+ modal(`<h2>조언 토큰 쓰기</h2><p>잠긴 선택지 하나를 조건과 상관없이 열어줍니다. 토큰을 쓴 팀은 신뢰 +1을 얻어요. 게임당 2개씩 가지고 있고, 현금이 모자라서 잠긴 선택지는 열 수 없습니다.</p><div class="options">${rows.join('')}</div>`);
+ document.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>{const [q,o]=b.dataset.adv.split('|');$('modal').close();dispatch({type:'advise',actor:+q,value:o,expected:game.revision,round:game.round});});
+}
+function shareModal(){
+ const ops=options(game).filter(o=>!o.known),cands=helperCandidates(q=>hasInfo(q)&&q.sharedRound!==game.round);
+ if(!ops.length||!cands.length)return toast('지금 알려줄 수 있는 정보가 없어요.');
+ const rows=cands.flatMap(q=>ops.map(o=>`<button class="choice" data-share="${q.id}|${o.id}"><b>${ICONS[q.id]} ${esc(q.name)}이 알려주기</b><span>${o.title}</span></button>`));
+ modal(`<h2>내가 아는 길을 알려주기</h2><p>돈은 들지 않습니다. 알려준 팀은 신뢰 +1을 얻고, 한 라운드에 한 번만 알려줄 수 있어요. 알려주지 않아도 됩니다.</p><div class="options">${rows.join('')}</div>`);
+ document.querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>{const [q,o]=b.dataset.share.split('|');$('modal').close();dispatch({type:'share',actor:+q,value:o,expected:game.revision,round:game.round});});
+}
+function guessModal(){
+ const ops=options(game).filter(o=>o.known);
+ modal(`<h2>${esc(game.players[game.turn].name)}은 무엇을 고를까요?</h2><p>맞히면 기록에 남습니다. 보상은 없어요. 결과는 선택이 공개될 때 함께 나옵니다.</p><div class="options">${ops.map(o=>`<button class="choice" data-guess="${o.id}"><b>${o.title}</b><span>${o.disabled?'지금은 잠겨 있는 선택지':o.desc}</span></button>`).join('')}</div>`);
+ document.querySelectorAll('[data-guess]').forEach(b=>b.onclick=()=>{const v=b.dataset.guess;$('modal').close();dispatch({type:'guess',actor:session.seat,value:v,expected:game.revision,round:game.round});});
+}
+function promiseModal(){
+ const me=mode==='online'?session.seat:mode==='solo'?0:game.turn;
+ modal(`<h2>약속 남기기</h2><p>게임이 강제하지 않는 약속입니다. 한 라운드에 한 번 기록할 수 있고, 상대가 "지켰어요"를 눌러줄 때 신뢰 +1을 얻어요. 지키지 못한 약속도 마지막에 그대로 남습니다.</p><label for="pr-to">누구에게 하는 약속인가요</label><select id="pr-to">${game.players.filter(q=>q.id!==me).map(q=>`<option value="${q.id}">${esc(q.name)}</option>`).join('')}</select><label for="pr-text">약속 내용</label><input id="pr-text" maxlength="60" placeholder="예: 취업하면 매 라운드 30씩 갚을게"><button class="primary wide" id="pr-go">약속 기록하기</button><p class="small muted">${esc(game.players[me].name)}의 이름으로 기록됩니다.</p>`);
+ $('pr-go').onclick=()=>{const to=+$('pr-to').value,text=$('pr-text').value;if(!text.trim())return toast('약속 내용을 적어주세요.');$('modal').close();dispatch({type:'promise',actor:me,value:{to,text},expected:game.revision,round:game.round});};
+}
+function bindGame(){
+ if($('ai-pause'))$('ai-pause').onclick=()=>{aiPaused=!aiPaused;clearTimeout(aiTimer);renderGame();scheduleAI();};
+ document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{
+  let v=b.dataset.value;
+  if(b.dataset.action==='target'&&v!=='cancel')v=+v;
+  const loose=['vote','forecast'].includes(b.dataset.action);
+  const id=loose&&mode==='online'?session.seat:actor(game);
+  dispatch({type:b.dataset.action,value:v,actor:id,expected:game.revision,round:game.round});
+ });
+ document.querySelectorAll('[data-player]').forEach(b=>b.onclick=()=>info(+b.dataset.player));
+ document.querySelectorAll('[data-keep]').forEach(b=>b.onclick=()=>{
+  const pr=game.promises[+b.dataset.keep];if(!pr)return;
+  dispatch({type:'keep',actor:mode==='online'?session.seat:pr.to,value:pr.id,expected:game.revision,round:game.round});
+ });
+ $('my-info').onclick=()=>info(mode==='online'?session.seat:mode==='solo'?0:game.turn);
+ if($('promise-btn'))$('promise-btn').onclick=promiseModal;
+ if($('projector'))$('projector').onclick=openProjector;
+ if($('advise-btn'))$('advise-btn').onclick=adviseModal;
+ if($('share-btn'))$('share-btn').onclick=shareModal;
+ if($('guess-btn'))$('guess-btn').onclick=guessModal;
+ if($('assist'))$('assist').onclick=()=>{modal('<h2>현재 차례를 도와줄까요?</h2><p>연결이 끊겼거나 오래 멈춘 팀의 이번 행동 한 번을 AI 제안으로 처리합니다. 해당 팀과 먼저 이야기해주세요.</p><button id="assist-confirm" class="primary wide">이번 행동 한 번 진행</button>');$('assist-confirm').onclick=async()=>{$('modal').close();if(busy)return;await hostAction(aiAction(game));};};
+}
+function info(id){
+ const p=game.players[id],owe=outstanding(p);
+ const mine=(game.promises||[]).filter(pr=>pr.from===id||pr.to===id);
+ modal(`<h2>${ICONS[id]} ${esc(p.name)}의 인생 카드</h2><p><b>${BACKGROUNDS[p.background].name}</b><br>${BACKGROUNDS[p.background].desc}</p><div class="ledger"><div class="row spread"><span>출발 자금 → 현재 순자산</span><b>${num(p.born)} → ${num(wealth(p))}</b></div><div class="row spread"><span>직업 / 턴당 소득</span><b>${p.job} / ${num(p.salary)}</b></div><div class="row spread"><span>투자 / 주택 / 대출</span><b>${num(p.stocks)} / ${num(p.home)} / ${num(p.debt)}</b></div><div class="row spread"><span>받을 돈 / 보험 잔여 보장</span><b>${num(receivable(p))} / ${num(p.insurance)}</b></div><div class="row spread"><span>조언 토큰 / 건강 최저</span><b>${p.tokens}개 / ${p.minHealth}</b></div>${owe?`<div class="row spread"><span>다른 팀에게 갚을 금액</span><b>${num(owe)}</b></div>`:''}</div>${capitalPanel(p)}${p.loans&&p.loans.some(l=>l.due>l.paid)?`<p><b>빌린 돈</b></p>${p.loans.filter(l=>l.due>l.paid).map(l=>`<p class="small">${esc(game.players[l.from].name)}에게 이자 ${l.rate}% · ${num(l.due-l.paid)} 남음 (매 턴 최대 50 자동 상환)</p>`).join('')}`:''}<p><b>만남 카드</b></p>${p.cards.map(c=>`<span class="badge">${c}</span>`).join('')}<p class="small muted">친구: 돌봄 할인·물건 빌리기 / 멘토·동문: 지원 제도 정보와 앞길 미리보기</p><div class="info"><b>나의 목표 · ${GOALS[p.goal].name}</b><br>${GOALS[p.goal].desc}</div>${mine.length?`<p><b>약속</b></p>${mine.map(pr=>`<p class="small">${esc(game.players[pr.from].name)} → ${esc(game.players[pr.to].name)}: ${esc(pr.text)} ${pr.kept?'· 지킴':'· 아직'}</p>`).join('')}`:''}<p class="small">건강은 최대 6입니다. 0이면 소득이 절반이지만 탈락하지 않아요. 순자산이 마이너스여도 끝까지 함께 플레이합니다.</p>`);
+}
+async function animate(old,next){if(next.phase!=='choice'||old.phase!=='roll'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;animating=true;const dice=$('dice');if(dice){dice.classList.add('rolling');for(let i=0;i<6;i++){dice.textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][i];beep(260+i*80);await new Promise(r=>setTimeout(r,70));}dice.classList.remove('rolling');dice.textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][next.die-1];}let tmp=structuredClone(old);for(let i=1;i<=next.die;i++){tmp.players[tmp.turn].pos=(old.players[old.turn].pos+i)%28;if($('board-host'))$('board-host').innerHTML=board(tmp);await new Promise(r=>setTimeout(r,100));}animating=false;}
+async function dispatch(action){action={...contextOf(game),...action};if(busy||queued||animating)return;busy=true;document.querySelectorAll('[data-action]').forEach(b=>b.disabled=true);try{if(mode==='online'){await rpc('send',{action,nonce:crypto.randomUUID()});queued=true;toast('선택을 보냈어요. 진행자 화면과 연결 중입니다.');}else{let next=transition(game,action);await animate(game,next);game=next;persist();beep(650);}}catch(e){toast(e.message);}finally{busy=false;if(mode!=='online'||!queued)renderGame();scheduleAI();}}
+function scheduleAI(){
+ clearTimeout(aiTimer);
+ if(aiPaused||$('modal').open||mode==='home'||screen!=='game'||!game||game.phase==='done'||busy||animating)return;
+ if(mode!=='online'&&game.phase==='choice'&&assistRev!==game.revision){
+  assistRev=game.revision;
+  const act=aiAssist(game);
+  if(act){aiTimer=setTimeout(()=>dispatch(act),900);return;}
+ }
+ if(game.players[actor(game)]?.ai)aiTimer=setTimeout(()=>{if(mode==='online')return;dispatch(aiAction(game));},game.phase==='result'?1600:2600);
+}
+function historyChart(g,w=700,h=210){
+ const rows=g.history||[];if(rows.length<2)return '';
+ const all=rows.flatMap(r=>r.assets),hi=Math.max(...all,1),lo=Math.min(...all,0),span=Math.max(1,hi-lo),pad=34;
+ const x=i=>pad+i*(w-pad*2)/Math.max(1,rows.length-1),y=v=>h-pad-((v-lo)/span)*(h-pad*1.6);
+ const lines=g.players.map(p=>`<polyline fill="none" stroke="${COLORS[p.id]}" stroke-width="2.6" stroke-linejoin="round" points="${rows.map((r,i)=>x(i).toFixed(1)+','+y(r.assets[p.id]).toFixed(1)).join(' ')}"/>`).join('');
+ const dots=g.players.map(p=>rows.map((r,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(r.assets[p.id]).toFixed(1)}" r="2.8" fill="${COLORS[p.id]}"/>`).join('')).join('');
+ const zero=lo<0?`<line x1="${pad}" y1="${y(0).toFixed(1)}" x2="${w-pad}" y2="${y(0).toFixed(1)}" stroke="#bdb7a4" stroke-dasharray="4 4"/>`:'';
+ const ticks=rows.map((r,i)=>`<text x="${x(i).toFixed(1)}" y="${h-10}" font-size="10" fill="#8a8574" text-anchor="middle">R${r.round}</text>`).join('');
+ return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="라운드별 팀 순자산 변화"><line x1="${pad}" y1="16" x2="${pad}" y2="${h-pad}" stroke="#ddd7c4"/><line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="#ddd7c4"/>${zero}${lines}${dots}${ticks}<text x="${pad-6}" y="22" font-size="10" fill="#8a8574" text-anchor="end">${num(hi)}</text></svg>`;
+}
+function winnerSection(g){
+ const ranked=g.players.map(p=>({p,total:totalCapital(p)})).sort((a,b)=>b.total-a.total);
+ const top=ranked[0].total,winners=ranked.filter(r=>r.total===top).map(r=>r.p);
+ const maxTotal=Math.max(1,top);
+ const banner=`<div class="winner-banner"><div class="crown">👑</div><div class="eyebrow">최종 자본 우승</div><h2>${winners.map(p=>`${ICONS[p.id]} ${esc(p.name)}`).join(' · ')}</h2><div class="score">총자본 ${num(top)}</div><p class="small muted">경제자본(순자산) + 인적자본×100 + 사회자본×100 + 문화자본×100을 모두 더한 값이 가장 높은 팀입니다.${winners.length>1?' 이번 판은 공동 우승이에요.':''}</p></div>`;
+ const board=`<div class="leaderboard">${ranked.map((r,i)=>{const c=capitalScore(r.p),segs=[['economic',c.economic],['human',c.human],['social',c.social],['cultural',c.cultural]];return `<div class="leader-row${i===0?' first':''}" style="--pc:${COLORS[r.p.id]}"><div class="leader-rank">${i===0?'👑':i+1}</div><div class="leader-name">${ICONS[r.p.id]} ${esc(r.p.name)}</div><div class="leader-bar">${segs.map(([k,v])=>`<span style="width:${clamp(v/maxTotal*100,0,100)}%;background:${CAPITALS[k].color}" title="${CAPITALS[k].name} ${num(v)}"></span>`).join('')}</div><div class="leader-score">${num(r.total)}</div></div>`;}).join('')}</div><div class="legend">${Object.values(CAPITALS).map(c=>`<span><i style="background:${c.color}"></i>${c.name}</span>`).join('')}</div>`;
+ return `${banner}<section class="panel"><h2>자본 순위표</h2><p class="small muted">막대는 경제·인적·사회·문화자본이 총자본에서 차지하는 비중입니다.</p>${board}</section>`;
+}
+function results(){
+ clearTimeout(aiTimer);screen='results';
+ const prize=awards(game),ws=game.players.map(wealth),hi=Math.max(...ws),lo=Math.min(...ws);
+ const max=Math.max(...ws,...game.players.map(p=>p.born),1);
+ const gap=lo>0?`${(hi/lo).toFixed(1)}배`:lo===0?'최하위 팀의 순자산은 0이에요':'최하위 팀은 마이너스로 끝났어요';
+ const first=game.history[0],last=game.history[game.history.length-1];
+ const spread=first&&last?`${num(Math.max(...first.assets)-Math.min(...first.assets))} → ${num(Math.max(...last.assets)-Math.min(...last.assets))}`:'';
+ const kept=(game.promises||[]).filter(p=>p.kept).length;
+ const topTotal=Math.max(...game.players.map(totalCapital));
+ mount(`<section class="results"><span class="eyebrow">Every choice leaves a trace</span><h1 style="margin-top:12px">우리의 인생은 어떤 모양이었나요?</h1><p class="muted">${game.maxRounds}라운드의 선택이 모였습니다. 돈, 배움, 건강, 함께한 순간을 돌아봐요.</p>${winnerSection(game)}<div class="result-grid">${game.players.map(p=>`<article class="result-card" style="--pc:${COLORS[p.id]}">${totalCapital(p)===topTotal?'<span class="badge" style="background:#f6ecd0">👑 자본 우승</span>':''}<h3>${ICONS[p.id]} ${esc(p.name)}</h3><p class="small muted">${p.job}</p><div class="money">${num(wealth(p))} <small>최종 순자산</small></div><p class="small">출발 ${num(p.born)} → 변화 ${wealth(p)-p.born>=0?'+':''}${num(wealth(p)-p.born)}</p><p class="small" style="margin-top:7px">♥ 건강 ${p.health}/6 · 도움 ${p.help}회</p>${capitalBars(p)}<div class="capital-total"><span>총자본</span><b>${num(totalCapital(p))}</b></div><div class="goal">${GOALS[p.goal].check(p)?'✓ 목표 달성':'◇ 다음 인생의 목표'}<br><b>${GOALS[p.goal].name}</b><br>${GOALS[p.goal].desc}</div>${prize[p.id].length?`<div class="awards">${prize[p.id].map(a=>`<div class="award"><b>${a.name}</b><span>${a.line}</span></div>`).join('')}</div>`:''}</article>`).join('')}</div><section class="panel"><h2>격차는 어디에서 벌어졌나요</h2><p class="small muted">라운드마다 기록한 팀별 순자산입니다. 첫 기록과 마지막 기록의 최고–최저 차이: ${spread}</p>${historyChart(game)}<div class="legend" style="margin-top:6px">${game.players.map(p=>`<span><i style="background:${COLORS[p.id]}"></i>${esc(p.name)}</span>`).join('')}</div></section><section class="panel"><h2>출발선과 도착선</h2><p class="small muted">연한 막대: 출발 자금 · 진한 막대: 최종 순자산 · 1위와 최하위 차이 ${gap}</p><div class="bars">${game.players.map(p=>`<div class="bar-row" style="--pc:${COLORS[p.id]}"><b>${esc(p.name)}</b><div class="bar-pair"><i style="width:${p.born/max*100}%"></i><i style="width:${Math.max(0,wealth(p))/max*100}%"></i></div><span>${num(wealth(p))}</span></div>`).join('')}</div><p class="small muted">이 결과는 이번 게임의 규칙과 선택에서 나왔습니다. 현실 사회의 인과관계나 자녀의 미래 자산을 뜻하지 않아요.</p></section>${game.promises&&game.promises.length?`<section class="panel"><h2>지킨 약속과 지키지 못한 약속</h2><p class="small muted">게임이 강제하지 않았던 약속 ${game.promises.length}개 중 ${kept}개가 지켜졌어요.</p><div class="promise-list">${game.promises.map(pr=>`<div class="promise-item${pr.kept?' kept':''}"><div><b>${esc(game.players[pr.from].name)} → ${esc(game.players[pr.to].name)}</b><div class="small">R${pr.round} · ${esc(pr.text)}</div></div><span class="badge">${pr.kept?'지킴':'미이행'}</span></div>`).join('')}</div></section>`:''}${game.comparison?`<section class="panel"><h2>같은 운, 달라진 출발선</h2><p class="small muted">이전 플레이와 이번 플레이의 최종 순자산입니다. 선택과 상호작용도 달라지므로 출발 조건만의 효과를 증명하지는 않아요.</p><div class="comparison-table">${game.players.map((p,i)=>`<div class="row spread"><b>${esc(p.name)}</b><span>${num(game.comparison[i].assets)} → ${num(wealth(p))} (${wealth(p)-game.comparison[i].assets>=0?'+':''}${num(wealth(p)-game.comparison[i].assets)})</span></div>`).join('')}</div></section>`:''}<section class="reflection" style="margin-top:20px"><h2>주사위를 내려놓고, 이야기해요.</h2><ol><li>하고 싶었지만 조건 때문에 선택하지 못했던 것은 무엇인가요?</li><li>아무도 알려주지 않았다면 몰랐을 선택지가 있었나요? 누가 알려줬나요?</li><li>공동 위기는 모두에게 똑같이 무거웠나요?</li><li>우리의 정책은 누구에게 도움이 되었고, 비용은 누가 부담했나요?</li><li>다시 한다면 나의 선택과 사회의 규칙 중 무엇을 바꾸고 싶나요?</li></ol></section><div class="row" style="margin:22px 0"><button id="export" class="primary">플레이 기록 내려받기</button><button id="print-result">결과 인쇄</button>${mode!=='online'?'<button id="replay-swap" class="secondary">같은 운명, 다른 출발선으로 다시</button><button id="replay">같은 친구들과 새 인생</button>':''}<button id="result-home">처음으로</button></div><p class="small muted">"같은 운명, 다른 출발선"은 주사위·시장·공동 위기의 추첨값을 그대로 두고 출발 조건만 서로 바꿔 다시 시작합니다.</p></section>`);
+ $('export').onclick=exportGame;$('print-result').onclick=()=>window.print();$('result-home').onclick=home;
+ if($('replay'))$('replay').onclick=()=>setup(mode);
+ if($('replay-swap'))$('replay-swap').onclick=()=>{
+  const previous=game.players.map(p=>({name:p.name,assets:wealth(p),health:p.health}));
+  const bgs=game.players.map((p,i)=>game.players[(i+1)%game.players.length].background);
+  startLocal(mode,{names:game.players.map(p=>p.name),rounds:game.maxRounds,equal:false,seed:game.initialSeed,backgrounds:bgs});game.comparison=previous;persist();
+ };
+ paintProjector();
+}
+function exportGame(){
+ const prize=awards(game);
+ const lines=['플레이하는 사회 — 인생 한 바퀴',`${game.maxRounds}라운드 · 시행 정책: ${game.policies.length?game.policies.map(k=>POLICIES[k].name).join(', '):'없음'}`,
+  ...game.players.flatMap(p=>['',p.name,
+   `출발 ${p.born} / 최종 순자산 ${wealth(p)} / 건강 ${p.health}(최저 ${p.minHealth}) / 도움 ${p.help}회`,
+   `자본 능력치 · 인적 ${p.skill} / 사회 ${p.trust} / 문화 ${p.culture} / 총자본 ${totalCapital(p)}`,
+   `정보 공유 ${p.shared}회 / 조언 토큰 사용 ${p.advised}회 / 거래한 팀 ${p.partners.length} / 남은 토큰 ${p.tokens}`,
+   `목표: ${GOALS[p.goal].desc} (${GOALS[p.goal].check(p)?'달성':'미달'})`,
+   ...(prize[p.id].length?['칭호: '+prize[p.id].map(a=>a.name).join(', ')]:[]),
+   ...p.choices.map(c=>`R${c.round} ${c.title}`)]),
+  '','라운드별 순자산',...game.history.map(h=>`R${h.round} ${game.players.map((p,i)=>p.name+' '+h.assets[i]).join(' / ')}`),
+  ...(game.promises&&game.promises.length?['','약속 기록',...game.promises.map(pr=>`R${pr.round} ${game.players[pr.from].name} → ${game.players[pr.to].name}: ${pr.text} (${pr.kept?'지킴':'미이행'})`)]:[]),
+  '','테이블 기록',...game.log.slice().reverse().map(l=>`R${l.round} ${l.text}`)];
+ const a=document.createElement('a');a.href=window.URL.createObjectURL(new Blob(['\ufeff'+lines.join('\n')],{type:'text/plain;charset=utf-8'}));a.download='인생한바퀴_플레이기록.txt';a.click();setTimeout(()=>window.URL.revokeObjectURL(a.href),1000);
+}
+function rules(){
+ modal(`<h2>인생 한 바퀴, 이렇게 해요</h2><ol class="rules-list"><li><b>출발선을 뽑아요.</b> 자금과 만남 카드가 다르게 시작해요.</li><li><b>주사위를 굴려요.</b> 1–6칸 이동하고 도착한 사건을 해결해요.</li><li><b>나의 선택을 해요.</b> 돈·건강·역량·관계에는 서로 다른 쓰임이 있어요.</li><li><b>다른 팀과 만나요.</b> 돌봄을 부탁하고, 공동사업을 제안하고, 급전을 빌립니다. 상대는 거절할 수 있어요.</li><li><b>라운드 끝에 시장을 예측해요.</b> 모두 동시에 오를지 내릴지 고르고, 맞힌 팀은 +25를 받아요.</li><li><b>3라운드마다 공동 위기.</b> 모두 같은 사건을 맞지만, 정액 부담과 비례 부담은 체감이 다릅니다.</li><li><b>4라운드마다 사회회의.</b> 새 정책과 그 비용을 함께 결정해요. 마지막 라운드에는 회의 없이 결과를 봐요.</li></ol><p><b>다른 팀 차례에도 할 일이 있어요.</b> 게임당 조언 토큰 2개로 남의 잠긴 선택지를 열어줄 수 있고(신뢰 +1), 멘토·동문 카드가 있으면 상대가 모르는 지원 제도를 공짜로 알려줄 수 있어요(라운드당 1회, 신뢰 +1). 온라인에서는 다른 팀의 선택을 예측할 수도 있습니다.</p><p><b>정보는 자원입니다.</b> 어떤 선택지는 멘토·동문 카드가 있어야 화면에 보입니다. 보이지 않는 팀에게는 "들어본 적 없는 선택지"로만 표시돼요. 멘토·동문 카드가 있으면 다음 6칸도 미리 볼 수 있습니다.</p><p>매 턴 소득을 받고 생활비를 냅니다. 주식은 라운드마다 −18%~+22%의 공통 시장 변화, 주택은 그 변동폭의 1/3이 적용됩니다. 은행 대출에는 라운드당 3% 이자가 붙고, 투자 칸에서 한 번에 최대 300까지 갚을 수 있어요. 다른 팀에게 빌린 돈은 매 턴 합계 최대 50씩 자동 상환됩니다. 받을 돈도 순자산에 포함됩니다. 마지막에는 은행 빚을 제외한 자산 범위에서 현금·투자·주택 순서로 정산하고, 못 받은 금액은 채권자의 손실로 처리합니다. 시장 칸의 보험은 50을 내고 다음 공동 위기 손실을 최대 150까지 줄이는 1회성 보장입니다.</p><p>건강 0이면 소득이 절반이지만 탈락하지 않아요. 순자산·개인 목표·도움의 기록·칭호로 각자의 삶을 돌아봅니다.</p><p><b>자본 능력치 (부르디외의 구별짓기에서 빌린 개념)</b> 팀마다 경제자본(순자산)과 함께 인적자본🛠(역량)·사회자본🤝(신뢰)·문화자본🎓(제도와 정보에 대한 접근)을 HP·MP처럼 따로 쌓아갑니다. 문화자본은 "그런 제도가 있다는 걸 알아야 쓸 수 있는" 선택지를 실제로 사용하거나, 멘토·동문 카드를 얻을 때마다 오릅니다. 마지막 라운드가 끝나면 경제자본에 인적·사회·문화자본을 각 100배로 환산해 더한 <b>총자본</b>이 가장 높은 팀이 우승합니다 — 서로 다른 자본이 자산으로 "환전"된다는 생각을 게임 점수로 옮겨본 규칙이에요.</p><p class="muted small">온라인은 진행자 화면이 게임을 진행합니다. 진행자가 나가면 일시 정지되며 같은 브라우저에서 이어할 수 있어요. 실명과 실제 가정형편은 입력하지 마세요.</p>`);
+}
+async function rpc(op,data={},s=session){const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),12000);try{const res=await fetch(`${URL}/rest/v1/rpc/nlh_room`,{method:'POST',headers:{apikey:KEY,Authorization:`Bearer ${KEY}`,'Content-Type':'application/json'},body:JSON.stringify({p_op:op,p_code:s?.code||'',p_token:s?.token||null,p_data:data}),signal:ctl.signal});const j=await res.json();if(!res.ok)throw Error(j.message||'연결을 확인해주세요.');return j;}catch(e){if(e.name==='AbortError')throw Error('연결이 지연되고 있어요. 잠시 후 다시 시도하세요.');throw e;}finally{clearTimeout(t);}}
+async function connect(op){if(busy)return;busy=true;$('setup-error').innerHTML='';document.querySelectorAll('.setup button').forEach(b=>b.disabled=true);try{const name=$('online-name').value.trim()||'새 모둠',code=$('online-code').value.trim().toUpperCase();if(op==='join'&&!/^[A-F0-9]{6}$/.test(code))throw Error('6자리 영문·숫자 방 코드를 확인하세요.');session=await rpc(op,{name},{code});localStorage.setItem(SESSION,JSON.stringify(session));mode='online';beginPoll();}catch(e){$('setup-error').innerHTML=`<p class="error">${esc(e.message)}</p>`;document.querySelectorAll('.setup button').forEach(b=>b.disabled=false);}finally{busy=false;}}
+function beginPoll(){clearInterval(pollTimer);clearTimeout(aiTimer);room=null;lastRendered=-1;queued=false;game=null;screen='lobby';mount('<section class="setup panel"><h2>우리 테이블에 연결하는 중…</h2><p class="desc">잠시만 기다려주세요.</p><div id="connection-error"></div></section>');poll();pollTimer=setInterval(poll,1800);}
+async function poll(){if(polling||busy||animating||mode!=='online')return;polling=true;try{const r=await rpc('read');if(mode!=='online')return;lastOnline=Date.now();room=r;const prior=game;game=r.state.phase==='lobby'?null:upgradeGame(r.state);if(lastRendered!==r.version){queued=false;lastRendered=r.version;if(game){if(prior&&prior.revision!==game.revision)await animate(prior,game);renderGame();}else lobby();}
+ if(session.host&&game&&game.phase!=='done'){
+  const pending=r.pending?.[0];if(pending){let next=game;try{next=transition(game,pending.action);}catch(e){toast('처리되지 않은 선택: '+e.message);}await commit(next,pending.id);}
+  else if(game.players[actor(game)]?.ai){await commit(transition(game,aiAction(game)));}
+ }
+ if($('net-status'))$('net-status').textContent=session.host?'진행자 · 온라인 연결됨':Date.now()-new Date(r.updated).getTime()>20000?'진행자 연결을 기다리는 중':'온라인 연결됨';
+ }catch(e){if($('connection-error'))$('connection-error').innerHTML=`<p class="error">${esc(e.message)}</p><button id="back-connection">처음으로</button>`;if($('back-connection'))$('back-connection').onclick=home;if($('net-status'))$('net-status').textContent='연결 재시도 중 · 선택은 잠시 기다려주세요';if(Date.now()-lastOnline>12000)queued=false;}finally{polling=false;}}
+function lobby(){screen='lobby';mount(`<section class="setup panel"><span class="eyebrow">Your table is ready</span><h1 style="margin-top:10px">친구들을 초대하세요</h1><div class="room-code">${esc(session.code)}</div><div class="row"><button id="copy-code">방 코드 복사</button><button id="copy-link">초대 링크 복사</button><span class="pill">${room.members.length} / 6팀</span></div><div style="margin-top:18px">${room.members.map(m=>`<div class="room-member"><span style="font-size:24px">${ICONS[m.seat]}</span><b>${esc(m.name)}</b><span class="muted small">${m.seat===0?'진행자':m.seat===session.seat?'나':'참가 완료'}</span></div>`).join('')}</div>${session.host?`<label for="online-rounds">게임 길이</label><select id="online-rounds"><option value="8">기본 8라운드</option><option value="12">확장 12라운드</option></select><label class="check"><input id="online-equal" type="checkbox">모두 같은 출발 조건</label><button class="primary wide" id="start-online" ${room.members.length<2?'disabled':''}>${room.members.length<2?'친구 한 팀이 더 필요해요':'모두 모였어요 · 게임 시작'}</button><div class="hint">게임 중 이 화면을 켜 두세요. 진행자가 화면을 나가면 진행이 멈춥니다.</div>`:'<p class="info" style="margin-top:20px">입장 완료! 진행자가 게임을 시작하면 보드판이 열립니다.</p>'}</section>`);$('copy-code').onclick=()=>copy(session.code);$('copy-link').onclick=()=>location.protocol==='file:'?toast('이 HTML 파일과 방 코드를 친구에게 공유해주세요.'):copy(location.origin+location.pathname+'?room='+session.code);if($('start-online'))$('start-online').onclick=async()=>{if(busy)return;busy=true;const rounds=+$('online-rounds').value,equal=$('online-equal').checked;try{const fresh=await rpc('read');room=fresh;if(fresh.state.phase!=='lobby')return;const g=newGame(fresh.members.map(m=>m.name),{rounds,equal});await commit(g);}catch(e){toast(e.message);}finally{busy=false;if(game)renderGame();}};}
+async function commit(next,ack){const r=await rpc('commit',{version:room.version,state:next,...(ack?{ack}: {})});if(game)await animate(game,next);room=r;game=r.state;lastRendered=r.version;queued=false;renderGame();}
+async function hostAction(a){if(!session?.host||busy)return;busy=true;try{room=await rpc('read');game=upgradeGame(room.state);await commit(transition(game,{...a,expected:game.revision}));}catch(e){toast(e.message);}finally{busy=false;if(game)renderGame();}}
+async function copy(text){try{await navigator.clipboard.writeText(text);toast('복사했어요. 친구에게 알려주세요.');}catch{modal(`<h2>복사할 내용</h2><p style="word-break:break-all;user-select:all">${esc(text)}</p>`);}}
+const PROJ_CSS=`*{box-sizing:border-box}body{margin:0;background:#f7f4eb;color:#3b3a33;font-family:'Noto Sans KR',system-ui,sans-serif;padding:26px 30px}h1{font-size:30px;margin:0 0 4px}.sub{color:#8a8574;font-size:14px;margin-bottom:20px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}.card{background:#fffdf5;border:1px solid #e6e0cd;border-left:6px solid var(--pc);border-radius:12px;padding:13px 15px}.card b{font-size:15px}.card .v{font-size:26px;font-weight:800;margin-top:4px}.card .m{font-size:12px;color:#8a8574;margin-top:3px}.big{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px}.stat{background:#efe9d8;border-radius:12px;padding:12px 18px;min-width:150px}.stat span{font-size:12px;color:#7d7867;display:block}.stat b{font-size:24px}.pol{display:inline-block;background:#e2ece4;border-radius:999px;padding:5px 13px;margin-right:7px;font-size:13px}.chart{width:100%;height:auto;background:#fffdf5;border:1px solid #e6e0cd;border-radius:12px;padding:8px}.foot{margin-top:18px;font-size:12px;color:#8a8574}`;
+function openProjector(){
+ try{
+  if(projWin&&!projWin.closed){projWin.focus();paintProjector();return;}
+  projWin=window.open('','nlh-projector','width=1280,height=840');
+  if(!projWin){toast('팝업이 차단되어 있어요. 브라우저에서 이 페이지의 팝업을 허용해주세요.');return;}
+  projWin.document.open();
+  projWin.document.write('<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>인생 한 바퀴 · 진행 화면</title><style>'+PROJ_CSS+'</style></head><body><div id="pj"></div></body></html>');
+  projWin.document.close();
+  paintProjector();
+  toast('진행 화면을 새 창으로 열었어요. 프로젝터로 옮겨주세요.');
+ }catch(e){toast('진행 화면을 열 수 없어요.');}
+}
+function paintProjector(){
+ try{
+  if(!projWin||projWin.closed||!game)return;
+  const host=projWin.document.getElementById('pj');if(!host)return;
+  const ws=game.players.map(wealth),hi=Math.max(...ws),lo=Math.min(...ws);
+  const gap=lo>0?`${(hi/lo).toFixed(1)}배`:'최하위가 마이너스';
+  const stage=game.phase==='done'?'게임 종료':game.phase==='vote'?'사회회의 진행 중':game.phase==='crisis'?'공동 위기 확인 중':game.phase==='forecast'?'시장 예측 중':`${esc(game.players[game.turn].name)}의 차례`;
+  host.innerHTML=`<h1>인생 한 바퀴 · ${game.round} / ${game.maxRounds} 라운드 · ${age(game)}세</h1><div class="sub">${stage}</div><div class="big"><div class="stat"><span>1위와 최하위 순자산 차이</span><b>${gap}</b></div><div class="stat"><span>공동기금</span><b>${num(game.fund)}</b></div><div class="stat"><span>${esc(game.market)}</span><b>${game.policies.length?game.policies.map(k=>POLICIES[k].icon).join(' '):'정책 없음'}</b></div></div><div>${game.policies.map(k=>`<span class="pol">${POLICIES[k].icon} ${POLICIES[k].name}</span>`).join('')||''}</div><div class="grid" style="margin-top:16px">${game.players.map(p=>`<div class="card" style="--pc:${COLORS[p.id]}"><b>${ICONS[p.id]} ${esc(p.name)}</b><div class="v">${num(wealth(p))}</div><div class="m">${p.job} · 건강 ${p.health}/6</div><div class="m">인적 ${p.skill} · 사회 ${p.trust} · 문화 ${p.culture} · 총자본 ${num(totalCapital(p))}</div><div class="m">도움 ${p.help}회 · 정보 공유 ${p.shared}회 · 토큰 ${p.tokens}개</div></div>`).join('')}</div>${historyChart(game,900,260)}<div class="foot">금액 단위는 게임머니입니다. 현실의 소득·투자수익을 예측하는 모형이 아닙니다.</div>`;
+ }catch(e){}
+}
+window.addEventListener('beforeunload',persist);home();const invite=new window.URLSearchParams(location.search).get('room');if(invite){setup('online');$('online-code').value=invite.slice(0,6);}</script></body></html>

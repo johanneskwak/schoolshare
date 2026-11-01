@@ -4,8 +4,12 @@ import { signImageUrls } from "@/lib/storage/signed-url";
 import { formatDate, formatFileSize } from "@/lib/format";
 import { CONDITION_GRADE_LABELS, SHARE_STATUS_LABELS } from "@/lib/constants/share";
 import { TransactionTypeIcon } from "@/components/TransactionTypeIcon";
+import { checkIsAdmin } from "@/lib/admin";
+import { AdminEditPanel } from "@/components/AdminEditPanel";
+import { AdminDeleteButton } from "@/components/AdminDeleteButton";
 import { ShareDetailActions } from "./ShareDetailActions";
 import { ShareCommentForm } from "./ShareCommentForm";
+import { adminDeleteShareCommentAction, adminDeleteSharePostAction, adminUpdateSharePostAction } from "../actions";
 
 export default async function ShareDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,6 +18,7 @@ export default async function ShareDetailPage({ params }: { params: Promise<{ id
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const isAdmin = await checkIsAdmin(supabase, user?.id);
 
   const { data: post } = await supabase
     .from("share_posts")
@@ -147,6 +152,24 @@ export default async function ShareDetailPage({ params }: { params: Promise<{ id
           />
         </div>
 
+        {isAdmin && (
+          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+            <AdminEditPanel
+              action={adminUpdateSharePostAction.bind(null, post.id)}
+              fields={[
+                { name: "title", label: "제목", defaultValue: post.title },
+                { name: "description", label: "설명", type: "textarea", defaultValue: post.description },
+                { name: "condition_note", label: "활용팁", type: "textarea", defaultValue: post.condition_note ?? "" },
+              ]}
+            />
+            <AdminDeleteButton
+              onDelete={adminDeleteSharePostAction.bind(null, post.id)}
+              label="관리자: 글 삭제"
+              confirmMessage="이 나눔/대여 글을 삭제할까요? 되돌릴 수 없습니다."
+            />
+          </div>
+        )}
+
         <h2 className="title" style={{ fontSize: 16, marginTop: 28 }}>댓글</h2>
         {isReserved && (
           <p className="muted" style={{ marginBottom: 8 }}>예약중인 글에는 새 댓글을 쓸 수 없습니다.</p>
@@ -156,7 +179,17 @@ export default async function ShareDetailPage({ params }: { params: Promise<{ id
           {(comments ?? []).length === 0 && <p className="muted">아직 댓글이 없어요.</p>}
           {comments?.map((c) => (
             <div key={c.id} className="comment">
-              <p className="author">{nicknameById.get(c.author_id) ?? "교사"}</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <p className="author">{nicknameById.get(c.author_id) ?? "교사"}</p>
+                {isAdmin && (
+                  <AdminDeleteButton
+                    onDelete={adminDeleteShareCommentAction.bind(null, post.id, c.id)}
+                    label="삭제"
+                    small
+                    confirmMessage="이 댓글을 삭제할까요?"
+                  />
+                )}
+              </div>
               <p>{c.body}</p>
             </div>
           ))}

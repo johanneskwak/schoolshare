@@ -113,6 +113,9 @@ export interface Database {
           subject?: string | null;
         };
         Update: Partial<{
+          title: string;
+          description: string;
+          condition_note: string | null;
           status: SharePostStatus;
           reserved_by: string | null;
           reserved_at: string | null;
@@ -213,6 +216,52 @@ export interface Database {
         Row: { id: string; cache_id: string; school_id: string; rank: number };
         Insert: { cache_id: string; school_id: string; rank: number };
         Update: Partial<{ rank: number }>;
+        Relationships: [];
+      };
+      board_posts: {
+        Row: {
+          id: string;
+          author_id: string;
+          title: string;
+          body: string;
+          major_category: string;
+          minor_category: string;
+          created_at: string;
+        };
+        Insert: {
+          author_id: string;
+          title: string;
+          body: string;
+          major_category: string;
+          minor_category: string;
+        };
+        Update: Partial<{ title: string; body: string; major_category: string; minor_category: string }>;
+        Relationships: [];
+      };
+      board_comments: {
+        Row: { id: string; post_id: string; author_id: string; body: string; created_at: string };
+        Insert: { post_id: string; author_id: string; body: string };
+        Update: never;
+        Relationships: [];
+      };
+      club_events: {
+        Row: {
+          id: string;
+          author_id: string;
+          title: string;
+          event_date: string;
+          location: string;
+          description: string | null;
+          created_at: string;
+        };
+        Insert: {
+          author_id: string;
+          title: string;
+          event_date: string;
+          location: string;
+          description?: string | null;
+        };
+        Update: Partial<{ title: string; event_date: string; location: string; description: string | null }>;
         Relationships: [];
       };
     };
